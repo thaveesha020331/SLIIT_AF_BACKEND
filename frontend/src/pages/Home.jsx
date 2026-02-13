@@ -1,0 +1,184 @@
+import React, { useEffect, useState } from 'react'
+import { Search, Leaf } from 'lucide-react'
+import { Navbar } from '@/components/Navbar'
+import Hero1 from '@/assets/hero1.png'
+import Hero2 from '@/assets/hero2.png'
+import Hero3 from '@/assets/hero2.png'
+import Hero4 from '@/assets/hero4.png'
+import Hero5 from '@/assets/hero5.png'
+
+const CAROUSEL_IMAGES = [
+    Hero1,
+    Hero2,
+    Hero3,
+    Hero4,
+    Hero5,
+]
+export function HomePage() {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % CAROUSEL_IMAGES.length)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [])
+  return (
+    <div className="min-h-screen bg-white font-sans text-dark selection:bg-lime-300 selection:text-lime-900">
+      <Navbar />
+      <main>
+    <section className="relative min-h-screen w-full bg-gradient-to-br from-lime-100 via-lime-200 to-lime-400 overflow-hidden pt-28 pb-32 md:pt-32 md:pb-40">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 w-2/3 h-full bg-white/10 rounded-l-full blur-3xl transform translate-x-1/4 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-lime-300/20 blur-3xl rounded-full pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 relative z-10">
+        <div className="flex flex-col lg:flex-row items-center">
+          {/* Left Content */}
+          <div className="w-full lg:w-[45%] text-center lg:text-left mb-16 lg:mb-0">
+            <span className="inline-block text-lime-800 font-bold tracking-widest text-xs md:text-sm mb-4 uppercase">
+              ECO FRIENDLY LOCAL PRODUCTS
+            </span>
+
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-dark leading-[1.1] mb-6">
+              LOVE FOR NATURE
+              <br />
+              LOVE LOCAL
+            </h1>
+
+            <p className="text-gray-600 text-sm md:text-base leading-relaxed max-w-lg mx-auto lg:mx-0 mb-10">
+                Discover the best of local, sustainable products that nourish you and the planet. From farm-fresh produce to eco-friendly essentials, we bring you a curated selection of goods that support local communities and promote a greener lifestyle. Join us in making conscious choices for a healthier you and a happier Earth.
+            </p>
+
+            {/* Search Bar */}
+            <div className="relative max-w-md mx-auto lg:mx-0 shadow-xl shadow-lime-900/5 rounded-full bg-white p-1.5 flex items-center">
+              <div className="pl-4 text-gray-400">
+                <Search size={20} />
+              </div>
+              <input
+                type="text"
+                placeholder="Search 5M+ recipes & foods"
+                className="flex-1 px-3 py-2 bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 text-sm w-full"
+              />
+              <button className="bg-dark text-white px-6 py-3 rounded-full text-xs font-bold tracking-wider hover:bg-gray-800 transition-colors uppercase">
+                Search
+              </button>
+            </div>
+          </div>
+
+          {/* Right Image Content */}
+          <div className="w-full lg:w-[55%] relative flex justify-center lg:justify-end">
+            <div className="relative w-[300px] h-[300px] md:w-[450px] md:h-[450px] lg:w-[550px] lg:h-[550px]">
+              {/* Main Bowl Image Container with Float Animation */}
+              <div className="w-full h-full relative z-10 animate-float">
+                <div className="w-full h-full rounded-full overflow-hidden shadow-2xl border-4 border-white/20 relative">
+                  {CAROUSEL_IMAGES.map((src, index) => (
+                    <img
+                      key={src}
+                      src={src}
+                      alt={`Healthy food ${index + 1}`}
+                      className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${index === currentImageIndex ? 'opacity-100 animate-ken-burns' : 'opacity-0'}`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Carousel Indicators */}
+              <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+                {CAROUSEL_IMAGES.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentImageIndex ? 'bg-lime-600 scale-125' : 'bg-lime-300 hover:bg-lime-400'}`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+
+              {/* Decorative Elements */}
+              {/* Top Right Leaf */}
+              <div
+                className="absolute -top-4 -right-4 md:top-0 md:right-0 text-lime-700 animate-float"
+                style={{
+                  animationDelay: '1s',
+                }}
+              >
+                <Leaf size={32} className="rotate-45" fill="currentColor" />
+              </div>
+
+              {/* Bottom Left Leaf */}
+              <div
+                className="absolute bottom-10 -left-4 md:bottom-20 md:left-0 text-lime-600 animate-float"
+                style={{
+                  animationDelay: '2s',
+                }}
+              >
+                <Leaf size={24} className="-rotate-12" fill="currentColor" />
+              </div>
+
+              {/* Small circles/dots for organic feel */}
+              <div className="absolute top-1/4 -left-8 w-3 h-3 bg-red-500 rounded-full opacity-80 animate-pulse" />
+              <div className="absolute bottom-1/3 -right-6 w-2 h-2 bg-lime-600 rounded-full opacity-60" />
+              <div className="absolute top-10 right-10 w-4 h-4 bg-yellow-400 rounded-full opacity-80 blur-[1px]" />
+
+              {/* Spices/Small Bowl (Simulated with CSS) */}
+              <div
+                className="absolute top-0 left-0 md:top-10 md:left-10 w-16 h-16 md:w-24 md:h-24 bg-amber-900/80 rounded-full shadow-lg border-2 border-white/30 flex items-center justify-center animate-float"
+                style={{
+                  animationDelay: '1.5s',
+                }}
+              >
+                <div className="w-3/4 h-3/4 bg-black/40 rounded-full flex items-center justify-center">
+                  <span className="text-3xl">🌿</span>
+                </div>
+              </div>
+
+              {/* Oil/Sauce Bottle (Simulated) */}
+              <div
+                className="absolute -bottom-6 left-10 md:bottom-0 md:left-20 w-12 h-12 md:w-20 md:h-20 bg-amber-600/40 backdrop-blur-sm rounded-full shadow-lg border border-white/40 flex items-center justify-center animate-float"
+                style={{
+                  animationDelay: '0.5s',
+                }}
+              >
+                <div className="w-1/2 h-1/2 bg-amber-700 rounded-full opacity-50"></div>
+              </div>
+
+              {/* Cutlery (Simulated) */}
+              <div className="absolute -bottom-10 right-0 md:-bottom-8 md:right-10 flex flex-col space-y-1 rotate-[-15deg] opacity-90">
+                <div className="w-32 h-3 bg-gray-800 rounded-full shadow-md flex items-center px-2">
+                  <div className="w-1 h-1 bg-white rounded-full mx-0.5"></div>
+                  <div className="w-1 h-1 bg-white rounded-full mx-0.5"></div>
+                </div>
+                <div className="w-32 h-3 bg-gray-800 rounded-full shadow-md flex items-center px-2 ml-4">
+                  <div className="w-1 h-1 bg-white rounded-full mx-0.5"></div>
+                  <div className="w-1 h-1 bg-white rounded-full mx-0.5"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Curve Separator at bottom */}
+      <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
+        <svg
+          className="relative block w-full h-[100px] md:h-[150px]"
+          data-name="Layer 1"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1200 120"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M985.66,92.83C906.67,72,823.78,31,432.84,37.88a1231.53,1231.53,0,0,0-293.26,26.5C73.13,79.55,14.73,111,0,119.88V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
+            className="fill-white opacity-30"
+          ></path>
+          <path
+            d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,2.92V0H0V25.61c61.27,1.14,124.1,11.81,186.29,21.86C231.86,55.61,276.62,58.42,321.39,56.44Z"
+            className="fill-transparent"
+          ></path>
+        </svg>
+      </div>
+    </section>
+    </main>
+    </div>
+  )
+}
