@@ -1,0 +1,100 @@
+import React, { useState } from 'react'
+import { ShoppingBag, Menu, X } from 'lucide-react'
+export function Navbar() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const navLinks = [
+    {
+      name: 'Home',
+      href: '#',
+    },
+    {
+      name: 'About Us',
+      href: '#',
+    },
+    {
+      name: 'Products',
+      href: '#',
+    },
+    {
+      name: 'Contact Us',
+      href: '#',
+    },
+  ]
+  return (
+    <nav className="absolute top-0 left-0 w-full z-50 px-6 py-6 md:px-12 lg:px-20">
+      <div className="flex items-center justify-between max-w-7xl mx-auto">
+        {/* Logo */}
+        <div className="flex-shrink-0">
+          <a
+            href="#"
+            className="text-2xl font-serif font-bold text-dark tracking-tight"
+          >
+            Eco<span className="text-lime-800">.</span>Mart
+          </a>
+        </div>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center space-x-8 lg:space-x-12">
+          {navLinks.map((link) => (
+            <a
+              key={link.name}
+              href={link.href}
+              className="text-xs lg:text-sm font-medium text-dark tracking-widest hover:text-lime-800 transition-colors uppercase"
+            >
+              {link.name}
+            </a>
+          ))}
+        </div>
+
+        {/* Right Actions */}
+        <div className="hidden md:flex items-center space-x-6">
+          <button
+            className="text-dark hover:text-lime-800 transition-colors"
+            aria-label="Shopping Cart"
+          >
+            <ShoppingBag size={20} />
+          </button>
+          <button className="px-6 py-2.5 text-xs font-bold tracking-wider border-2 border-dark rounded-full hover:bg-dark hover:text-white transition-all duration-300 uppercase">
+            Login
+          </button>
+        </div>
+
+        {/* Mobile Menu Button */}
+        <div className="md:hidden">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="text-dark p-2"
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMenuOpen && (
+        <div className="absolute top-full left-0 w-full bg-white/95 backdrop-blur-md shadow-lg md:hidden py-6 px-6 flex flex-col space-y-4 border-t border-gray-100">
+          {navLinks.map((link) => (
+            <a
+              key={link.name}
+              href={link.href}
+              className="text-sm font-bold text-dark tracking-widest py-2 border-b border-gray-50"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {link.name}
+            </a>
+          ))}
+          <div className="flex items-center justify-between pt-4">
+            <button className="flex items-center space-x-2 text-dark font-medium">
+              <ShoppingBag size={20} />
+              <span>Cart</span>
+            </button>
+            <button className="px-6 py-2 text-xs font-bold border-2 border-dark rounded-full uppercase">
+              Login
+            </button>
+          </div>
+        </div>
+      )}
+    </nav>
+  )
+}
