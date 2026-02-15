@@ -1,6 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import connectDB from '../config/db.js';
+import connectDB from './config/db.js';
 
 dotenv.config();
 
@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'success',
-    message: 'Server is running',
+    message: 'Thaama Panapitin Sandamaaali !',
     timestamp: new Date().toISOString(),
   });
 });
@@ -22,7 +22,7 @@ app.get('/health', (req, res) => {
 // Root endpoint
 app.get('/', (req, res) => {
   res.status(200).json({
-    message: 'SLIIT AF Backend API',
+    message: 'Server is running Succefully !',
     version: '1.0.0',
   });
 });

@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "description": "SLIIT Academic Framework Backend",
-  "main": "api/Server.js",
+  "main": "Server.js",
   "scripts": {
-    "start": "node api/Server.js",
-    "dev": "nodemon api/Server.js"
+    "start": "node Server.js",
+    "dev": "nodemon Server.js"
   },
   "dependencies": {
     "express": "^5.2.1",
