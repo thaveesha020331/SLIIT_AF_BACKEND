@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ShoppingBag, Menu, X } from 'lucide-react'
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const navigate = useNavigate()
   const navLinks = [
     {
       name: 'Home',
-      href: '#',
+      href: '/',
     },
     {
       name: 'About Us',
@@ -13,7 +15,7 @@ export function Navbar() {
     },
     {
       name: 'Products',
-      href: '#',
+      href: '/products',
     },
     {
       name: 'Contact Us',
@@ -36,13 +38,13 @@ export function Navbar() {
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8 lg:space-x-12">
           {navLinks.map((link) => (
-            <a
+            <button
               key={link.name}
-              href={link.href}
-              className="text-xs lg:text-sm font-medium text-dark tracking-widest hover:text-lime-800 transition-colors uppercase"
+              onClick={() => navigate(link.href)}
+              className="text-xs lg:text-sm font-medium text-dark tracking-widest hover:text-lime-800 transition-colors uppercase bg-none border-none cursor-pointer"
             >
               {link.name}
-            </a>
+            </button>
           ))}
         </div>
 
@@ -75,14 +77,16 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="absolute top-full left-0 w-full bg-white/95 backdrop-blur-md shadow-lg md:hidden py-6 px-6 flex flex-col space-y-4 border-t border-gray-100">
           {navLinks.map((link) => (
-            <a
+            <button
               key={link.name}
-              href={link.href}
-              className="text-sm font-bold text-dark tracking-widest py-2 border-b border-gray-50"
-              onClick={() => setIsMenuOpen(false)}
+              onClick={() => {
+                navigate(link.href)
+                setIsMenuOpen(false)
+              }}
+              className="text-sm font-bold text-dark tracking-widest py-2 border-b border-gray-50 text-left bg-none border-none cursor-pointer"
             >
               {link.name}
-            </a>
+            </button>
           ))}
           <div className="flex items-center justify-between pt-4">
             <button className="flex items-center space-x-2 text-dark font-medium">
