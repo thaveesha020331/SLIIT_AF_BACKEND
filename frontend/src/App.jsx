@@ -4,6 +4,7 @@ import { HomePage } from './pages/Home'
 import UserProducts from './pages/Lakna/UserProducts'
 import Cart from './pages/Thaveesha/Cart'
 import MyOrders from './pages/Thaveesha/MyOrders'
+import MyReviewPage from './pages/Senara/MyReviewPage'
 import { Navbar } from './components/Navbar'
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="/products" element={<UserProducts />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/my-orders" element={<MyOrders />} />
+        <Route path="/my-reviews" element={<MyReviewPage />} />
       </Routes>
     </Router>
   )

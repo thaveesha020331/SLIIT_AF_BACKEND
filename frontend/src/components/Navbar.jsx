@@ -9,6 +9,7 @@ export function Navbar() {
     { name: 'About Us', href: '#' },
     { name: 'Products', href: '/products' },
     { name: 'My Orders', href: '/my-orders' },
+    { name: 'My Reviews', href: '/my-reviews' },
     { name: 'Contact Us', href: '#' },
   ]
   return (
