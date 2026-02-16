@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './UserProducts.css';
 
 const UserProducts = () => {
+  const navigate = useNavigate();
   // Dummy products data
   const dummyProducts = [
     {
@@ -265,6 +267,15 @@ const UserProducts = () => {
     }
   };
 
+  const handleAddToCart = async (productId, quantity = 1) => {
+    try {
+      await axios.post('/api/cart/add', { productId, quantity });
+      navigate('/cart');
+    } catch (err) {
+      navigate('/cart'); // still go to cart when API not ready
+    }
+  };
+
   const handleAddReview = async (e) => {
     e.preventDefault();
 
@@ -373,6 +384,17 @@ const UserProducts = () => {
                       <div className="metric-label">Recyclability</div>
                     </div>
                   </div>
+                </div>
+
+                {/* Add to cart in modal */}
+                <div style={{ marginBottom: 20 }}>
+                  <button
+                    className="btn-view-details"
+                    style={{ padding: '12px 24px' }}
+                    onClick={() => handleAddToCart(selectedProduct._id)}
+                  >
+                    Add to cart
+                  </button>
                 </div>
 
                 {/* Manufacturer Info */}
@@ -535,12 +557,21 @@ const UserProducts = () => {
                     </div>
                   </div>
 
-                  <button
-                    className="btn-view-details"
-                    onClick={() => setSelectedProduct(product)}
-                  >
-                    View Details
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
+                    <button
+                      className="btn-view-details"
+                      onClick={() => setSelectedProduct(product)}
+                    >
+                      View Details
+                    </button>
+                    <button
+                      className="btn-view-details"
+                      style={{ background: '#65a30d', color: 'white' }}
+                      onClick={() => handleAddToCart(product._id)}
+                    >
+                      Add to cart
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

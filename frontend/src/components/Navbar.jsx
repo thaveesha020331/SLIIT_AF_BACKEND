@@ -5,22 +5,11 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const navigate = useNavigate()
   const navLinks = [
-    {
-      name: 'Home',
-      href: '/',
-    },
-    {
-      name: 'About Us',
-      href: '#',
-    },
-    {
-      name: 'Products',
-      href: '/products',
-    },
-    {
-      name: 'Contact Us',
-      href: '#',
-    },
+    { name: 'Home', href: '/' },
+    { name: 'About Us', href: '#' },
+    { name: 'Products', href: '/products' },
+    { name: 'My Orders', href: '/my-orders' },
+    { name: 'Contact Us', href: '#' },
   ]
   return (
     <nav className="absolute top-0 left-0 w-full z-50 px-6 py-6 md:px-12 lg:px-20">
@@ -51,6 +40,7 @@ export function Navbar() {
         {/* Right Actions */}
         <div className="hidden md:flex items-center space-x-6">
           <button
+            onClick={() => navigate('/cart')}
             className="text-dark hover:text-lime-800 transition-colors"
             aria-label="Shopping Cart"
           >
@@ -89,7 +79,10 @@ export function Navbar() {
             </button>
           ))}
           <div className="flex items-center justify-between pt-4">
-            <button className="flex items-center space-x-2 text-dark font-medium">
+            <button
+              onClick={() => { navigate('/cart'); setIsMenuOpen(false); }}
+              className="flex items-center space-x-2 text-dark font-medium bg-none border-none cursor-pointer"
+            >
               <ShoppingBag size={20} />
               <span>Cart</span>
             </button>
