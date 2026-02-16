@@ -56,7 +56,7 @@ export function HomePage() {
 
                           {/* Explore More Button */}
                           <button 
-                            onClick={() => navigate('/UserProducts')}
+                            onClick={() => navigate('/products')}
                             className="bg-[#0D0D0D] text-white px-8 py-4 rounded-full text-sm font-bold tracking-wider hover:bg-gray-800 transition-colors uppercase shadow-lg"
                           >
                             Explore More
