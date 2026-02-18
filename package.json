@@ -6,12 +6,17 @@
   "main": "Server.js",
   "scripts": {
     "start": "node Server.js",
-    "dev": "nodemon Server.js"
+    "dev": "nodemon Server.js",
+    "create-admin": "node scripts/createAdminUser.js",
+    "create-test-users": "node scripts/createAdminUser.js --all"
   },
   "dependencies": {
     "express": "^5.2.1",
     "mongoose": "^8.0.0",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "cors": "^2.8.5"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

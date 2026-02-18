@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { Search, Leaf } from 'lucide-react'
-import { Navbar } from '../components/Navbar';
 import { useNavigate } from 'react-router-dom';
 import Hero1 from "@/assets/Hero1.png";
 import Hero2 from "@/assets/Hero2.png";
@@ -27,7 +26,6 @@ export function HomePage() {
   }, [])
   return (
     <div className="min-h-screen bg-white">
-      <Navbar />
       <main className="mb-0">
         {/* Hero */}
         <section className="mt-0">

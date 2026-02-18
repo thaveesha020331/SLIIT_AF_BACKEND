@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './AdminLogin.css';
+import './UserLogin.css'; // Reusing UserLogin styles
 import { authAPI, authHelpers } from '../../services/Tudakshana/authService';
 
-const AdminLogin = () => {
+const SellerLogin = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
@@ -66,28 +66,28 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      // Call backend API for admin login
+      // Call backend API for seller login
       const response = await authAPI.login(
         {
           email: formData.email,
           password: formData.password,
         },
-        'admin' // Enforce admin role
+        'seller' // Enforce seller role
       );
 
       if (response.success) {
         // Save auth data
         authHelpers.saveAuth(response.data.token, response.data.user);
         
-        setSuccess('Admin login successful! Redirecting...');
+        setSuccess('Seller login successful! Redirecting...');
         
-        // Navigate immediately to admin dashboard
-        navigate('/admin/dashboard', { replace: true });
+        // Navigate immediately to seller dashboard
+        navigate('/seller/dashboard', { replace: true });
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Login failed. Please try again.';
       setError(errorMessage);
-      console.error('Admin login error:', err);
+      console.error('Seller login error:', err);
     } finally {
       setLoading(false);
     }
@@ -99,26 +99,13 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="admin-login-page">
-      <div className="admin-login-container">
-        <div className="admin-login-header">
-          <div className="admin-login-logo">🔐</div>
-          <span className="admin-badge">Admin Portal</span>
-          <h1>Admin Access</h1>
-          <p>Secure login for administrators only</p>
-        </div>
-
-        <div className="security-notice">
-          <div className="security-notice-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-              <line x1="12" y1="9" x2="12" y2="13" />
-              <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
-          </div>
-          <div className="security-notice-text">
-            This is a restricted area. Unauthorized access attempts will be logged and reported.
-          </div>
+    <div className="user-login-page">
+      <div className="user-login-container">
+        <div className="user-login-header">
+          <div className="user-login-logo">🏪</div>
+          <span className="user-badge" style={{ backgroundColor: '#10b981' }}>Seller Portal</span>
+          <h1>Seller Access</h1>
+          <p>Sign in to manage your products and orders</p>
         </div>
 
         {error && (
@@ -135,12 +122,12 @@ const AdminLogin = () => {
 
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="email">Admin Email</label>
+            <label htmlFor="email">Seller Email</label>
             <input
               type="email"
               id="email"
               name="email"
-              placeholder="admin@ecomart.com"
+              placeholder="seller@example.com"
               value={formData.email}
               onChange={handleInputChange}
               disabled={loading}
@@ -149,13 +136,13 @@ const AdminLogin = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Admin Password</label>
+            <label htmlFor="password">Password</label>
             <div className="password-input-wrapper">
               <input
                 type={showPassword ? 'text' : 'password'}
                 id="password"
                 name="password"
-                placeholder="Enter your admin password"
+                placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleInputChange}
                 disabled={loading}
@@ -194,23 +181,29 @@ const AdminLogin = () => {
               />
               <label htmlFor="rememberMe">Remember me</label>
             </div>
-            <a href="#" onClick={(e) => { e.preventDefault(); navigate('/admin/forgot-password'); }} className="forgot-password">
+            <a href="#" onClick={(e) => { e.preventDefault(); navigate('/forgot-password'); }} className="forgot-password">
               Forgot password?
             </a>
           </div>
 
-          <button type="submit" className="btn-admin-login" disabled={loading}>
+          <button type="submit" className="btn-login" disabled={loading}>
             {loading && <span className="spinner"></span>}
-            {loading ? 'Verifying...' : 'Sign In as Admin'}
+            {loading ? 'Signing in...' : 'Sign In as Seller'}
           </button>
         </form>
 
+        <div className="signup-link">
+          Don't have a seller account? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/signup'); }}>Register as Seller</a>
+        </div>
+
         <div className="login-type-switch">
-          Not an admin? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>Login as User</a>
+          Are you a customer? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>Customer Login</a>
+          {' | '}
+          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/admin/login'); }}>Admin Login</a>
         </div>
       </div>
     </div>
   );
 };
 
-export default AdminLogin;
+export default SellerLogin;

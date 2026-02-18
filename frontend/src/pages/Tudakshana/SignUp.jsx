@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SignUp.css';
+import { authAPI, authHelpers } from '../../services/Tudakshana/authService';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const SignUp = () => {
     phone: '',
     password: '',
     confirmPassword: '',
+    role: 'customer', // Default role
     agreeToTerms: false,
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -19,6 +21,23 @@ const SignUp = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [passwordStrength, setPasswordStrength] = useState('');
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const isLoggedIn = authHelpers.isAuthenticated();
+    const userRole = authHelpers.getUserRole();
+    
+    if (isLoggedIn) {
+      // Redirect based on role
+      if (userRole === 'admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (userRole === 'seller') {
+        navigate('/seller/dashboard', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -125,36 +144,32 @@ const SignUp = () => {
     setLoading(true);
 
     try {
-      // Simulate API call
-      // TODO: Replace with actual API endpoint
-      // const response = await axios.post('/api/auth/signup', {
-      //   firstName: formData.firstName,
-      //   lastName: formData.lastName,
-      //   email: formData.email,
-      //   phone: formData.phone,
-      //   password: formData.password,
-      // });
-
-      // Simulated signup delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Simulated successful signup
-      setSuccess('Account created successfully! Redirecting to login...');
-      
-      // TODO: Handle response and redirect
-      // localStorage.setItem('token', response.data.token);
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-
-      console.log('Sign up data:', {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+      // Call backend API for registration
+      const response = await authAPI.register({
+        name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         phone: formData.phone,
+        password: formData.password,
+        role: formData.role,
       });
+
+      if (response.success) {
+        setSuccess('Account created successfully! Redirecting to login...');
+        
+        // Redirect to appropriate login page based on role immediately
+        const role = response.data.user.role;
+        if (role === 'admin') {
+          navigate('/admin/login', { replace: true });
+        } else if (role === 'seller') {
+          navigate('/seller/login', { replace: true });
+        } else {
+          navigate('/login', { replace: true });
+        }
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Sign up failed. Please try again.');
+      const errorMessage = err.response?.data?.message || 'Sign up failed. Please try again.';
+      setError(errorMessage);
+      console.error('Sign up error:', err);
     } finally {
       setLoading(false);
     }
@@ -230,6 +245,24 @@ const SignUp = () => {
               disabled={loading}
               autoComplete="email"
             />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="role">
+              Account Type<span className="required">*</span>
+            </label>
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleInputChange}
+              disabled={loading}
+              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}
+            >
+              <option value="customer">Customer - Shop for eco-friendly products</option>
+              <option value="seller">Seller - Sell your sustainable products</option>
+              <option value="admin">Admin - Manage the platform</option>
+            </select>
           </div>
 
           <div className="form-group">

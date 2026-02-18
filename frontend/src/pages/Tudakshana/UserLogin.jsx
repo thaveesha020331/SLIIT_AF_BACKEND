@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './UserLogin.css';
+import { authAPI, authHelpers } from '../../services/Tudakshana/authService';
 
 const UserLogin = () => {
   const navigate = useNavigate();
@@ -13,6 +14,23 @@ const UserLogin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const isLoggedIn = authHelpers.isAuthenticated();
+    const userRole = authHelpers.getUserRole();
+    
+    if (isLoggedIn) {
+      // Redirect based on role
+      if (userRole === 'admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (userRole === 'seller') {
+        navigate('/seller/dashboard', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -48,32 +66,32 @@ const UserLogin = () => {
     setLoading(true);
 
     try {
-      // Simulate API call
-      // TODO: Replace with actual API endpoint
-      // const response = await axios.post('/api/auth/user/login', {
-      //   email: formData.email,
-      //   password: formData.password,
-      // });
-
-      // Simulated login delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Simulated successful login
-      setSuccess('Login successful! Redirecting...');
-      
-      // TODO: Store token and redirect
-      // localStorage.setItem('token', response.data.token);
-      // localStorage.setItem('userRole', 'user');
-      setTimeout(() => {
-        navigate('/products');
-      }, 1000);
-
-      console.log('User login attempt:', {
+      // Call backend API for user login (customer or seller)
+      const response = await authAPI.login({
         email: formData.email,
-        rememberMe: formData.rememberMe,
+        password: formData.password,
       });
+
+      if (response.success) {
+        // Save auth data
+        authHelpers.saveAuth(response.data.token, response.data.user);
+        
+        setSuccess('Login successful! Redirecting...');
+        
+        // Redirect based on user role immediately
+        const role = response.data.user.role;
+        if (role === 'seller') {
+          navigate('/seller/dashboard', { replace: true });
+        } else if (role === 'customer') {
+          navigate('/products', { replace: true });
+        } else {
+          navigate('/', { replace: true });
+        }
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      const errorMessage = err.response?.data?.message || 'Login failed. Please try again.';
+      setError(errorMessage);
+      console.error('User login error:', err);
     } finally {
       setLoading(false);
     }
@@ -184,6 +202,8 @@ const UserLogin = () => {
 
         <div className="login-type-switch">
           Are you an admin? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/admin/login'); }}>Login as Admin</a>
+          {' | '}
+          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/seller/login'); }}>Login as Seller</a>
         </div>
       </div>
     </div>
