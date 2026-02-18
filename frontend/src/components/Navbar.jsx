@@ -47,7 +47,10 @@ export function Navbar() {
           >
             <ShoppingBag size={20} />
           </button>
-          <button className="px-6 py-2.5 text-xs font-bold tracking-wider border-2 border-dark rounded-full hover:bg-dark hover:text-white transition-all duration-300 uppercase">
+          <button
+            onClick={() => navigate('/login')}
+            className="px-6 py-2.5 text-xs font-bold tracking-wider border-2 border-dark rounded-full hover:bg-dark hover:text-white transition-all duration-300 uppercase"
+          >
             Login
           </button>
         </div>
@@ -87,7 +90,10 @@ export function Navbar() {
               <ShoppingBag size={20} />
               <span>Cart</span>
             </button>
-            <button className="px-6 py-2 text-xs font-bold border-2 border-dark rounded-full uppercase">
+            <button
+              onClick={() => { navigate('/login'); setIsMenuOpen(false); }}
+              className="px-6 py-2 text-xs font-bold border-2 border-dark rounded-full uppercase"
+            >
               Login
             </button>
           </div>
