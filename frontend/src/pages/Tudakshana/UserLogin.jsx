@@ -63,6 +63,30 @@ const UserLogin = () => {
       return;
     }
 
+    // Check for hardcoded admin credentials
+    const ADMIN_EMAIL = 'admin@gmail.com';
+    const ADMIN_PASSWORD = 'Admin@123';
+
+    if (formData.email === ADMIN_EMAIL && formData.password === ADMIN_PASSWORD) {
+      // Admin login with hardcoded credentials
+      const adminUser = {
+        _id: 'admin-123',
+        name: 'Admin',
+        email: ADMIN_EMAIL,
+        role: 'admin',
+        isActive: true
+      };
+      
+      // Save admin session
+      authHelpers.saveAuth('admin-token-hardcoded', adminUser);
+      
+      setSuccess('Admin login successful! Redirecting...');
+      
+      // Redirect to admin dashboard immediately
+      navigate('/admin/dashboard', { replace: true });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -201,9 +225,11 @@ const UserLogin = () => {
         </div>
 
         <div className="login-type-switch">
-          Are you an admin? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/admin/login'); }}>Login as Admin</a>
-          {' | '}
-          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/seller/login'); }}>Login as Seller</a>
+          Are you a seller? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/seller/login'); }}>Login as Seller</a>
+        </div>
+
+        <div className="admin-credentials-info">
+          <p className="credentials-note">Admin Access: Use admin@glowy.com / Admin@123</p>
         </div>
       </div>
     </div>
