@@ -1,14 +1,31 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import connectDB from './config/db.js';
+import authRoutes from './routes/Tudakshana/authRoutes.js';
+import adminRoutes from './routes/Tudakshana/adminRoutes.js';
 
 dotenv.config();
 
 const app = express();
 
+// CORS Configuration
+const corsOptions = {
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
 // Middleware
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
