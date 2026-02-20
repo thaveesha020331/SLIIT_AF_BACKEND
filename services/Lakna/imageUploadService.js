@@ -33,6 +33,11 @@ export const uploadProductImage = async (file) => {
       throw new Error('No file provided');
     }
 
+    if (file.path || file.filename) {
+      const filename = file.filename || path.basename(file.path);
+      return `/uploads/products/${filename}`;
+    }
+
     // Generate unique filename
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 8);

@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import path from 'path';
 import connectDB from './config/db.js';
 import authRoutes from './routes/Tudakshana/authRoutes.js';
 import adminRoutes from './routes/Tudakshana/adminRoutes.js';
@@ -25,6 +26,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.resolve('uploads')));
 
 // API Routes
 app.use('/api/auth', authRoutes);
