@@ -4,6 +4,9 @@ import cors from 'cors';
 import connectDB from './config/db.js';
 import authRoutes from './routes/Tudakshana/authRoutes.js';
 import adminRoutes from './routes/Tudakshana/adminRoutes.js';
+import productRoutes from './routes/Lakna/productRoutes.js';
+import cartRoutes from './routes/Thaveesha/cartRoutes.js';
+import orderRoutes from './routes/Thaveesha/orderRoutes.js';
 
 dotenv.config();
 
@@ -26,6 +29,9 @@ app.use(express.urlencoded({ extended: true }));
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

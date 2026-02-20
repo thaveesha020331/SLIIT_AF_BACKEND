@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { ShoppingBag, Menu, X, User } from 'lucide-react'
 import { authHelpers } from '../services/Tudakshana/authService'
+import api from '../services/Tudakshana/authService'
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [userName, setUserName] = useState('')
+  const [cartCount, setCartCount] = useState(0)
   const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     // Check authentication status
@@ -18,11 +21,14 @@ export function Navbar() {
         if (authenticated) {
           const user = authHelpers.getUser()
           setUserName(user?.name || 'User')
+        } else {
+          setCartCount(0)
         }
       } catch (error) {
         console.error('Auth check error:', error)
         setIsAuthenticated(false)
         setUserName('')
+        setCartCount(0)
       }
     }
 
@@ -31,6 +37,17 @@ export function Navbar() {
     window.addEventListener('storage', checkAuth)
     return () => window.removeEventListener('storage', checkAuth)
   }, [])
+
+  // Fetch cart count when authenticated (and on route change so it updates after cart actions)
+  useEffect(() => {
+    if (!isAuthenticated) return
+    api.get('/cart')
+      .then((res) => {
+        const items = res.data?.items || []
+        setCartCount(items.reduce((sum, i) => sum + (i.quantity || 1), 0))
+      })
+      .catch(() => setCartCount(0))
+  }, [isAuthenticated, location.pathname])
 
   const handleLogout = () => {
     try {
@@ -156,8 +173,15 @@ export function Navbar() {
               onClick={() => { navigate('/cart'); setIsMenuOpen(false); }}
               className="flex items-center space-x-2 text-dark font-medium bg-none border-none cursor-pointer py-2"
             >
-              <ShoppingBag size={20} />
-              <span>Cart</span>
+              <span className="relative inline-block">
+                <ShoppingBag size={20} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-lime-600 text-white text-xs font-bold px-1">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
+              </span>
+              <span>Cart{cartCount > 0 ? ` (${cartCount})` : ''}</span>
             </button>
             
             {isAuthenticated ? (

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/Tudakshana/authService';
 import './Order.css';
-
-const API_BASE = '';
 
 const STATUS_LABELS = {
   pending: 'Pending',
@@ -24,6 +22,7 @@ export default function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cancellingId, setCancellingId] = useState(null);
 
   useEffect(() => {
     fetchOrders();
@@ -33,38 +32,32 @@ export default function MyOrders() {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get(`${API_BASE}/api/orders/my-orders`);
+      const res = await api.get('/orders/my-orders');
       setOrders(Array.isArray(res.data) ? res.data : res.data?.orders || []);
     } catch (err) {
-      // Mock orders for UI when backend not ready
-      setOrders([
-        {
-          _id: 'ORD-001',
-          createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'delivered',
-          total: 94.97,
-          items: [{ product: { title: 'Eco Bamboo Bottle' }, quantity: 2 }, { product: { title: 'Organic T-Shirt' }, quantity: 1 }],
-          shippingAddress: '123 Green Lane, Colombo',
-        },
-        {
-          _id: 'ORD-002',
-          createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'shipped',
-          total: 34.99,
-          items: [{ product: { title: 'Organic Cotton T-Shirt' }, quantity: 1 }],
-          shippingAddress: '45 Eco Street, Kandy',
-        },
-        {
-          _id: 'ORD-003',
-          createdAt: new Date().toISOString(),
-          status: 'processing',
-          total: 52.98,
-          items: [{ product: { title: 'Handmade Soap Bar' }, quantity: 2 }, { product: { title: 'Bamboo Cutting Board' }, quantity: 1 }],
-          shippingAddress: '78 Nature Road, Galle',
-        },
-      ]);
+      if (err.response?.status === 401) return;
+      setError(err.response?.data?.message || 'Failed to load orders');
+      setOrders([]);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleCancel(orderId) {
+    if (!window.confirm('Cancel this order?')) return;
+    setCancellingId(orderId);
+    try {
+      await api.patch(`/orders/${orderId}/cancel`);
+      setOrders((prev) =>
+        prev.map((o) =>
+          o._id === orderId ? { ...o, status: 'cancelled' } : o
+        )
+      );
+    } catch (err) {
+      if (err.response?.status === 401) return;
+      setError(err.response?.data?.message || 'Failed to cancel order');
+    } finally {
+      setCancellingId(null);
     }
   }
 
@@ -101,10 +94,16 @@ export default function MyOrders() {
         <div className="orders-list">
           {orders.map((order) => {
             const stepIndex = getStepIndex(order.status);
+            const canCancel = ['pending', 'processing'].includes(order.status);
+            const busy = cancellingId === order._id;
             return (
               <div key={order._id} className="order-card">
                 <div className="order-card-header">
-                  <span className="order-id">{order._id}</span>
+                  <span className="order-id">
+                    <Link to={`/my-orders/${order._id}`} className="order-detail-link">
+                      {order._id}
+                    </Link>
+                  </span>
                   <span className="order-date">{formatDate(order.createdAt)}</span>
                   <span className={`order-status ${order.status}`}>
                     {STATUS_LABELS[order.status] || order.status}
@@ -132,6 +131,22 @@ export default function MyOrders() {
                       );
                     })}
                   </div>
+                </div>
+
+                <div className="order-card-actions">
+                  <Link to={`/my-orders/${order._id}`} className="btn-primary-link btn-small">
+                    View details
+                  </Link>
+                  {canCancel && (
+                    <button
+                      type="button"
+                      className="cart-item-remove"
+                      onClick={() => handleCancel(order._id)}
+                      disabled={busy}
+                    >
+                      {busy ? 'Cancelling...' : 'Cancel order'}
+                    </button>
+                  )}
                 </div>
               </div>
             );

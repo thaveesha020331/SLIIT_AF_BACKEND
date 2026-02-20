@@ -10,7 +10,6 @@ import {
   getByCertification,
   addReview,
 } from '../../controllers/Lakna/productController.js';
-import UserProducts from './pages/Lakna/UserProducts';
 
 // Middleware for file upload
 const storage = multer.diskStorage({
@@ -87,8 +86,5 @@ router.get('/certification/:certification', getByCertification);
 // Add review to product (Authenticated users)
 // router.post('/:id/reviews', auth, addReview);
 router.post('/:id/reviews', addReview);
-
-// Route to display UserProducts page
-router.get('/products', UserProducts);
 
 export default router;

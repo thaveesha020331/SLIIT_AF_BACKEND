@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import api from '../../services/Tudakshana/authService';
 import './UserProducts.css';
 
 const UserProducts = () => {
@@ -250,13 +251,13 @@ const UserProducts = () => {
 
   const tryFetchFromAPI = async () => {
     try {
-      let url = `/api/products?page=${page}&limit=12`;
+      let url = `/products?page=${page}&limit=12`;
 
       if (categoryFilter) url += `&category=${categoryFilter}`;
       if (certificationFilter) url += `&ecocertification=${certificationFilter}`;
       if (searchQuery) url += `&search=${searchQuery}`;
 
-      const response = await axios.get(url, { timeout: 5000 });
+      const response = await api.get(url, { timeout: 5000 });
       if (response.data?.data && response.data?.pagination) {
         setProducts(response.data.data);
         setTotalPages(response.data.pagination.pages || 1);
@@ -269,10 +270,11 @@ const UserProducts = () => {
 
   const handleAddToCart = async (productId, quantity = 1) => {
     try {
-      await axios.post('/api/cart/add', { productId, quantity });
+      await api.post('/cart/add', { productId, quantity });
       navigate('/cart');
     } catch (err) {
-      navigate('/cart'); // still go to cart when API not ready
+      if (err.response?.status === 401) return; // auth interceptor handles redirect
+      alert(err.response?.data?.message || 'Failed to add to cart');
     }
   };
 
