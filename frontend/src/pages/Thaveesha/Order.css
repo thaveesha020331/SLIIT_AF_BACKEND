@@ -407,3 +407,52 @@
   margin-bottom: 20px;
   font-weight: 500;
 }
+
+/* Order detail page */
+.order-detail-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #84cc16;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.order-detail-items {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.order-detail-items h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+.order-detail-link {
+  color: #1f2937;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.order-detail-link:hover {
+  color: #84cc16;
+  text-decoration: underline;
+}
+
+.order-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn-small {
+  padding: 6px 14px;
+  font-size: 13px;
+}

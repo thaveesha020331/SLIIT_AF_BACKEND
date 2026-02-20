@@ -4,6 +4,7 @@ import { HomePage } from './pages/Home'
 import UserProducts from './pages/Lakna/UserProducts'
 import Cart from './pages/Thaveesha/Cart'
 import MyOrders from './pages/Thaveesha/MyOrders'
+import OrderDetail from './pages/Thaveesha/OrderDetail'
 import MyReviewPage from './pages/Senara/MyReviewPage'
 import UserLogin from './pages/Tudakshana/UserLogin'
 import SellerLogin from './pages/Tudakshana/SellerLogin'
@@ -26,10 +27,32 @@ function App() {
         <Route path="/seller/login" element={<SellerLogin />} />
         <Route path="/signup" element={<SignUp />} />
         
-        {/* User Routes - Now Public (no authentication required) */}
+        {/* User Routes - require login for cart & orders */}
         <Route path="/profile" element={<UserProfile />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/my-orders" element={<MyOrders />} />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-orders"
+          element={
+            <ProtectedRoute>
+              <MyOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-orders/:orderId"
+          element={
+            <ProtectedRoute>
+              <OrderDetail />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/my-reviews" element={<MyReviewPage />} />
         
         {/* Admin Only Routes */}

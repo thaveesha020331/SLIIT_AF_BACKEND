@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/Tudakshana/authService';
 import './Order.css';
-
-const API_BASE = ''; // same origin; set proxy in vite if needed
 
 export default function Cart() {
   const [cart, setCart] = useState([]);
@@ -11,6 +9,7 @@ export default function Cart() {
   const [error, setError] = useState(null);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [placing, setPlacing] = useState(false);
+  const [updating, setUpdating] = useState(null);
   const [checkoutForm, setCheckoutForm] = useState({
     shippingAddress: '',
     phone: '',
@@ -25,31 +24,45 @@ export default function Cart() {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get(`${API_BASE}/api/cart`);
+      const res = await api.get('/cart');
       setCart(Array.isArray(res.data?.items) ? res.data.items : res.data || []);
     } catch (err) {
-      // Mock cart for UI when backend not ready
-      setCart([
-        { _id: '1', product: { _id: '1', title: 'Eco Bamboo Bottle', price: 29.99, image: 'https://images.unsplash.com/photo-1602143407151-7111542de099?w=200&h=200&fit=crop' }, quantity: 2 },
-        { _id: '2', product: { _id: '2', title: 'Organic Cotton T-Shirt', price: 34.99, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200&h=200&fit=crop' }, quantity: 1 },
-      ]);
+      if (err.response?.status === 401) return;
+      setError(err.response?.data?.message || err.message || 'Failed to load cart');
+      setCart([]);
     } finally {
       setLoading(false);
     }
   }
 
-  function updateQty(itemId, delta) {
-    setCart((prev) =>
-      prev.map((item) =>
-        item._id === itemId
-          ? { ...item, quantity: Math.max(1, (item.quantity || 1) + delta) }
-          : item
-      )
-    );
+  async function updateQty(itemId, delta) {
+    const item = cart.find((i) => i._id === itemId);
+    if (!item) return;
+    const newQty = Math.max(1, (item.quantity || 1) + delta);
+    if (newQty === item.quantity) return;
+    setUpdating(itemId);
+    try {
+      const res = await api.put('/cart', { itemId, quantity: newQty });
+      if (res.data?.items) setCart(res.data.items);
+    } catch (err) {
+      if (err.response?.status === 401) return;
+      setError(err.response?.data?.message || 'Failed to update quantity');
+    } finally {
+      setUpdating(null);
+    }
   }
 
-  function removeItem(itemId) {
-    setCart((prev) => prev.filter((item) => item._id !== itemId));
+  async function removeItem(itemId) {
+    setUpdating(itemId);
+    try {
+      const res = await api.delete(`/cart/item/${itemId}`);
+      if (res.data?.items) setCart(res.data.items);
+    } catch (err) {
+      if (err.response?.status === 401) return;
+      setError(err.response?.data?.message || 'Failed to remove item');
+    } finally {
+      setUpdating(null);
+    }
   }
 
   const subtotal = cart.reduce((sum, item) => {
@@ -66,7 +79,7 @@ export default function Cart() {
     setPlacing(true);
     setError(null);
     try {
-      await axios.post(`${API_BASE}/api/orders`, {
+      await api.post('/orders', {
         items: cart.map((item) => ({
           productId: (item.product && item.product._id) || item._id,
           quantity: item.quantity || 1,
@@ -78,9 +91,10 @@ export default function Cart() {
       setOrderSuccess(true);
       setCart([]);
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Checkout failed. Using demo mode.');
-      setOrderSuccess(true);
-      setCart([]);
+      setError(err.response?.data?.message || err.message || 'Checkout failed.');
+      if (err.response?.status !== 401) {
+        setOrderSuccess(false);
+      }
     } finally {
       setPlacing(false);
     }
@@ -127,6 +141,7 @@ export default function Cart() {
                 const p = item.product || item;
                 const price = p.price ?? 0;
                 const qty = item.quantity ?? 1;
+                const busy = updating === item._id;
                 return (
                   <div key={item._id} className="cart-item">
                     <img
@@ -139,12 +154,31 @@ export default function Cart() {
                       <span className="cart-item-price">${price.toFixed(2)} each</span>
                     </div>
                     <div className="cart-item-qty">
-                      <button type="button" onClick={() => updateQty(item._id, -1)} aria-label="Decrease">−</button>
+                      <button
+                        type="button"
+                        onClick={() => updateQty(item._id, -1)}
+                        aria-label="Decrease"
+                        disabled={busy || qty <= 1}
+                      >
+                        −
+                      </button>
                       <span>{qty}</span>
-                      <button type="button" onClick={() => updateQty(item._id, 1)} aria-label="Increase">+</button>
+                      <button
+                        type="button"
+                        onClick={() => updateQty(item._id, 1)}
+                        aria-label="Increase"
+                        disabled={busy}
+                      >
+                        +
+                      </button>
                     </div>
                     <span className="cart-item-price">${(price * qty).toFixed(2)}</span>
-                    <button type="button" className="cart-item-remove" onClick={() => removeItem(item._id)}>
+                    <button
+                      type="button"
+                      className="cart-item-remove"
+                      onClick={() => removeItem(item._id)}
+                      disabled={busy}
+                    >
                       Remove
                     </button>
                   </div>
