@@ -46,11 +46,11 @@ export function Navbar() {
 
   const navLinks = [
     { name: 'Home', href: '/' },
-    { name: 'About Us', href: '#' },
+    { name: 'About Us', href: '/' },
     { name: 'Products', href: '/products' },
     { name: 'My Orders', href: '/my-orders' },
     { name: 'My Reviews', href: '/my-reviews' },
-    { name: 'Contact Us', href: '#' },
+    { name: 'Contact Us', href: '/' },
   ]
 
   return (
@@ -58,12 +58,12 @@ export function Navbar() {
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo */}
         <div className="flex-shrink-0">
-          <a
-            href="#"
-            className="text-2xl font-serif font-bold text-dark tracking-tight"
+          <button
+            onClick={() => navigate('/')}
+            className="text-2xl font-serif font-bold text-dark tracking-tight bg-transparent border-none cursor-pointer"
           >
             Eco<span className="text-lime-800">.</span>Mart
-          </a>
+          </button>
         </div>
 
         {/* Desktop Navigation */}

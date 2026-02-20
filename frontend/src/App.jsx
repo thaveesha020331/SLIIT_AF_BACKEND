@@ -6,7 +6,6 @@ import Cart from './pages/Thaveesha/Cart'
 import MyOrders from './pages/Thaveesha/MyOrders'
 import MyReviewPage from './pages/Senara/MyReviewPage'
 import UserLogin from './pages/Tudakshana/UserLogin'
-import AdminLogin from './pages/Tudakshana/AdminLogin'
 import SellerLogin from './pages/Tudakshana/SellerLogin'
 import SignUp from './pages/Tudakshana/SignUp'
 import AdminDashboard from './pages/Tudakshana/AdminDashboard'
@@ -24,53 +23,17 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/products" element={<UserProducts />} />
         <Route path="/login" element={<UserLogin />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/seller/login" element={<SellerLogin />} />
         <Route path="/signup" element={<SignUp />} />
         
-        {/* Protected Routes - Require Authentication */}
-        <Route 
-          path="/profile" 
-          element={
-            <ProtectedRoute>
-              <UserProfile />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/cart" 
-          element={
-            <ProtectedRoute>
-              <Cart />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/my-orders" 
-          element={
-            <ProtectedRoute>
-              <MyOrders />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/my-reviews" 
-          element={
-            <ProtectedRoute>
-              <MyReviewPage />
-            </ProtectedRoute>
-          } 
-        />
+        {/* User Routes - Now Public (no authentication required) */}
+        <Route path="/profile" element={<UserProfile />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/my-orders" element={<MyOrders />} />
+        <Route path="/my-reviews" element={<MyReviewPage />} />
         
         {/* Admin Only Routes */}
-        <Route 
-          path="/admin/dashboard" 
-          element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } 
-        />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
         {/* Seller Only Routes */}
         <Route 

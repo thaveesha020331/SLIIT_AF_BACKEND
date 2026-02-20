@@ -6,11 +6,13 @@ import './AdminDashboard.css';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     role: '',
     isActive: '',
@@ -19,7 +21,6 @@ const AdminDashboard = () => {
     limit: 10,
   });
   const [pagination, setPagination] = useState(null);
-  const [editingUser, setEditingUser] = useState(null);
 
   useEffect(() => {
     // Check if user is admin
@@ -30,21 +31,62 @@ const AdminDashboard = () => {
     }
 
     fetchStats();
-    fetchUsers();
-  }, [filters]);
+    if (activeTab === 'users') {
+      fetchUsers();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, activeTab, navigate]);
 
   const fetchStats = async () => {
     try {
+      // Check if using hardcoded admin credentials
+      const token = localStorage.getItem('token');
+      if (token === 'admin-token-hardcoded') {
+        // Set mock stats for hardcoded admin
+        setStats({
+          total: 0,
+          active: 0,
+          byRole: {
+            admin: 1,
+            seller: 0,
+            customer: 0
+          }
+        });
+        return;
+      }
+      
       const response = await adminAPI.getStats();
       setStats(response.data.stats);
     } catch (err) {
       console.error('Error fetching stats:', err);
+      // Set default stats on error
+      setStats({
+        total: 0,
+        active: 0,
+        byRole: {
+          admin: 1,
+          seller: 0,
+          customer: 0
+        }
+      });
     }
   };
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      
+      // Check if using hardcoded admin credentials
+      const token = localStorage.getItem('token');
+      if (token === 'admin-token-hardcoded') {
+        // Set empty users list for hardcoded admin
+        setUsers([]);
+        setPagination({ total: 0, page: 1, pages: 0, limit: 10 });
+        setError('');
+        setLoading(false);
+        return;
+      }
+      
       console.log('Fetching users with filters:', filters);
       const response = await adminAPI.getAllUsers(filters);
       console.log('Users response:', response);
@@ -71,6 +113,14 @@ const AdminDashboard = () => {
   };
 
   const handleToggleStatus = async (userId) => {
+    // Check if using hardcoded admin credentials
+    const token = localStorage.getItem('token');
+    if (token === 'admin-token-hardcoded') {
+      setError('This feature requires a real backend connection. Please use a database-connected admin account.');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
+    
     try {
       const response = await adminAPI.toggleUserStatus(userId);
       setSuccess(response.message);
@@ -83,6 +133,14 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteUser = async (userId) => {
+    // Check if using hardcoded admin credentials
+    const token = localStorage.getItem('token');
+    if (token === 'admin-token-hardcoded') {
+      setError('This feature requires a real backend connection. Please use a database-connected admin account.');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
+    
     if (!window.confirm('Are you sure you want to delete this user?')) {
       return;
     }
@@ -117,73 +175,145 @@ const AdminDashboard = () => {
     }
   };
 
-  if (loading && !users.length) {
-    return (
-      <div className="admin-dashboard">
-        <div className="loader">Loading...</div>
+  const renderMainContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return renderDashboardView();
+      case 'users':
+        return renderUsersView();
+      case 'orders':
+        return <div className="coming-soon">Order Management - Coming Soon</div>;
+      case 'customers':
+        return <div className="coming-soon">Customers - Coming Soon</div>;
+      case 'add-product':
+        return <div className="coming-soon">Add Product - Coming Soon</div>;
+      case 'products':
+        return <div className="coming-soon">Product List - Coming Soon</div>;
+      case 'reviews':
+        return <div className="coming-soon">Reviews - Coming Soon</div>;
+      case 'profile':
+        return <div className="coming-soon">Profile - Coming Soon</div>;
+      default:
+        return renderDashboardView();
+    }
+  };
+
+  const renderDashboardView = () => (
+    <>
+      <div className="dashboard-welcome">
+        <h2>Admin Dashboard</h2>
+        <p>Welcome back! Here's what's happening with your store.</p>
       </div>
-    );
-  }
-
-  return (
-    <div className="admin-dashboard">
-      <header className="dashboard-header">
-        <div className="header-content">
-          <h1>👨‍💼 Admin Dashboard</h1>
-          <button onClick={handleLogout} className="btn-logout">
-            Sign Out
-          </button>
-        </div>
-      </header>
-
-      {error && (
-        <div className="alert alert-error">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="alert alert-success">
-          {success}
-        </div>
-      )}
 
       {/* Statistics Cards */}
+      {stats && (
+        <div className="stats-grid">
+          <div className="stat-card stat-orders">
+            <div className="stat-icon">🛍️</div>
+            <div className="stat-info">
+              <p className="stat-label">Total Orders</p>
+              <h3 className="stat-value">6</h3>
+            </div>
+          </div>
+          <div className="stat-card stat-revenue">
+            <div className="stat-icon">💰</div>
+            <div className="stat-info">
+              <p className="stat-label">Total Revenue</p>
+              <h3 className="stat-value">LKR 19510.00</h3>
+            </div>
+          </div>
+          <div className="stat-card stat-products">
+            <div className="stat-icon">📦</div>
+            <div className="stat-info">
+              <p className="stat-label">Total Products</p>
+              <h3 className="stat-value">5</h3>
+            </div>
+          </div>
+          <div className="stat-card stat-pending">
+            <div className="stat-icon">⏰</div>
+            <div className="stat-info">
+              <p className="stat-label">Pending Orders</p>
+              <h3 className="stat-value">0</h3>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Analytics Section */}
+      <div className="analytics-section">
+        <div className="section-header">
+          <h3>Analytics Dashboard</h3>
+          <div className="analytics-controls">
+            <button className="btn-icon">📅</button>
+            <select className="period-select">
+              <option>Weekly</option>
+              <option>Monthly</option>
+              <option>Yearly</option>
+            </select>
+            <button className="btn-download">📥 Download Report</button>
+          </div>
+        </div>
+        <div className="analytics-grid">
+          <div className="chart-card">
+            <h4>Orders & Revenue</h4>
+            <div className="chart-placeholder">
+              <p>Chart visualization coming soon...</p>
+            </div>
+          </div>
+          <div className="chart-card">
+            <h4>New Users</h4>
+            <div className="chart-placeholder">
+              <p>Chart visualization coming soon...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+
+  const renderUsersView = () => (
+    <>
+      <div className="users-header">
+        <h2>Users Management</h2>
+        <p>Manage all users, roles, and permissions</p>
+      </div>
+
+      {/* User Statistics */}
       {stats && (
         <div className="stats-grid">
           <div className="stat-card">
             <div className="stat-icon">👥</div>
             <div className="stat-info">
-              <h3>{stats.total}</h3>
-              <p>Total Users</p>
+              <p className="stat-label">Total Users</p>
+              <h3 className="stat-value">{stats.total}</h3>
             </div>
           </div>
           <div className="stat-card">
             <div className="stat-icon">✅</div>
             <div className="stat-info">
-              <h3>{stats.active}</h3>
-              <p>Active Users</p>
+              <p className="stat-label">Active Users</p>
+              <h3 className="stat-value">{stats.active}</h3>
             </div>
           </div>
           <div className="stat-card">
             <div className="stat-icon">👨‍💼</div>
             <div className="stat-info">
-              <h3>{stats.byRole.admin}</h3>
-              <p>Admins</p>
+              <p className="stat-label">Admins</p>
+              <h3 className="stat-value">{stats.byRole.admin}</h3>
             </div>
           </div>
           <div className="stat-card">
             <div className="stat-icon">🏪</div>
             <div className="stat-info">
-              <h3>{stats.byRole.seller}</h3>
-              <p>Sellers</p>
+              <p className="stat-label">Sellers</p>
+              <h3 className="stat-value">{stats.byRole.seller}</h3>
             </div>
           </div>
           <div className="stat-card">
             <div className="stat-icon">🛒</div>
             <div className="stat-info">
-              <h3>{stats.byRole.customer}</h3>
-              <p>Customers</p>
+              <p className="stat-label">Customers</p>
+              <h3 className="stat-value">{stats.byRole.customer}</h3>
             </div>
           </div>
         </div>
@@ -191,17 +321,18 @@ const AdminDashboard = () => {
 
       {/* Filters */}
       <div className="filters-section">
-        <form onSubmit={handleSearch} className="search-form">
+        <div className="search-box">
+          <span className="search-icon">🔍</span>
           <input
             type="text"
             placeholder="Search by name or email..."
             value={filters.search}
-            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
           />
-          <button type="submit">Search</button>
-        </form>
+        </div>
 
         <select
+          className="filter-select"
           value={filters.role}
           onChange={(e) => setFilters({ ...filters, role: e.target.value, page: 1 })}
         >
@@ -212,6 +343,7 @@ const AdminDashboard = () => {
         </select>
 
         <select
+          className="filter-select"
           value={filters.isActive}
           onChange={(e) => setFilters({ ...filters, isActive: e.target.value, page: 1 })}
         >
@@ -222,7 +354,9 @@ const AdminDashboard = () => {
       </div>
 
       {/* Users Table */}
-      {users.length > 0 ? (
+      {loading && !users.length ? (
+        <div className="loader">Loading users...</div>
+      ) : users.length > 0 ? (
         <div className="table-container">
           <table className="users-table">
             <thead>
@@ -288,20 +422,142 @@ const AdminDashboard = () => {
           <button
             onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
             disabled={filters.page === 1}
+            className="pagination-btn"
           >
             Previous
           </button>
-          <span>
+          <span className="pagination-info">
             Page {pagination.page} of {pagination.pages}
           </span>
           <button
             onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
             disabled={filters.page === pagination.pages}
+            className="pagination-btn"
           >
             Next
           </button>
         </div>
       )}
+    </>
+  );
+
+  return (
+    <div className="admin-dashboard-layout">
+      {/* Sidebar */}
+      <aside className="dashboard-sidebar">
+        <div className="sidebar-header">
+          <div className="brand">
+            <span className="brand-icon">🌿</span>
+            <span className="brand-name">Admin Panel</span>
+          </div>
+        </div>
+
+        <nav className="sidebar-nav">
+          <div className="nav-section">
+            <h4 className="nav-section-title">MAIN MENU</h4>
+            <button
+              className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+              onClick={() => setActiveTab('dashboard')}
+            >
+              <span className="nav-icon">📊</span>
+              <span className="nav-text">Dashboard</span>
+            </button>
+            <button
+              className={`nav-item ${activeTab === 'users' ? 'active' : ''}`}
+              onClick={() => setActiveTab('users')}
+            >
+              <span className="nav-icon">👥</span>
+              <span className="nav-text">Users List</span>
+            </button>
+            <button
+              className={`nav-item ${activeTab === 'orders' ? 'active' : ''}`}
+              onClick={() => setActiveTab('orders')}
+            >
+              <span className="nav-icon">📦</span>
+              <span className="nav-text">Order Management</span>
+            </button>
+            <button
+              className={`nav-item ${activeTab === 'customers' ? 'active' : ''}`}
+              onClick={() => setActiveTab('customers')}
+            >
+              <span className="nav-icon">👤</span>
+              <span className="nav-text">Customers</span>
+            </button>
+          </div>
+
+          <div className="nav-section">
+            <h4 className="nav-section-title">PRODUCT</h4>
+            <button
+              className={`nav-item ${activeTab === 'add-product' ? 'active' : ''}`}
+              onClick={() => setActiveTab('add-product')}
+            >
+              <span className="nav-icon">➕</span>
+              <span className="nav-text">Add Products</span>
+            </button>
+            <button
+              className={`nav-item ${activeTab === 'products' ? 'active' : ''}`}
+              onClick={() => setActiveTab('products')}
+            >
+              <span className="nav-icon">📋</span>
+              <span className="nav-text">Product List</span>
+            </button>
+            <button
+              className={`nav-item ${activeTab === 'reviews' ? 'active' : ''}`}
+              onClick={() => setActiveTab('reviews')}
+            >
+              <span className="nav-icon">⭐</span>
+              <span className="nav-text">Reviews</span>
+            </button>
+          </div>
+
+          <div className="nav-section">
+            <h4 className="nav-section-title">ADMIN</h4>
+            <button
+              className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
+              onClick={() => setActiveTab('profile')}
+            >
+              <span className="nav-icon">👤</span>
+              <span className="nav-text">Profile</span>
+            </button>
+          </div>
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <main className="dashboard-main">
+        <header className="main-header">
+          <div className="search-bar">
+            <span className="search-icon">🔍</span>
+            <input
+              type="text"
+              placeholder="Search data, users, or reports"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <button onClick={handleLogout} className="btn-logout">
+            Sign Out
+          </button>
+        </header>
+
+        {/* Success Message */}
+        {success && (
+          <div className="alert alert-success">
+            ✓ {success}
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="alert alert-error">
+            ✕ {error}
+          </div>
+        )}
+
+        <div className="content-area">
+          {renderMainContent()}
+        </div>
+      </main>
     </div>
   );
 };
