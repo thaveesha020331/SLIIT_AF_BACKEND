@@ -243,6 +243,14 @@
   background-color: #f9fafb;
 }
 
+.table-product-image {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
 .eco-score {
   display: flex;
   flex-direction: column;

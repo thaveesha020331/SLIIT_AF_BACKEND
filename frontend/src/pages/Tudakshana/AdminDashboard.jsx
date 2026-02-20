@@ -489,7 +489,7 @@ const AdminDashboard = () => {
             <h4 className="nav-section-title">PRODUCT</h4>
             <button
               className={`nav-item ${activeTab === 'add-product' ? 'active' : ''}`}
-              onClick={() => setActiveTab('add-product')}
+              onClick={() => navigate('/admin/products')}
             >
               <span className="nav-icon">➕</span>
               <span className="nav-text">Add Products</span>

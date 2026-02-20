@@ -10,6 +10,7 @@ import UserLogin from './pages/Tudakshana/UserLogin'
 import SellerLogin from './pages/Tudakshana/SellerLogin'
 import SignUp from './pages/Tudakshana/SignUp'
 import AdminDashboard from './pages/Tudakshana/AdminDashboard'
+import AdminProducts from './pages/Lakna/AdminProducts'
 import SellerDashboard from './pages/Tudakshana/SellerDashboard'
 import UserProfile from './pages/Tudakshana/UserProfile'
 import ProtectedRoute from './components/Tudakshana/ProtectedRoute'
@@ -57,6 +58,7 @@ function App() {
         
         {/* Admin Only Routes */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/products" element={<AdminProducts />} />
 
         {/* Seller Only Routes */}
         <Route 

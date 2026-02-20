@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AdminProducts.css';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = API_URL.replace(/\/api\/?$/, '');
+
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -9,6 +12,7 @@ const AdminProducts = () => {
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [page, setPage] = useState(1);
   const [categoryFilter, setCategoryFilter] = useState('');
   const [certificationFilter, setCertificationFilter] = useState('');
@@ -39,15 +43,23 @@ const AdminProducts = () => {
     setLoading(true);
     setError(null);
     try {
-      let url = `/api/products?page=${page}`;
+      let url = `${API_URL}/products?page=${page}`;
       if (categoryFilter) url += `&category=${categoryFilter}`;
       if (certificationFilter) url += `&ecocertification=${certificationFilter}`;
 
       const response = await axios.get(url);
-      setProducts(response.data.data);
-      setFilteredProducts(response.data.data);
+      const productList = Array.isArray(response?.data?.data)
+        ? response.data.data
+        : Array.isArray(response?.data?.products)
+          ? response.data.products
+          : [];
+
+      setProducts(productList);
+      setFilteredProducts(productList);
     } catch (err) {
       setError('Failed to fetch products');
+      setProducts([]);
+      setFilteredProducts([]);
       console.error(err);
     } finally {
       setLoading(false);
@@ -76,45 +88,98 @@ const AdminProducts = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({
-          ...formData,
-          image: reader.result,
-        });
-      };
-      reader.readAsDataURL(file);
+      setSelectedFile(file);
+      setFormData({
+        ...formData,
+        image: URL.createObjectURL(file),
+      });
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.description || !formData.price || !formData.stock || !formData.category || !formData.ecocertification) {
-      setError('All fields are required');
+    const trimmedTitle = formData.title.trim();
+    const trimmedDescription = formData.description.trim();
+    const priceValue = Number(formData.price);
+    const stockValue = Number(formData.stock);
+
+    if (!trimmedTitle || !trimmedDescription || formData.price === '' || formData.stock === '' || !formData.category || !formData.ecocertification) {
+      setError('All required fields must be filled');
+      return;
+    }
+
+    if (trimmedTitle.length < 3) {
+      setError('Title must be at least 3 characters long');
+      return;
+    }
+
+    if (trimmedDescription.length < 10) {
+      setError('Description must be at least 10 characters long');
+      return;
+    }
+
+    if (Number.isNaN(priceValue) || priceValue <= 0) {
+      setError('Price must be greater than 0');
+      return;
+    }
+
+    if (Number.isNaN(stockValue) || stockValue < 0) {
+      setError('Stock cannot be negative');
+      return;
+    }
+
+    if (!editingId && !selectedFile) {
+      setError('Please select a product image');
       return;
     }
 
     try {
-      const data = new FormData();
-      Object.keys(formData).forEach((key) => {
-        if (key !== 'manufacturerInfo') {
-          data.append(key, formData[key]);
-        } else {
-          data.append(key, JSON.stringify(formData.manufacturerInfo));
-        }
-      });
+      setError(null);
 
       if (editingId) {
-        await axios.put(`/api/products/${editingId}`, data);
+        if (selectedFile) {
+          const data = new FormData();
+          Object.keys(formData).forEach((key) => {
+            if (key === 'manufacturerInfo') {
+              data.append(key, JSON.stringify(formData.manufacturerInfo));
+            } else if (key === 'image') {
+              data.append('image', selectedFile);
+            } else {
+              data.append(key, formData[key]);
+            }
+          });
+          await axios.put(`${API_URL}/products/${editingId}`, data);
+        } else {
+          await axios.put(`${API_URL}/products/${editingId}`, {
+            ...formData,
+            manufacturerInfo: formData.manufacturerInfo,
+            image: formData.image,
+          });
+        }
         alert('Product updated successfully');
       } else {
-        await axios.post('/api/products', data);
+        const data = new FormData();
+        Object.keys(formData).forEach((key) => {
+          if (key === 'manufacturerInfo') {
+            data.append(key, JSON.stringify(formData.manufacturerInfo));
+          } else if (key === 'image') {
+            if (selectedFile) {
+              data.append('image', selectedFile);
+            } else if (formData.image && !formData.image.startsWith('blob:')) {
+              data.append('image', formData.image);
+            }
+          } else {
+            data.append(key, formData[key]);
+          }
+        });
+        await axios.post(`${API_URL}/products`, data);
         alert('Product created successfully');
       }
 
       setShowForm(false);
       setEditingId(null);
+      setSelectedFile(null);
       setFormData({
         title: '',
         description: '',
@@ -130,7 +195,13 @@ const AdminProducts = () => {
       });
       fetchProducts();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to save product');
+      const backendErrors = err.response?.data?.errors;
+      if (backendErrors && typeof backendErrors === 'object') {
+        const firstValidationError = Object.values(backendErrors)[0];
+        setError(firstValidationError || 'Validation failed');
+      } else {
+        setError(err.response?.data?.message || err.response?.data?.error || 'Failed to save product');
+      }
       console.error(err);
     }
   };
@@ -146,6 +217,7 @@ const AdminProducts = () => {
       image: product.image,
       manufacturerInfo: product.manufacturerInfo || { name: '', location: '' },
     });
+    setSelectedFile(null);
     setEditingId(product._id);
     setShowForm(true);
   };
@@ -154,13 +226,26 @@ const AdminProducts = () => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      await axios.delete(`/api/products/${id}`);
+      await axios.delete(`${API_URL}/products/${id}`);
       alert('Product deleted successfully');
       fetchProducts();
     } catch (err) {
       setError('Failed to delete product');
       console.error(err);
     }
+  };
+
+  const getProductImageSrc = (imagePath) => {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('blob:') || imagePath.startsWith('data:')) {
+      return imagePath;
+    }
+
+    if (imagePath.startsWith('/')) {
+      return `${API_BASE_URL}${imagePath}`;
+    }
+
+    return `${API_BASE_URL}/${imagePath}`;
   };
 
   return (
@@ -170,6 +255,7 @@ const AdminProducts = () => {
         <button className="btn-primary" onClick={() => {
           setShowForm(!showForm);
           setEditingId(null);
+          setSelectedFile(null);
           setFormData({
             title: '',
             description: '',
@@ -285,7 +371,7 @@ const AdminProducts = () => {
               <input
                 type="file"
                 onChange={handleFileChange}
-                accept="image/*"
+                accept="image/jpeg,image/png,image/gif,image/webp"
                 required={!editingId}
               />
               {formData.image && (
@@ -381,6 +467,7 @@ const AdminProducts = () => {
             <thead>
               <tr>
                 <th>Title</th>
+                <th>Image</th>
                 <th>Category</th>
                 <th>Certification</th>
                 <th>Price</th>
@@ -390,9 +477,20 @@ const AdminProducts = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredProducts.map((product) => (
+              {(Array.isArray(filteredProducts) ? filteredProducts : []).map((product) => (
                 <tr key={product._id}>
                   <td>{product.title}</td>
+                  <td>
+                    {product.image ? (
+                      <img
+                        src={getProductImageSrc(product.image)}
+                        alt={product.title}
+                        className="table-product-image"
+                      />
+                    ) : (
+                      <span>No image</span>
+                    )}
+                  </td>
                   <td>{product.category}</td>
                   <td>{product.ecocertification}</td>
                   <td>${product.price.toFixed(2)}</td>

@@ -1,4 +1,5 @@
 import Product from '../../models/Lakna/Product.js';
+import mongoose from 'mongoose';
 import { validateProductInput } from '../../utills/Lakna/validators.js';
 import { calculateEcoImpact } from '../../services/Lakna/ecoImpactService.js';
 import { uploadProductImage } from '../../services/Lakna/imageUploadService.js';
@@ -9,8 +10,13 @@ import { uploadProductImage } from '../../services/Lakna/imageUploadService.js';
  */
 export const createProduct = async (req, res) => {
   try {
+    const validationPayload = {
+      ...req.body,
+      image: req.body.image || (req.file ? 'uploaded-file' : undefined),
+    };
+
     // Validate input
-    const { errors, isValid } = validateProductInput(req.body);
+    const { errors, isValid } = validateProductInput(validationPayload);
     if (!isValid) {
       return res.status(400).json({
         status: 'error',
@@ -32,9 +38,23 @@ export const createProduct = async (req, res) => {
       eco_certification: req.body.ecocertification,
     });
 
+    let manufacturerInfo = req.body.manufacturerInfo;
+    if (typeof manufacturerInfo === 'string') {
+      try {
+        manufacturerInfo = JSON.parse(manufacturerInfo);
+      } catch (parseError) {
+        manufacturerInfo = { name: '', location: '' };
+      }
+    }
+
+    if (!manufacturerInfo || typeof manufacturerInfo !== 'object' || Array.isArray(manufacturerInfo)) {
+      manufacturerInfo = { name: '', location: '' };
+    }
+
     // Create product object
     const productData = {
       ...req.body,
+      manufacturerInfo,
       image: imageUrl,
       imagePath: req.file ? req.file.path : null,
       ecoImpactScore: {
@@ -43,8 +63,12 @@ export const createProduct = async (req, res) => {
         waterUsage: ecoImpactScore.waterUsage,
         recyclabilityScore: ecoImpactScore.recyclabilityScore,
       },
-      createdBy: req.user._id, // Assuming authenticated user
+      createdBy: req.user?._id,
     };
+
+    if (!productData.createdBy) {
+      delete productData.createdBy;
+    }
 
     const product = new Product(productData);
     await product.save();
@@ -171,6 +195,13 @@ export const getProductById = async (req, res) => {
  */
 export const updateProduct = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid product ID',
+      });
+    }
+
     // Validate input
     const { errors, isValid } = validateProductInput(req.body, true);
     if (!isValid) {
@@ -194,6 +225,22 @@ export const updateProduct = async (req, res) => {
     let imageUrl = req.body.image;
     if (req.file) {
       imageUrl = await uploadProductImage(req.file);
+    }
+
+    let manufacturerInfo = req.body.manufacturerInfo;
+    if (typeof manufacturerInfo === 'string') {
+      try {
+        manufacturerInfo = JSON.parse(manufacturerInfo);
+      } catch (parseError) {
+        manufacturerInfo = product.manufacturerInfo || { name: '', location: '' };
+      }
+    }
+
+    if (
+      manufacturerInfo !== undefined &&
+      (!manufacturerInfo || typeof manufacturerInfo !== 'object' || Array.isArray(manufacturerInfo))
+    ) {
+      manufacturerInfo = product.manufacturerInfo || { name: '', location: '' };
     }
 
     // Recalculate eco-impact if category or certification changed
@@ -223,7 +270,6 @@ export const updateProduct = async (req, res) => {
       'stock',
       'category',
       'ecocertification',
-      'manufacturerInfo',
       'isActive',
     ];
 
@@ -232,6 +278,10 @@ export const updateProduct = async (req, res) => {
         product[field] = req.body[field];
       }
     });
+
+    if (manufacturerInfo !== undefined) {
+      product.manufacturerInfo = manufacturerInfo;
+    }
 
     if (imageUrl) {
       product.image = imageUrl;
@@ -249,6 +299,15 @@ export const updateProduct = async (req, res) => {
     });
   } catch (error) {
     console.error('Update product error:', error);
+
+    if (error.name === 'ValidationError' || error.name === 'CastError') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid product update data',
+        error: error.message,
+      });
+    }
+
     res.status(500).json({
       status: 'error',
       message: 'Failed to update product',
