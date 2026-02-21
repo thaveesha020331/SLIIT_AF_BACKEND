@@ -127,13 +127,13 @@ export function Navbar() {
             <>
               <button
                 onClick={() => navigate('/login')}
-                className="px-6 py-2.5 text-xs font-bold tracking-wider border-2 border-dark rounded-full hover:bg-dark hover:text-white transition-all duration-300 uppercase"
+                className="px-6 py-2.5 text-xs font-bold tracking-wider border-2 border-dark rounded-full hover:bg-[#0D0D0D] hover:text-white transition-all duration-300 uppercase"
               >
                 Login
               </button>
               <button
                 onClick={() => navigate('/signup')}
-                className="px-6 py-2.5 text-xs font-bold tracking-wider bg-dark text-white rounded-full hover:bg-lime-800 transition-all duration-300 uppercase"
+                className="px-6 py-2.5 text-xs font-bold tracking-wider bg-dark text-white rounded-full hover:bg-[#0D0D0D] transition-all duration-300 uppercase"
               >
                 Sign Up
               </button>
