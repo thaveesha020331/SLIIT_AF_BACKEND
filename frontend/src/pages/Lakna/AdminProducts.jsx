@@ -1,21 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useSearchParams } from 'react-router-dom';
 import './AdminProducts.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const API_BASE_URL = API_URL.replace(/\/api\/?$/, '');
 
-const AdminProducts = () => {
+const AdminProducts = ({ mode = 'both' }) => {
+  const [searchParams] = useSearchParams();
+  const isAddMode = mode === 'add';
+  const isListMode = mode === 'list';
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(isAddMode);
   const [editingId, setEditingId] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [page, setPage] = useState(1);
   const [categoryFilter, setCategoryFilter] = useState('');
   const [certificationFilter, setCertificationFilter] = useState('');
+  const canShowForm = mode === 'both' || isAddMode || (isListMode && editingId !== null);
+  const canShowList = mode === 'both' || isListMode;
 
   const categories = ['Reusable', 'Organic', 'Handmade', 'Biodegradable', 'Sustainable', 'Ecofriendly'];
   const certifications = ['FSC', 'USDA Organic', 'Fair Trade', 'Carbon Neutral', 'B Corp', 'Cradle to Cradle', 'EU Ecolabel', 'Green Seal'];
@@ -34,10 +40,49 @@ const AdminProducts = () => {
     },
   });
 
+  const resetForm = () => {
+    setEditingId(null);
+    setSelectedFile(null);
+    setFormData({
+      title: '',
+      description: '',
+      price: '',
+      stock: '',
+      category: '',
+      ecocertification: '',
+      image: '',
+      manufacturerInfo: {
+        name: '',
+        location: '',
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (mode !== 'both') {
+      setShowForm(isAddMode);
+      return;
+    }
+
+    const view = searchParams.get('view');
+    if (view === 'add') {
+      setShowForm(true);
+      resetForm();
+      return;
+    }
+
+    if (view === 'list') {
+      setShowForm(false);
+    }
+  }, [searchParams, mode, isAddMode]);
+
   // Fetch products
   useEffect(() => {
+    if (!canShowList) {
+      return;
+    }
     fetchProducts();
-  }, [page, categoryFilter, certificationFilter]);
+  }, [page, categoryFilter, certificationFilter, canShowList]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -178,22 +223,13 @@ const AdminProducts = () => {
       }
 
       setShowForm(false);
-      setEditingId(null);
-      setSelectedFile(null);
-      setFormData({
-        title: '',
-        description: '',
-        price: '',
-        stock: '',
-        category: '',
-        ecocertification: '',
-        image: '',
-        manufacturerInfo: {
-          name: '',
-          location: '',
-        },
-      });
-      fetchProducts();
+      if (isAddMode) {
+        setShowForm(true);
+      }
+      resetForm();
+      if (canShowList) {
+        fetchProducts();
+      }
     } catch (err) {
       const backendErrors = err.response?.data?.errors;
       if (backendErrors && typeof backendErrors === 'object') {
@@ -252,28 +288,19 @@ const AdminProducts = () => {
     <div className="admin-products-container">
       <div className="admin-header">
         <h1>Product Management</h1>
-        <button className="btn-primary" onClick={() => {
-          setShowForm(!showForm);
-          setEditingId(null);
-          setSelectedFile(null);
-          setFormData({
-            title: '',
-            description: '',
-            price: '',
-            stock: '',
-            category: '',
-            ecocertification: '',
-            image: '',
-            manufacturerInfo: { name: '', location: '' },
-          });
-        }}>
-          {showForm ? 'Cancel' : 'Add New Product'}
-        </button>
+        {mode === 'both' && (
+          <button className="btn-primary" onClick={() => {
+            setShowForm(!showForm);
+            resetForm();
+          }}>
+            {showForm ? 'Cancel' : 'Add New Product'}
+          </button>
+        )}
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
 
-      {showForm && (
+      {canShowForm && showForm && (
         <div className="product-form-container">
           <h2>{editingId ? 'Edit Product' : 'Add New Product'}</h2>
           <form onSubmit={handleSubmit} className="product-form">
@@ -410,12 +437,18 @@ const AdminProducts = () => {
 
             <div className="form-actions">
               <button type="submit" className="btn-primary">
-                {editingId ? 'Update Product' : 'Create Product'}
+                {editingId ? 'Update Product' : 'Add Product'}
               </button>
               <button
                 type="button"
                 className="btn-secondary"
                 onClick={() => {
+                  if (isAddMode) {
+                    resetForm();
+                    setShowForm(true);
+                    return;
+                  }
+
                   setShowForm(false);
                   setEditingId(null);
                 }}
@@ -427,95 +460,99 @@ const AdminProducts = () => {
         </div>
       )}
 
-      <div className="filters-section">
-        <div className="filter-group">
-          <label>Filter by Category:</label>
-          <select value={categoryFilter} onChange={(e) => {
-            setCategoryFilter(e.target.value);
-            setPage(1);
-          }}>
-            <option value="">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-        </div>
+      {canShowList && (
+        <>
+          <div className="filters-section">
+            <div className="filter-group">
+              <label>Filter by Category:</label>
+              <select value={categoryFilter} onChange={(e) => {
+                setCategoryFilter(e.target.value);
+                setPage(1);
+              }}>
+                <option value="">All Categories</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <div className="filter-group">
-          <label>Filter by Certification:</label>
-          <select value={certificationFilter} onChange={(e) => {
-            setCertificationFilter(e.target.value);
-            setPage(1);
-          }}>
-            <option value="">All Certifications</option>
-            {certifications.map((cert) => (
-              <option key={cert} value={cert}>
-                {cert}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+            <div className="filter-group">
+              <label>Filter by Certification:</label>
+              <select value={certificationFilter} onChange={(e) => {
+                setCertificationFilter(e.target.value);
+                setPage(1);
+              }}>
+                <option value="">All Certifications</option>
+                {certifications.map((cert) => (
+                  <option key={cert} value={cert}>
+                    {cert}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-      {loading ? (
-        <div className="loading">Loading products...</div>
-      ) : (
-        <div className="products-table-container">
-          <table className="products-table">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Image</th>
-                <th>Category</th>
-                <th>Certification</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Eco-Impact Score</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(Array.isArray(filteredProducts) ? filteredProducts : []).map((product) => (
-                <tr key={product._id}>
-                  <td>{product.title}</td>
-                  <td>
-                    {product.image ? (
-                      <img
-                        src={getProductImageSrc(product.image)}
-                        alt={product.title}
-                        className="table-product-image"
-                      />
-                    ) : (
-                      <span>No image</span>
-                    )}
-                  </td>
-                  <td>{product.category}</td>
-                  <td>{product.ecocertification}</td>
-                  <td>${product.price.toFixed(2)}</td>
-                  <td>{product.stock}</td>
-                  <td>
-                    <div className="eco-score">
-                      <div className="sustainability-rating">
-                        {product.ecoImpactScore?.sustainabilityRating || 0}%
-                      </div>
-                      <small>CO2: {product.ecoImpactScore?.carbonFootprint || 0} kg</small>
-                    </div>
-                  </td>
-                  <td className="actions">
-                    <button className="btn-edit" onClick={() => handleEdit(product)}>
-                      Edit
-                    </button>
-                    <button className="btn-delete" onClick={() => handleDelete(product._id)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          {loading ? (
+            <div className="loading">Loading products...</div>
+          ) : (
+            <div className="products-table-container">
+              <table className="products-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Image</th>
+                    <th>Category</th>
+                    <th>Certification</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Eco-Impact Score</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(Array.isArray(filteredProducts) ? filteredProducts : []).map((product) => (
+                    <tr key={product._id}>
+                      <td>{product.title}</td>
+                      <td>
+                        {product.image ? (
+                          <img
+                            src={getProductImageSrc(product.image)}
+                            alt={product.title}
+                            className="table-product-image"
+                          />
+                        ) : (
+                          <span>No image</span>
+                        )}
+                      </td>
+                      <td>{product.category}</td>
+                      <td>{product.ecocertification}</td>
+                      <td>${product.price.toFixed(2)}</td>
+                      <td>{product.stock}</td>
+                      <td>
+                        <div className="eco-score">
+                          <div className="sustainability-rating">
+                            {product.ecoImpactScore?.sustainabilityRating || 0}%
+                          </div>
+                          <small>CO2: {product.ecoImpactScore?.carbonFootprint || 0} kg</small>
+                        </div>
+                      </td>
+                      <td className="actions">
+                        <button className="btn-edit" onClick={() => handleEdit(product)}>
+                          Edit
+                        </button>
+                        <button className="btn-delete" onClick={() => handleDelete(product._id)}>
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

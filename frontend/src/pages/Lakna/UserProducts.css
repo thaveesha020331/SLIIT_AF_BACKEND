@@ -4,7 +4,7 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
-  background: linear-gradient(to bottom, #faf9f6, #f1f513 40%, #dcfce7);
+  background: #ffffff;
   min-height: 100vh;
 }
 
@@ -269,8 +269,8 @@
 
 .btn-view-details {
   padding: 10px 16px;
-  background-color: #84cc16;
-  color: #1f2937;
+  background-color: #0D0D0D;
+  color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -282,6 +282,35 @@
 .btn-view-details:hover {
   background-color: #65a30d;
   color: white;
+}
+
+.product-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.btn-view-details-wide {
+  flex: 1;
+  min-width: 140px;
+}
+
+.btn-cart-icon {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  background: #65a30d;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cart-icon:hover {
+  background: #4d7c0f;
 }
 
 /* Modal Styles */

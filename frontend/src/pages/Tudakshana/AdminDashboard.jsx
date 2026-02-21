@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminAPI } from '../../services/Tudakshana/adminService';
 import { authHelpers } from '../../services/Tudakshana/authService';
+import AdminProducts from '../Lakna/AdminProducts';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -186,9 +187,9 @@ const AdminDashboard = () => {
       case 'customers':
         return <div className="coming-soon">Customers - Coming Soon</div>;
       case 'add-product':
-        return <div className="coming-soon">Add Product - Coming Soon</div>;
+        return <AdminProducts mode="add" />;
       case 'products':
-        return <div className="coming-soon">Product List - Coming Soon</div>;
+        return <AdminProducts mode="list" />;
       case 'reviews':
         return <div className="coming-soon">Reviews - Coming Soon</div>;
       case 'profile':
@@ -489,7 +490,7 @@ const AdminDashboard = () => {
             <h4 className="nav-section-title">PRODUCT</h4>
             <button
               className={`nav-item ${activeTab === 'add-product' ? 'active' : ''}`}
-              onClick={() => navigate('/admin/products')}
+              onClick={() => setActiveTab('add-product')}
             >
               <span className="nav-icon">➕</span>
               <span className="nav-text">Add Products</span>
