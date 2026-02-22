@@ -70,25 +70,25 @@ export function Navbar() {
   ]
 
   return (
-    <nav className="absolute top-0 left-0 w-full z-50 px-6 py-6 md:px-12 lg:px-20">
-      <div className="flex items-center justify-between max-w-7xl mx-auto">
+    <nav className="sticky top-0 left-0 w-full z-50 bg-white border-b border-gray-200 shadow-sm">
+      <div className="flex items-center justify-between max-w-7xl mx-auto px-4 py-4 sm:px-6 md:px-8 lg:px-10">
         {/* Logo */}
         <div className="flex-shrink-0">
           <button
             onClick={() => navigate('/')}
-            className="text-2xl font-serif font-bold text-dark tracking-tight bg-transparent border-none cursor-pointer"
+            className="text-xl sm:text-2xl font-serif font-bold text-gray-900 tracking-tight bg-transparent border-none cursor-pointer"
           >
-            Eco<span className="text-lime-800">.</span>Mart
+            Eco<span className="text-lime-700">.</span>Mart
           </button>
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-8 lg:space-x-12">
+        <div className="hidden md:flex items-center gap-6 lg:gap-10">
           {navLinks.map((link) => (
             <button
               key={link.name}
               onClick={() => navigate(link.href)}
-              className="text-xs lg:text-sm font-medium text-dark tracking-widest hover:text-lime-800 transition-colors uppercase bg-none border-none cursor-pointer"
+              className="text-xs lg:text-sm font-medium text-gray-700 tracking-wide hover:text-lime-700 transition-colors uppercase bg-none border-none cursor-pointer"
             >
               {link.name}
             </button>
@@ -96,20 +96,25 @@ export function Navbar() {
         </div>
 
         {/* Right Actions */}
-        <div className="hidden md:flex items-center space-x-6">
+        <div className="hidden md:flex items-center gap-4 lg:gap-6">
           <button
             onClick={() => navigate('/cart')}
-            className="text-dark hover:text-lime-800 transition-colors"
+            className="relative text-gray-700 hover:text-lime-700 transition-colors p-1"
             aria-label="Shopping Cart"
           >
             <ShoppingBag size={20} />
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-lime-600 text-white text-xs font-bold px-1">
+                {cartCount > 99 ? '99+' : cartCount}
+              </span>
+            )}
           </button>
           
           {isAuthenticated ? (
             <>
               <button
                 onClick={() => navigate('/profile')}
-                className="flex items-center space-x-2 text-dark hover:text-lime-800 transition-colors"
+                className="flex items-center gap-2 text-gray-700 hover:text-lime-700 transition-colors"
                 aria-label="Profile"
               >
                 <User size={20} />
@@ -117,7 +122,7 @@ export function Navbar() {
               </button>
               <button
                 onClick={handleLogout}
-                className="px-6 py-2.5 text-xs font-bold tracking-wider border-2 border-dark rounded-full hover:bg-dark hover:text-white transition-all duration-300 uppercase"
+                className="px-4 py-2 text-xs font-bold tracking-wider border-2 border-gray-800 rounded-full hover:bg-gray-800 hover:text-white transition-colors uppercase"
               >
                 Logout
               </button>
@@ -126,13 +131,13 @@ export function Navbar() {
             <>
               <button
                 onClick={() => navigate('/login')}
-                className="px-6 py-2.5 text-xs font-bold tracking-wider border-2 border-dark rounded-full hover:bg-[#0D0D0D] hover:text-white transition-all duration-300 uppercase"
+                className="px-4 py-2 text-xs font-bold tracking-wider border-2 border-gray-800 rounded-full hover:bg-gray-800 hover:text-white transition-colors uppercase"
               >
                 Login
               </button>
               <button
                 onClick={() => navigate('/signup')}
-                className="px-6 py-2.5 text-xs font-bold tracking-wider bg-dark text-white rounded-full hover:bg-[#0D0D0D] transition-all duration-300 uppercase"
+                className="px-4 py-2 text-xs font-bold tracking-wider bg-gray-800 text-white rounded-full hover:bg-gray-700 transition-colors uppercase"
               >
                 Sign Up
               </button>
@@ -144,7 +149,7 @@ export function Navbar() {
         <div className="md:hidden">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-dark p-2"
+            className="text-gray-800 p-2 rounded hover:bg-gray-100"
             aria-label="Toggle menu"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -154,7 +159,7 @@ export function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="absolute top-full left-0 w-full bg-white/95 backdrop-blur-md shadow-lg md:hidden py-6 px-6 flex flex-col space-y-4 border-t border-gray-100">
+        <div className="absolute top-full left-0 w-full bg-white border-t border-gray-200 shadow-md md:hidden py-4 px-4 flex flex-col gap-1">
           {navLinks.map((link) => (
             <button
               key={link.name}
@@ -162,15 +167,15 @@ export function Navbar() {
                 navigate(link.href)
                 setIsMenuOpen(false)
               }}
-              className="text-sm font-bold text-dark tracking-widest py-2 border-b border-gray-50 text-left bg-none border-none cursor-pointer"
+              className="text-sm font-medium text-gray-800 py-3 px-2 text-left bg-none border-none cursor-pointer hover:bg-gray-50 rounded"
             >
               {link.name}
             </button>
           ))}
-          <div className="flex flex-col space-y-3 pt-4 border-t border-gray-100">
+          <div className="flex flex-col gap-1 pt-3 border-t border-gray-200">
             <button
               onClick={() => { navigate('/cart'); setIsMenuOpen(false); }}
-              className="flex items-center space-x-2 text-dark font-medium bg-none border-none cursor-pointer py-2"
+              className="flex items-center gap-2 text-gray-800 font-medium bg-none border-none cursor-pointer py-3 px-2 hover:bg-gray-50 rounded"
             >
               <span className="relative inline-block">
                 <ShoppingBag size={20} />
@@ -187,14 +192,14 @@ export function Navbar() {
               <>
                 <button
                   onClick={() => { navigate('/profile'); setIsMenuOpen(false); }}
-                  className="flex items-center space-x-2 text-dark font-medium bg-none border-none cursor-pointer py-2"
+                  className="flex items-center gap-2 text-gray-800 font-medium bg-none border-none cursor-pointer py-3 px-2 hover:bg-gray-50 rounded"
                 >
                   <User size={20} />
                   <span>{userName}</span>
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="px-6 py-2 text-xs font-bold border-2 border-dark rounded-full uppercase bg-white"
+                  className="px-4 py-2 text-xs font-bold border-2 border-gray-800 rounded-full uppercase bg-white text-left"
                 >
                   Logout
                 </button>
@@ -203,13 +208,13 @@ export function Navbar() {
               <>
                 <button
                   onClick={() => { navigate('/login'); setIsMenuOpen(false); }}
-                  className="px-6 py-2 text-xs font-bold border-2 border-dark rounded-full uppercase bg-white"
+                  className="px-4 py-2 text-xs font-bold border-2 border-gray-800 rounded-full uppercase bg-white text-left"
                 >
                   Login
                 </button>
                 <button
                   onClick={() => { navigate('/signup'); setIsMenuOpen(false); }}
-                  className="px-6 py-2 text-xs font-bold bg-dark text-white rounded-full uppercase"
+                  className="px-4 py-2 text-xs font-bold bg-gray-800 text-white rounded-full uppercase text-left"
                 >
                   Sign Up
                 </button>

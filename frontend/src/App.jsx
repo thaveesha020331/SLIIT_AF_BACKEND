@@ -23,7 +23,7 @@ function AppContent() {
   return (
     <>
       {showNavbar && <Navbar />}
-      <main className="container">
+      <main className="main-content">
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />

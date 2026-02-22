@@ -1,6 +1,18 @@
 #root {
   width: 100%;
+  min-height: 100vh;
 }
+
+/* Full-width layout: content below navbar, consistent padding */
+.main-content {
+  width: 100%;
+  min-height: calc(100vh - 64px);
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+/* Pages that need max-width use their own container (e.g. order-page-container, max-w-7xl) */
 
 .logo {
   height: 6em;

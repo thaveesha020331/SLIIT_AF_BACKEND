@@ -28,10 +28,10 @@ export function HomePage() {
     <div className="min-h-screen bg-white">
       <main className="mb-0">
         {/* Hero */}
-        <section className="mt-0 px-4 md:px-8 pt-2 pb-12">
-          <div className="relative h-[100vh] min-h-[660px] overflow-hidden rounded-[1.5rem]">
+        <section className="px-4 md:px-6 lg:px-8 pt-4 pb-12 max-w-7xl mx-auto">
+          <div className="relative h-[85vh] min-h-[500px] overflow-hidden rounded-xl md:rounded-2xl">
             <div className="absolute inset-0 bg-gradient-to-br from-lime-100 via-lime-200 to-lime-400" />
-            <div className="relative h-full flex items-center justify-center px-4 text-center mt-12">
+            <div className="relative h-full flex items-center justify-center px-4 text-center">
               {/* Decorative Background Elements */}
               <div className="absolute top-0 right-0 w-2/3 h-full bg-white/10 rounded-l-full blur-3xl transform translate-x-1/4 pointer-events-none" />
               <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-lime-300/20 blur-3xl rounded-full pointer-events-none" />

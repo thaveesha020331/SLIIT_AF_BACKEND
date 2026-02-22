@@ -1,11 +1,25 @@
 /* Order & Cart UI - Thaveesha (matches Lakna theme) */
 
 .order-page-container {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
-  background: linear-gradient(to bottom, #faf9f6, #f1f513 40%, #dcfce7);
-  min-height: 100vh;
+  padding: 24px 16px;
+  box-sizing: border-box;
+  background: #f8faf8;
+  min-height: calc(100vh - 64px);
+}
+
+@media (min-width: 640px) {
+  .order-page-container {
+    padding: 32px 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .order-page-container {
+    padding: 40px 32px;
+  }
 }
 
 .order-page-header {
@@ -455,4 +469,119 @@
 .btn-small {
   padding: 6px 14px;
   font-size: 13px;
+}
+
+/* Map address picker (checkout) */
+.map-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.map-picker-box {
+  background: white;
+  border-radius: 12px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.map-picker-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  position: relative;
+}
+
+.map-picker-header h3 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  color: #1f2937;
+}
+
+.map-picker-header p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.map-picker-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f3f4f6;
+  border-radius: 6px;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: #374151;
+}
+
+.map-picker-close:hover {
+  background: #e5e7eb;
+}
+
+.map-picker-body {
+  padding: 16px;
+  position: relative;
+}
+
+.map-picker-loading {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #84cc16;
+  color: #1f2937;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 1001;
+}
+
+.btn-map-pick {
+  margin-top: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  background: #e5e7eb;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-map-pick:hover {
+  background: #d1d5db;
+}
+
+/* Order tracking map */
+.order-tracking-map {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.order-tracking-map h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+.order-tracking-map-loading {
+  padding: 24px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
 }
