@@ -1,3 +1,7 @@
+/**
+ * Order controller – Thaveesha
+ * Create order, list my orders, get by id, cancel. Uses User, Cart, Product (Lakna stock).
+ */
 import Order from '../../models/Thaveesha/Order.js';
 import Cart from '../../models/Thaveesha/Cart.js';
 import Product from '../../models/Lakna/Product.js';

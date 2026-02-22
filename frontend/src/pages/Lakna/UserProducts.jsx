@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import api from '../../services/Tudakshana/authService';
+import { cartAPI } from '../../services/Thaveesha';
 import './UserProducts.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -63,7 +64,7 @@ const UserProducts = () => {
 
   const handleAddToCart = async (productId, quantity = 1) => {
     try {
-      await api.post('/cart/add', { productId, quantity });
+      await cartAPI.addToCart(productId, quantity);
       navigate('/cart');
     } catch (err) {
       if (err.response?.status === 401) return; // auth interceptor handles redirect

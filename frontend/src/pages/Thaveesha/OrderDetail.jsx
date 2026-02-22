@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import api from '../../services/Tudakshana/authService';
+import { orderAPI } from '../../services/Thaveesha';
 import './Order.css';
 
 const STATUS_LABELS = {
@@ -33,8 +33,8 @@ export default function OrderDetail() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get(`/orders/${orderId}`);
-      setOrder(res.data);
+      const data = await orderAPI.getOrderById(orderId);
+      setOrder(data);
     } catch (err) {
       if (err.response?.status === 401) return;
       setError(err.response?.data?.message || 'Order not found');
@@ -49,8 +49,8 @@ export default function OrderDetail() {
     if (!window.confirm('Cancel this order?')) return;
     setCancelling(true);
     try {
-      const res = await api.patch(`/orders/${orderId}/cancel`);
-      setOrder(res.data.order);
+      const data = await orderAPI.cancelOrder(orderId);
+      setOrder(data.order);
     } catch (err) {
       if (err.response?.status === 401) return;
       setError(err.response?.data?.message || 'Failed to cancel order');

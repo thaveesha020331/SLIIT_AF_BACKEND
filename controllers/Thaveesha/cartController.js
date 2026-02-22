@@ -1,3 +1,8 @@
+/**
+ * Cart controller – Thaveesha
+ * Handles GET cart, add item, update qty, remove item.
+ * Depends: User (Tudakshana – req.user), Product (Lakna).
+ */
 import mongoose from 'mongoose';
 import Cart from '../../models/Thaveesha/Cart.js';
 import Product from '../../models/Lakna/Product.js';

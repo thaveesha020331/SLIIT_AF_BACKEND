@@ -1,6 +1,11 @@
+/**
+ * Cart routes – Thaveesha
+ * Mounted at /api/cart. All routes require auth (protect – Tudakshana).
+ * Uses User (Tudakshana), Product (Lakna).
+ */
 import express from 'express';
 import { getCart, addToCart, updateCartItem, removeCartItem } from '../../controllers/Thaveesha/cartController.js';
-import { protect } from '../../utills/Tudakshana/authMiddleware.js';
+import { protect } from '../../utils/Tudakshana/authMiddleware.js';
 
 const router = express.Router();
 

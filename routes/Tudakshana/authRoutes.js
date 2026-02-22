@@ -6,7 +6,7 @@ import {
   updateProfile,
   changePassword,
 } from '../../controllers/Tudakshana/authController.js';
-import { protect } from '../../utills/Tudakshana/authMiddleware.js';
+import { protect } from '../../utils/Tudakshana/authMiddleware.js';
 
 const router = express.Router();
 
