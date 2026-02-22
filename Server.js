@@ -85,6 +85,9 @@ const startServer = async () => {
   }
 };
 
-startServer();
+// Do not start server when running integration tests (supertest uses app directly)
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
 
 export default app;
