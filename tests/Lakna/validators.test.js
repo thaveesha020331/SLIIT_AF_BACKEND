@@ -5,7 +5,7 @@ import {
   validateEcoCertification,
   validateCategory,
   validateReview,
-} from '../../utills/Lakna/validators.js';
+} from '../../utils/Lakna/validators.js';
 
 describe('Product Validators', () => {
   describe('validateProductInput', () => {

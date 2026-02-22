@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../../services/Tudakshana/authService';
+import { orderAPI } from '../../services/Thaveesha';
 import './Order.css';
 
 const STATUS_LABELS = {
@@ -32,8 +32,8 @@ export default function MyOrders() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get('/orders/my-orders');
-      setOrders(Array.isArray(res.data) ? res.data : res.data?.orders || []);
+      const list = await orderAPI.getMyOrders();
+      setOrders(Array.isArray(list) ? list : []);
     } catch (err) {
       if (err.response?.status === 401) return;
       setError(err.response?.data?.message || 'Failed to load orders');
@@ -47,7 +47,7 @@ export default function MyOrders() {
     if (!window.confirm('Cancel this order?')) return;
     setCancellingId(orderId);
     try {
-      await api.patch(`/orders/${orderId}/cancel`);
+      await orderAPI.cancelOrder(orderId);
       setOrders((prev) =>
         prev.map((o) =>
           o._id === orderId ? { ...o, status: 'cancelled' } : o

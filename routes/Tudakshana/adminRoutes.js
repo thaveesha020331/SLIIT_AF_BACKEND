@@ -7,7 +7,7 @@ import {
   toggleUserStatus,
   getUserStats,
 } from '../../controllers/Tudakshana/adminController.js';
-import { protect, isAdmin } from '../../utills/Tudakshana/authMiddleware.js';
+import { protect, isAdmin } from '../../utils/Tudakshana/authMiddleware.js';
 
 const router = express.Router();
 

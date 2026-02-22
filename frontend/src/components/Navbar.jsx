@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ShoppingBag, Menu, X, User } from 'lucide-react'
 import { authHelpers } from '../services/Tudakshana/authService'
-import api from '../services/Tudakshana/authService'
+import { cartAPI } from '../services/Thaveesha'
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -41,10 +41,9 @@ export function Navbar() {
   // Fetch cart count when authenticated (and on route change so it updates after cart actions)
   useEffect(() => {
     if (!isAuthenticated) return
-    api.get('/cart')
-      .then((res) => {
-        const items = res.data?.items || []
-        setCartCount(items.reduce((sum, i) => sum + (i.quantity || 1), 0))
+    cartAPI.getCart()
+      .then(({ items }) => {
+        setCartCount((items || []).reduce((sum, i) => sum + (i.quantity || 1), 0))
       })
       .catch(() => setCartCount(0))
   }, [isAuthenticated, location.pathname])

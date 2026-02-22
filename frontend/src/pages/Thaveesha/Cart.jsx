@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../../services/Tudakshana/authService';
+import { cartAPI, orderAPI } from '../../services/Thaveesha';
 import './Order.css';
 
 export default function Cart() {
@@ -24,8 +24,8 @@ export default function Cart() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get('/cart');
-      setCart(Array.isArray(res.data?.items) ? res.data.items : res.data || []);
+      const { items } = await cartAPI.getCart();
+      setCart(Array.isArray(items) ? items : []);
     } catch (err) {
       if (err.response?.status === 401) return;
       setError(err.response?.data?.message || err.message || 'Failed to load cart');
@@ -42,8 +42,8 @@ export default function Cart() {
     if (newQty === item.quantity) return;
     setUpdating(itemId);
     try {
-      const res = await api.put('/cart', { itemId, quantity: newQty });
-      if (res.data?.items) setCart(res.data.items);
+      const data = await cartAPI.updateItem(itemId, newQty);
+      if (data?.items) setCart(data.items);
     } catch (err) {
       if (err.response?.status === 401) return;
       setError(err.response?.data?.message || 'Failed to update quantity');
@@ -55,8 +55,8 @@ export default function Cart() {
   async function removeItem(itemId) {
     setUpdating(itemId);
     try {
-      const res = await api.delete(`/cart/item/${itemId}`);
-      if (res.data?.items) setCart(res.data.items);
+      const data = await cartAPI.removeItem(itemId);
+      if (data?.items) setCart(data.items);
     } catch (err) {
       if (err.response?.status === 401) return;
       setError(err.response?.data?.message || 'Failed to remove item');
@@ -79,7 +79,7 @@ export default function Cart() {
     setPlacing(true);
     setError(null);
     try {
-      await api.post('/orders', {
+      await orderAPI.createOrder({
         items: cart.map((item) => ({
           productId: (item.product && item.product._id) || item._id,
           quantity: item.quantity || 1,

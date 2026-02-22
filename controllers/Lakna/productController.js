@@ -1,6 +1,6 @@
 import Product from '../../models/Lakna/Product.js';
 import mongoose from 'mongoose';
-import { validateProductInput } from '../../utills/Lakna/validators.js';
+import { validateProductInput } from '../../utils/Lakna/validators.js';
 import { calculateEcoImpact } from '../../services/Lakna/ecoImpactService.js';
 import { uploadProductImage } from '../../services/Lakna/imageUploadService.js';
 
