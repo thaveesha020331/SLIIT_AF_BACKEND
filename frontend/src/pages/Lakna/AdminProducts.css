@@ -203,6 +203,31 @@
   font-size: 14px;
 }
 
+.report-action {
+  justify-content: flex-end;
+}
+
+.btn-report {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #0ea5e9;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-report:hover:not(:disabled) {
+  background-color: #0284c7;
+  transform: translateY(-1px);
+}
+
+.btn-report:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .loading {
   text-align: center;
   padding: 40px;
