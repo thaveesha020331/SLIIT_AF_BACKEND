@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { cartAPI, orderAPI } from '../../services/Thaveesha';
+import MapAddressPicker from '../../components/Thaveesha/MapAddressPicker';
 import './Order.css';
 
 export default function Cart() {
@@ -10,6 +11,9 @@ export default function Cart() {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [placing, setPlacing] = useState(false);
   const [updating, setUpdating] = useState(null);
+  const [showMapPicker, setShowMapPicker] = useState(false);
+  const [shippingLat, setShippingLat] = useState(null);
+  const [shippingLng, setShippingLng] = useState(null);
   const [checkoutForm, setCheckoutForm] = useState({
     shippingAddress: '',
     phone: '',
@@ -87,6 +91,7 @@ export default function Cart() {
         shippingAddress: checkoutForm.shippingAddress,
         phone: checkoutForm.phone,
         notes: checkoutForm.notes,
+        ...(shippingLat != null && shippingLng != null && { shippingLat, shippingLng }),
       });
       setOrderSuccess(true);
       setCart([]);
@@ -201,6 +206,17 @@ export default function Cart() {
                 <span>${total.toFixed(2)}</span>
               </div>
 
+              {showMapPicker && (
+                <MapAddressPicker
+                  onSelect={({ address, lat, lng }) => {
+                    setCheckoutForm((f) => ({ ...f, shippingAddress: address }));
+                    setShippingLat(lat);
+                    setShippingLng(lng);
+                    setShowMapPicker(false);
+                  }}
+                  onClose={() => setShowMapPicker(false)}
+                />
+              )}
               <form className="checkout-form" onSubmit={handleCheckout}>
                 <div className="form-group">
                   <label>Shipping Address *</label>
@@ -211,6 +227,13 @@ export default function Cart() {
                     placeholder="Street, City, Postal code"
                     required
                   />
+                  <button
+                    type="button"
+                    className="btn-map-pick"
+                    onClick={() => setShowMapPicker(true)}
+                  >
+                    Set location on map
+                  </button>
                 </div>
                 <div className="form-group">
                   <label>Phone *</label>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { orderAPI } from '../../services/Thaveesha';
+import OrderTrackingMap from '../../components/Thaveesha/OrderTrackingMap';
 import './Order.css';
 
 const STATUS_LABELS = {
@@ -156,6 +157,14 @@ export default function OrderDetail() {
             })}
           </div>
         </div>
+
+        <OrderTrackingMap
+          shippingAddress={order.shippingAddress}
+          shippingLat={order.shippingLat}
+          shippingLng={order.shippingLng}
+          trackingLat={order.trackingLat}
+          trackingLng={order.trackingLng}
+        />
 
         {canCancel && (
           <button
