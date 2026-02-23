@@ -6,6 +6,7 @@ import Cart from './pages/Thaveesha/Cart'
 import MyOrders from './pages/Thaveesha/MyOrders'
 import OrderDetail from './pages/Thaveesha/OrderDetail'
 import MyReviewPage from './pages/Senara/MyReviewPage'
+import ProductReviewPage from './pages/Senara/ProductReviewPage'
 import UserLogin from './pages/Tudakshana/UserLogin'
 import SellerLogin from './pages/Tudakshana/SellerLogin'
 import SignUp from './pages/Tudakshana/SignUp'
@@ -59,6 +60,7 @@ function AppContent() {
             }
           />
           <Route path="/my-reviews" element={<MyReviewPage />} />
+          <Route path="/products/:productId/review" element={ <ProductReviewPage />}/>
           
           {/* Admin Only Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />

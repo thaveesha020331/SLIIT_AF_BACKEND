@@ -133,6 +133,15 @@ export default function OrderDetail() {
                 <div className="cart-item-details">
                   <h3 className="cart-item-title">{product.title || 'Product'}</h3>
                   <span className="cart-item-price">${price.toFixed(2)} × {qty}</span>
+                  {order.status === 'delivered' && (
+                    <Link
+                      to={`/products/${product._id || product}/review?orderId=${orderId}`}
+                      className="btn-outline btn-small"
+                      style={{ marginTop: 8, display: 'inline-block' }}
+                    >
+                      Add review
+                    </Link>
+                  )}
                 </div>
                 <span className="cart-item-price">${(price * qty).toFixed(2)}</span>
               </div>
@@ -158,7 +167,7 @@ export default function OrderDetail() {
           </div>
         </div>
 
-        <OrderTrackingMap
+          <OrderTrackingMap
           shippingAddress={order.shippingAddress}
           shippingLat={order.shippingLat}
           shippingLng={order.shippingLng}
