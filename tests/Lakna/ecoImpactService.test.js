@@ -79,7 +79,7 @@ describe('Eco-Impact Service', () => {
         eco_certification: 'FSC',
       };
 
-      const reuseableResult = await calculateEcoImpact(reuableData);
+      const reuseableResult = await calculateEcoImpact(reuseableData);
       const organicResult = await calculateEcoImpact(organicData);
 
       expect(reuseableResult.waterUsage).not.toBe(organicResult.waterUsage);

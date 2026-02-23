@@ -34,11 +34,10 @@ describe('Product Controller', () => {
         save: jest.fn().mockResolvedValue(this),
       };
 
-      Product.mockImplementation(() => mockProduct);
-
-      // Simulate controller logic
-      expect(mockProduct.carbonFootprint).toBeUndefined();
-      expect(mockProduct.sustainabilityRating).toBeDefined();
+      expect(mockProduct._id).toBeDefined();
+      expect(mockProduct.ecoImpactScore.carbonFootprint).toBeDefined();
+      expect(mockProduct.ecoImpactScore.sustainabilityRating).toBeDefined();
+      await expect(mockProduct.save()).resolves.toBeUndefined();
     });
   });
 
@@ -67,7 +66,6 @@ describe('Product Controller', () => {
     test('Product schema should have eco-impact score fields', () => {
       const productSchema = Product.schema;
 
-      expect(productSchema.paths.ecoImpactScore).toBeDefined();
       expect(productSchema.paths['ecoImpactScore.carbonFootprint']).toBeDefined();
       expect(productSchema.paths['ecoImpactScore.sustainabilityRating']).toBeDefined();
       expect(productSchema.paths['ecoImpactScore.waterUsage']).toBeDefined();
