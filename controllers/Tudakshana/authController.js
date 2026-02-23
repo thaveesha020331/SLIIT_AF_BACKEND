@@ -38,8 +38,8 @@ export const register = async (req, res) => {
       });
     }
 
-    // Validate role
-    const validRoles = ['admin', 'seller', 'customer'];
+    // Validate role - prevent admin registration via API
+    const validRoles = ['seller', 'customer'];
     const userRole = role && validRoles.includes(role) ? role : 'customer';
 
     // Create user

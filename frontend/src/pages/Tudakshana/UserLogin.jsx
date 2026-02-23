@@ -63,30 +63,6 @@ const UserLogin = () => {
       return;
     }
 
-    // Check for hardcoded admin credentials
-    const ADMIN_EMAIL = 'admin@gmail.com';
-    const ADMIN_PASSWORD = 'Admin@123';
-
-    if (formData.email === ADMIN_EMAIL && formData.password === ADMIN_PASSWORD) {
-      // Admin login with hardcoded credentials
-      const adminUser = {
-        _id: 'admin-123',
-        name: 'Admin',
-        email: ADMIN_EMAIL,
-        role: 'admin',
-        isActive: true
-      };
-      
-      // Save admin session
-      authHelpers.saveAuth('admin-token-hardcoded', adminUser);
-      
-      setSuccess('Admin login successful! Redirecting...');
-      
-      // Redirect to admin dashboard immediately
-      navigate('/admin/dashboard', { replace: true });
-      return;
-    }
-
     setLoading(true);
 
     try {
@@ -104,7 +80,9 @@ const UserLogin = () => {
         
         // Redirect based on user role immediately
         const role = response.data.user.role;
-        if (role === 'seller') {
+        if (role === 'admin') {
+          navigate('/admin/dashboard', { replace: true });
+        } else if (role === 'seller') {
           navigate('/seller/dashboard', { replace: true });
         } else if (role === 'customer') {
           navigate('/products', { replace: true });

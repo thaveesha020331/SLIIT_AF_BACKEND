@@ -243,6 +243,7 @@ export const getUserStats = async (req, res) => {
           active: activeUsers,
           inactive: inactiveUsers,
           byRole: {
+            
             admin: adminCount,
             seller: sellerCount,
             customer: customerCount,

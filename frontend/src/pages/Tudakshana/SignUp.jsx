@@ -29,9 +29,7 @@ const SignUp = () => {
     
     if (isLoggedIn) {
       // Redirect based on role
-      if (userRole === 'admin') {
-        navigate('/admin/dashboard', { replace: true });
-      } else if (userRole === 'seller') {
+      if (userRole === 'seller') {
         navigate('/seller/dashboard', { replace: true });
       } else {
         navigate('/', { replace: true });
@@ -156,11 +154,9 @@ const SignUp = () => {
       if (response.success) {
         setSuccess('Account created successfully! Redirecting to login...');
         
-        // Redirect to appropriate login page based on role immediately
+        // Redirect to appropriate login page based on role
         const role = response.data.user.role;
-        if (role === 'admin') {
-          navigate('/admin/login', { replace: true });
-        } else if (role === 'seller') {
+        if (role === 'seller') {
           navigate('/seller/login', { replace: true });
         } else {
           navigate('/login', { replace: true });
@@ -261,7 +257,6 @@ const SignUp = () => {
             >
               <option value="customer">Customer - Shop for eco-friendly products</option>
               <option value="seller">Seller - Sell your sustainable products</option>
-              <option value="admin">Admin - Manage the platform</option>
             </select>
           </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { orderAPI } from '../../services/Thaveesha';
 import './Order.css';
 
@@ -23,8 +23,16 @@ export default function MyOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setIsAuthenticated(false);
+      setLoading(false);
+      return;
+    }
     fetchOrders();
   }, []);
 
@@ -35,7 +43,11 @@ export default function MyOrders() {
       const list = await orderAPI.getMyOrders();
       setOrders(Array.isArray(list) ? list : []);
     } catch (err) {
-      if (err.response?.status === 401) return;
+      if (err.response?.status === 401) {
+        setIsAuthenticated(false);
+        setLoading(false);
+        return;
+      }
       setError(err.response?.data?.message || 'Failed to load orders');
       setOrders([]);
     } finally {
@@ -54,8 +66,11 @@ export default function MyOrders() {
         )
       );
     } catch (err) {
-      if (err.response?.status === 401) return;
-      setError(err.response?.data?.message || 'Failed to cancel order');
+      if (err.response?.status === 401) {
+        setIsAuthenticated(false);
+      } else {
+        setError(err.response?.data?.message || 'Failed to cancel order');
+      }
     } finally {
       setCancellingId(null);
     }
@@ -75,6 +90,34 @@ export default function MyOrders() {
       .join(', ') + (items.length > 3 ? '...' : '');
   }
 
+  const navigate = useNavigate();
+
+  if (loading) {
+    return (
+      <div className="order-page-container">
+        <div className="orders-loading">Loading orders...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="order-page-container">
+        <div className="orders-empty">
+          <div className="empty-icon">🔒</div>
+          <h2>Login Required</h2>
+          <p>Please log in to view your orders</p>
+          <button 
+            className="btn-primary" 
+            onClick={() => navigate('/login')}
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="order-page-container">
       <div className="order-page-header">
@@ -84,9 +127,7 @@ export default function MyOrders() {
 
       {error && <div className="order-error">{error}</div>}
 
-      {loading ? (
-        <div className="orders-loading">Loading orders...</div>
-      ) : orders.length === 0 ? (
+      {orders.length === 0 ? (
         <div className="orders-empty">
           You have no orders yet. <Link to="/products" className="btn-primary-link">Browse products</Link>
         </div>

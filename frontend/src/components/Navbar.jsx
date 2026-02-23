@@ -22,6 +22,7 @@ export function Navbar() {
           const user = authHelpers.getUser()
           setUserName(user?.name || 'User')
         } else {
+          setUserName('')
           setCartCount(0)
         }
       } catch (error) {
@@ -36,7 +37,7 @@ export function Navbar() {
     // Listen for storage changes (for multi-tab sync)
     window.addEventListener('storage', checkAuth)
     return () => window.removeEventListener('storage', checkAuth)
-  }, [])
+  }, [location.pathname]) // Re-check auth whenever route changes
 
   // Fetch cart count when authenticated (and on route change so it updates after cart actions)
   useEffect(() => {
@@ -53,7 +54,7 @@ export function Navbar() {
       authHelpers.clearAuth()
       setIsAuthenticated(false)
       setUserName('')
-      navigate('/login')
+      navigate('/')
       setIsMenuOpen(false)
     } catch (error) {
       console.error('Logout error:', error)

@@ -108,7 +108,7 @@ const UserProfile = () => {
 
   const handleLogout = () => {
     authHelpers.clearAuth();
-    navigate('/login');
+    navigate('/');
   };
 
   const getRoleBadgeClass = (role) => {

@@ -9,8 +9,16 @@ const MyReviewPage = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setIsAuthenticated(false);
+      setLoading(false);
+      return;
+    }
     fetchMyReviews();
   }, []);
 
@@ -21,7 +29,11 @@ const MyReviewPage = () => {
       const res = await reviewService.getMyReviews();
       setReviews(res.data?.data || []);
     } catch (err) {
-      if (err.response?.status === 401) return;
+      if (err.response?.status === 401) {
+        setIsAuthenticated(false);
+        setLoading(false);
+        return;
+      }
       setError(err.response?.data?.message || 'Failed to load your reviews');
       setReviews([]);
     } finally {
@@ -58,6 +70,24 @@ const MyReviewPage = () => {
     return (
       <div className="my-reviews-container">
         <div className="orders-loading">Loading your reviews...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="my-reviews-container">
+        <div className="orders-empty">
+          <div className="empty-icon">🔒</div>
+          <h2>Login Required</h2>
+          <p>Please log in to view your reviews</p>
+          <button 
+            className="btn-primary" 
+            onClick={() => navigate('/login')}
+          >
+            Go to Login
+          </button>
+        </div>
       </div>
     );
   }
