@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const isTestEnv = process.env.NODE_ENV === 'test';
+
 /**
  * Eco-Impact Score Service
  * Integrates with third-party environmental APIs to calculate carbon footprint
@@ -55,15 +57,17 @@ export const calculateEcoImpact = async (productData) => {
 
     // Try to fetch real carbon intensity data from third-party API
     let realWorldCarbonData = null;
-    try {
-      realWorldCarbonData = await fetchCarbonIntensityData();
-      if (realWorldCarbonData) {
-        // Adjust carbon footprint based on real data
-        carbonFootprint = baseCarbonFootprint * (realWorldCarbonData.intensity / 100) * certMultiplier;
+    if (!isTestEnv) {
+      try {
+        realWorldCarbonData = await fetchCarbonIntensityData();
+        if (realWorldCarbonData) {
+          // Adjust carbon footprint based on real data
+          carbonFootprint = baseCarbonFootprint * (realWorldCarbonData.intensity / 100) * certMultiplier;
+        }
+      } catch (apiError) {
+        console.warn('Third-party API unavailable, using baseline calculation:', apiError.message);
+        // Continue with baseline calculations
       }
-    } catch (apiError) {
-      console.warn('Third-party API unavailable, using baseline calculation:', apiError.message);
-      // Continue with baseline calculations
     }
 
     // Calculate sustainability rating (0-100)

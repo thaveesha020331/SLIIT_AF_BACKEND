@@ -8,36 +8,79 @@ class SummaryReporter {
   }
 
   onRunComplete(_contexts, results) {
-    let positive = 0, negative = 0, edge = 0;
-    let positivePass = 0, positiveFail = 0, negativePass = 0, negativeFail = 0, edgePass = 0, edgeFail = 0;
+    const allResults = results.testResults || [];
 
-    for (const tr of results.testResults || []) {
-      for (const r of tr.testResults || []) {
-        const name = (r.fullName || r.title || '').trim();
-        const pass = r.status === 'passed';
-        if (name.includes('(Positive)')) {
-          positive++;
-          if (pass) positivePass++; else positiveFail++;
-        } else if (name.includes('(Negative)')) {
-          negative++;
-          if (pass) negativePass++; else negativeFail++;
-        } else if (name.includes('(Edge)')) {
-          edge++;
-          if (pass) edgePass++; else edgeFail++;
+    const buildSummary = (folderName) => {
+      let positive = 0;
+      let negative = 0;
+      let edge = 0;
+      let positivePass = 0;
+      let positiveFail = 0;
+      let negativePass = 0;
+      let negativeFail = 0;
+      let edgePass = 0;
+      let edgeFail = 0;
+      let passed = 0;
+      let failed = 0;
+      let hasTests = false;
+
+      for (const tr of allResults) {
+        const path = String(tr.testFilePath || '').replace(/\\/g, '/');
+        if (!path.includes(`/tests/${folderName}/`)) {
+          continue;
+        }
+
+        for (const r of tr.testResults || []) {
+          hasTests = true;
+          const name = (r.fullName || r.title || '').trim();
+          const pass = r.status === 'passed';
+          const fail = r.status === 'failed';
+
+          if (pass) passed++;
+          if (fail) failed++;
+
+          if (name.includes('(Positive)')) {
+            positive++;
+            if (pass) positivePass++; else if (fail) positiveFail++;
+          } else if (name.includes('(Negative)')) {
+            negative++;
+            if (pass) negativePass++; else if (fail) negativeFail++;
+          } else if (name.includes('(Edge)')) {
+            edge++;
+            if (pass) edgePass++; else if (fail) edgeFail++;
+          }
         }
       }
-    }
 
-    const passed = positivePass + negativePass + edgePass;
-    const failed = positiveFail + negativeFail + edgeFail;
-    const total = positive + negative + edge;
+      return {
+        hasTests,
+        passed,
+        failed,
+        total: passed + failed,
+        positive,
+        negative,
+        edge,
+        positivePass,
+        positiveFail,
+        negativePass,
+        negativeFail,
+        edgePass,
+        edgeFail,
+      };
+    };
 
-    console.log('\n--- Thaveesha Cart & Order test summary ---');
-    console.log(`Total:   ${passed} passed, ${failed} failed, ${total} total`);
-    console.log(`Positive: ${positivePass} passed, ${positiveFail} failed (${positive} total)`);
-    console.log(`Negative: ${negativePass} passed, ${negativeFail} failed (${negative} total)`);
-    console.log(`Edge:     ${edgePass} passed, ${edgeFail} failed (${edge} total)`);
-    console.log('-------------------------------------------\n');
+    const printSummary = (title, summary) => {
+      if (!summary.hasTests) return;
+      console.log(`\n--- ${title} ---`);
+      console.log(`Total:   ${summary.passed} passed, ${summary.failed} failed, ${summary.total} total`);
+      console.log(`Positive: ${summary.positivePass} passed, ${summary.positiveFail} failed (${summary.positive} total)`);
+      console.log(`Negative: ${summary.negativePass} passed, ${summary.negativeFail} failed (${summary.negative} total)`);
+      console.log(`Edge:     ${summary.edgePass} passed, ${summary.edgeFail} failed (${summary.edge} total)`);
+      console.log('-------------------------------------------\n');
+    };
+
+    printSummary('Thaveesha Cart & Order test summary', buildSummary('Thaveesha'));
+    printSummary('Lakna Product test summary', buildSummary('Lakna'));
   }
 }
 
