@@ -28,8 +28,8 @@ export function HomePage() {
     <div className="min-h-screen bg-white">
       <main className="mb-0">
         {/* Hero */}
-        <section className="px-4 md:px-6 lg:px-8 pt-4 pb-12 max-w-7xl mx-auto">
-          <div className="relative h-[85vh] min-h-[500px] overflow-hidden rounded-xl md:rounded-2xl">
+        <section className="px-4 md:px-6 lg:px-8 pt-4 pb-12 max-w-8xl mx-auto">
+          <div className="relative h-[95vh] min-h-[500px] overflow-hidden rounded-xl md:rounded-2xl">
             <div className="absolute inset-0 bg-gradient-to-br from-lime-100 via-lime-200 to-lime-400" />
             <div className="relative h-full flex items-center justify-center px-4 text-center">
               {/* Decorative Background Elements */}
@@ -63,7 +63,7 @@ export function HomePage() {
 
                 {/* Right Image Content */}
                 <div className="w-full lg:w-[55%] relative flex justify-center lg:justify-end">
-                  <div className="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] lg:w-[500px] lg:h-[500px]">
+                  <div className="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] lg:w-[460px] lg:h-[460px]">
                     {/* Main Bowl Image Container with Float Animation */}
                     <div className="w-full h-full relative z-10 animate-float -mt-12">
                       <div className="w-full h-full rounded-full overflow-hidden shadow-2xl border-4 border-white/20 relative">

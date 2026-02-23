@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import './AdminProducts.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const API_BASE_URL = API_URL.replace(/\/api\/?$/, '');
+const REPORT_COMPANY = {
+  name: 'EcoLife Marketplace',
+  address: 'No. 12, Green Avenue, Colombo, Sri Lanka',
+  email: 'support@ecolife.lk',
+  phone: '+94 11 234 5678',
+};
 
 const AdminProducts = ({ mode = 'both' }) => {
   const [searchParams] = useSearchParams();
@@ -13,6 +21,7 @@ const AdminProducts = ({ mode = 'both' }) => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [reportLoading, setReportLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(isAddMode);
   const [editingId, setEditingId] = useState(null);
@@ -284,6 +293,156 @@ const AdminProducts = ({ mode = 'both' }) => {
     return `${API_BASE_URL}/${imagePath}`;
   };
 
+  const getReportFileName = () => {
+    const stamp = new Date().toISOString().slice(0, 10);
+    return `products-report-${stamp}.pdf`;
+  };
+
+  const fetchReportProducts = async () => {
+    const reportLimit = 100;
+    let reportPage = 1;
+    let reportPages = 1;
+    const allProducts = [];
+
+    while (reportPage <= reportPages) {
+      let url = `${API_URL}/products?page=${reportPage}&limit=${reportLimit}`;
+      if (categoryFilter) {
+        url += `&category=${encodeURIComponent(categoryFilter)}`;
+      }
+      if (certificationFilter) {
+        url += `&ecocertification=${encodeURIComponent(certificationFilter)}`;
+      }
+
+      const response = await axios.get(url);
+      const pageProducts = Array.isArray(response?.data?.data)
+        ? response.data.data
+        : Array.isArray(response?.data?.products)
+          ? response.data.products
+          : [];
+
+      allProducts.push(...pageProducts);
+
+      const apiPages = Number(response?.data?.pagination?.pages);
+      reportPages = Number.isFinite(apiPages) && apiPages > 0
+        ? apiPages
+        : (pageProducts.length === reportLimit ? reportPage + 1 : reportPage);
+      reportPage += 1;
+    }
+
+    return allProducts;
+  };
+
+  const savePdfWithLocationPicker = async (doc, fileName) => {
+    const hasSavePicker = typeof window !== 'undefined' && typeof window.showSaveFilePicker === 'function';
+
+    if (!hasSavePicker) {
+      doc.save(fileName);
+      return;
+    }
+
+    const handle = await window.showSaveFilePicker({
+      suggestedName: fileName,
+      types: [
+        {
+          description: 'PDF Document',
+          accept: { 'application/pdf': ['.pdf'] },
+        },
+      ],
+    });
+
+    const writable = await handle.createWritable();
+    await writable.write(doc.output('blob'));
+    await writable.close();
+  };
+
+  const handleDownloadReport = async () => {
+    setReportLoading(true);
+    setError(null);
+
+    try {
+      const reportProducts = await fetchReportProducts();
+
+      if (!reportProducts.length) {
+        setError('No products available for the selected filters');
+        return;
+      }
+
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const generatedAt = new Date();
+      const filterSummary = [
+        `Category: ${categoryFilter || 'All'}`,
+        `Certification: ${certificationFilter || 'All'}`,
+      ].join('  |  ');
+
+      doc.setFillColor(16, 185, 129);
+      doc.rect(0, 0, pageWidth, 92, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.text(REPORT_COMPANY.name, 40, 38);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(REPORT_COMPANY.address, 40, 56);
+      doc.text(`${REPORT_COMPANY.email}  |  ${REPORT_COMPANY.phone}`, 40, 72);
+
+      doc.setTextColor(31, 41, 55);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text('Product Report', 40, 122);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(`Generated on: ${generatedAt.toLocaleString()}`, 40, 142);
+      doc.text(filterSummary, 40, 158);
+
+      autoTable(doc, {
+        startY: 176,
+        head: [['Title', 'Category', 'Certification', 'Price (USD)', 'Stock', 'Manufacturer', 'Location']],
+        body: reportProducts.map((product) => ([
+          product.title || '-',
+          product.category || '-',
+          product.ecocertification || '-',
+          Number(product.price || 0).toFixed(2),
+          String(product.stock ?? 0),
+          product.manufacturerInfo?.name || '-',
+          product.manufacturerInfo?.location || '-',
+        ])),
+        styles: {
+          font: 'helvetica',
+          fontSize: 9,
+          textColor: [55, 65, 81],
+          cellPadding: 6,
+        },
+        headStyles: {
+          fillColor: [16, 185, 129],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+        },
+        alternateRowStyles: {
+          fillColor: [249, 250, 251],
+        },
+      });
+
+      const finalY = doc.lastAutoTable?.finalY || 176;
+      doc.setFontSize(10);
+      doc.setTextColor(75, 85, 99);
+      doc.text(`Total Products: ${reportProducts.length}`, 40, finalY + 24);
+
+      await savePdfWithLocationPicker(doc, getReportFileName());
+    } catch (err) {
+      if (err?.name === 'AbortError') {
+        return;
+      }
+
+      setError('Failed to generate report');
+      console.error(err);
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
   return (
     <div className="admin-products-container">
       <div className="admin-header">
@@ -491,6 +650,18 @@ const AdminProducts = ({ mode = 'both' }) => {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="filter-group report-action">
+              <label>Product Report:</label>
+              <button
+                type="button"
+                className="btn-report"
+                onClick={handleDownloadReport}
+                disabled={loading || reportLoading}
+              >
+                {reportLoading ? 'Generating PDF...' : 'Download Report'}
+              </button>
             </div>
           </div>
 

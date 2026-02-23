@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import api from '../../services/Tudakshana/authService';
@@ -17,19 +17,17 @@ const UserProducts = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // Filter states
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [certificationFilter, setCertificationFilter] = useState('');
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 10000 });
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedCertifications, setSelectedCertifications] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('az');
 
   const categories = ['Reusable', 'Organic', 'Handmade', 'Biodegradable', 'Sustainable', 'Ecofriendly'];
   const certifications = ['FSC', 'USDA Organic', 'Fair Trade', 'Carbon Neutral', 'B Corp', 'Cradle to Cradle', 'EU Ecolabel', 'Green Seal'];
 
-  // Fetch products from API
   useEffect(() => {
     fetchProducts();
-  }, [page, categoryFilter, certificationFilter, priceRange, searchQuery]);
+  }, [page, searchQuery]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -37,12 +35,7 @@ const UserProducts = () => {
 
     try {
       let url = `/products?page=${page}&limit=12`;
-
-      if (categoryFilter) url += `&category=${categoryFilter}`;
-      if (certificationFilter) url += `&ecocertification=${certificationFilter}`;
       if (searchQuery) url += `&search=${searchQuery}`;
-      if (priceRange.min > 0) url += `&minPrice=${priceRange.min}`;
-      if (priceRange.max) url += `&maxPrice=${priceRange.max}`;
 
       const response = await api.get(url, { timeout: 5000 });
       if (response.data?.data && response.data?.pagination) {
@@ -67,16 +60,16 @@ const UserProducts = () => {
       await cartAPI.addToCart(productId, quantity);
       navigate('/cart');
     } catch (err) {
-      if (err.response?.status === 401) return; // auth interceptor handles redirect
+      if (err.response?.status === 401) return;
       alert(err.response?.data?.message || 'Failed to add to cart');
     }
   };
 
   const getEcoRatingColor = (rating) => {
-    if (rating >= 80) return '#10b981'; // Green
-    if (rating >= 60) return '#f59e0b'; // Yellow
-    if (rating >= 40) return '#f97316'; // Orange
-    return '#ef4444'; // Red
+    if (rating >= 80) return '#10b981';
+    if (rating >= 60) return '#f59e0b';
+    if (rating >= 40) return '#f97316';
+    return '#ef4444';
   };
 
   const getEcoRatingLabel = (rating) => {
@@ -104,10 +97,50 @@ const UserProducts = () => {
     return `${API_BASE_URL}/${imagePath}`;
   };
 
+  const handleCategoryToggle = (category) => {
+    setSelectedCategories((prev) => (
+      prev.includes(category)
+        ? prev.filter((item) => item !== category)
+        : [...prev, category]
+    ));
+  };
+
+  const handleCertificationToggle = (certification) => {
+    setSelectedCertifications((prev) => (
+      prev.includes(certification)
+        ? prev.filter((item) => item !== certification)
+        : [...prev, certification]
+    ));
+  };
+
+  const displayedProducts = useMemo(() => {
+    const categoryFiltered = products.filter((product) => {
+      if (!selectedCategories.length) return true;
+      return selectedCategories.includes(product.category);
+    });
+
+    const certificationFiltered = categoryFiltered.filter((product) => {
+      if (!selectedCertifications.length) return true;
+      return selectedCertifications.includes(product.ecocertification);
+    });
+
+    return [...certificationFiltered].sort((first, second) => {
+      if (sortBy === 'za') {
+        return String(second.title || '').localeCompare(String(first.title || ''));
+      }
+      if (sortBy === 'price-low') {
+        return Number(first.price || 0) - Number(second.price || 0);
+      }
+      if (sortBy === 'price-high') {
+        return Number(second.price || 0) - Number(first.price || 0);
+      }
+      return String(first.title || '').localeCompare(String(second.title || ''));
+    });
+  }, [products, selectedCategories, selectedCertifications, sortBy]);
+
   return (
-    <section className="mt-0 px-4 md:px-8 pt-16 pb-12">
+    <section className="mt-0 px-4 md:px-8 pt-2 pb-12">
       <div className="user-products-container">
-        {/* Header */}
         <div className="products-header">
           <h1>Eco-Friendly Products</h1>
           <p>Discover sustainable and environmentally conscious products</p>
@@ -115,19 +148,16 @@ const UserProducts = () => {
 
         {error && <div className="alert alert-error">{error}</div>}
 
-        {/* Product Details Modal */}
         {selectedProduct && (
           <div className="modal-overlay" onClick={() => setSelectedProduct(null)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <button className="modal-close" onClick={() => setSelectedProduct(null)}>×</button>
 
               <div className="product-detail-grid">
-                {/* Image */}
                 <div className="product-detail-image">
                   <img src={getProductImageSrc(selectedProduct.image)} alt={selectedProduct.title} />
                 </div>
 
-                {/* Details */}
                 <div className="product-detail-info">
                   <h2>{selectedProduct.title}</h2>
 
@@ -138,7 +168,6 @@ const UserProducts = () => {
 
                   <p className="product-description">{selectedProduct.description}</p>
 
-                  {/* Pricing and Stock */}
                   <div className="product-pricing">
                     <div className="price">${selectedProduct.price.toFixed(2)}</div>
                     <div className={`stock ${selectedProduct.stock > 0 ? 'in-stock' : 'out-of-stock'}`}>
@@ -146,7 +175,6 @@ const UserProducts = () => {
                     </div>
                   </div>
 
-                  {/* Eco-Impact Score */}
                   <div className="eco-impact-section">
                     <h3>Eco-Impact Score</h3>
                     <div className="eco-metrics">
@@ -179,7 +207,6 @@ const UserProducts = () => {
                     </div>
                   </div>
 
-                  {/* Add to cart in modal */}
                   <div style={{ marginBottom: 20 }}>
                     <button
                       className="btn-view-details"
@@ -190,7 +217,6 @@ const UserProducts = () => {
                     </button>
                   </div>
 
-                  {/* Manufacturer Info */}
                   {selectedProduct.manufacturerInfo && (
                     <div className="manufacturer-info">
                       <h3>Manufacturer</h3>
@@ -199,7 +225,6 @@ const UserProducts = () => {
                     </div>
                   )}
 
-                  {/* Reviews */}
                   <div className="reviews-section">
                     <h3>Customer Reviews ({selectedProduct.reviews?.length || 0})</h3>
 
@@ -222,145 +247,150 @@ const UserProducts = () => {
           </div>
         )}
 
-        {/* Filters */}
-        <div className="filters-container">
-          <div className="search-box">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
-          </div>
+        <div className="products-layout">
+          <aside className="filters-sidebar">
+            <h3>Filters</h3>
 
-          <div className="filters-grid">
-            <div className="filter-group">
-              <label>Category</label>
-              <select value={categoryFilter} onChange={(e) => {
-                setCategoryFilter(e.target.value);
-                setPage(1);
-              }}>
-                <option value="">All Categories</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="filter-group">
-              <label>Certification</label>
-              <select value={certificationFilter} onChange={(e) => {
-                setCertificationFilter(e.target.value);
-                setPage(1);
-              }}>
-                <option value="">All Certifications</option>
-                {certifications.map((cert) => (
-                  <option key={cert} value={cert}>
-                    {cert}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="filter-group">
-              <label>Max Price</label>
-              <input
-                type="number"
-                value={priceRange.max}
-                onChange={(e) => {
-                  setPriceRange({ ...priceRange, max: parseInt(e.target.value) });
-                  setPage(1);
-                }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Products Grid */}
-        {loading ? (
-          <div className="loading">Loading products...</div>
-        ) : (
-          <>
-            <div className="products-grid">
-              {products.map((product) => (
-                <div key={product._id} className="product-card">
-                  <div className="product-image">
-                    <img src={getProductImageSrc(product.image)} alt={product.title} />
-                    <div className="product-badges">
-                      <span className="badge badge-category">{product.category}</span>
-                      <span className="badge badge-cert">{product.ecocertification}</span>
-                    </div>
-                  </div>
-
-                  <div className="product-card-content">
-                    <h3>{product.title}</h3>
-
-                    <div className="eco-score-small">
-                      <div className="sustainability-score">
-                        <div className="score-circle" style={{ borderColor: getEcoRatingColor(product.ecoImpactScore?.sustainabilityRating || 0) }}>
-                          {product.ecoImpactScore?.sustainabilityRating || 0}%
-                        </div>
-                        <span>Eco Rating</span>
-                      </div>
-                    </div>
-
-                    <div className="product-footer">
-                      <div className="price">${product.price.toFixed(2)}</div>
-                      <div className={`stock-status ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}`}>
-                        {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
-                      </div>
-                    </div>
-
-                    <div className="product-card-actions">
-                      <button
-                        className="btn-view-details btn-view-details-wide"
-                        onClick={() => setSelectedProduct(product)}
-                      >
-                        View Details
-                      </button>
-                      <button
-                        className="btn-cart-icon"
-                        onClick={() => handleAddToCart(product._id)}
-                        aria-label="Add to cart"
-                        title="Add to cart"
-                      >
-                        <ShoppingCart size={18} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+            <div className="sidebar-filter-group">
+              <h4>Category</h4>
+              {categories.map((category) => (
+                <label key={category} className="checkbox-option">
+                  <input
+                    type="checkbox"
+                    checked={selectedCategories.includes(category)}
+                    onChange={() => handleCategoryToggle(category)}
+                  />
+                  <span>{category}</span>
+                </label>
               ))}
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="pagination">
-                <button
-                  className="btn-pagination"
-                  onClick={() => setPage(page - 1)}
-                  disabled={page === 1}
-                >
-                  Previous
-                </button>
+            <div className="sidebar-filter-group">
+              <h4>Certification</h4>
+              {certifications.map((certification) => (
+                <label key={certification} className="checkbox-option">
+                  <input
+                    type="checkbox"
+                    checked={selectedCertifications.includes(certification)}
+                    onChange={() => handleCertificationToggle(certification)}
+                  />
+                  <span>{certification}</span>
+                </label>
+              ))}
+            </div>
+          </aside>
 
-                <span className="page-info">Page {page} of {totalPages}</span>
-
-                <button
-                  className="btn-pagination"
-                  onClick={() => setPage(page + 1)}
-                  disabled={page === totalPages}
-                >
-                  Next
-                </button>
+          <div className="products-main-content">
+            <div className="top-controls-row">
+              <div className="search-box">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setPage(1);
+                  }}
+                />
               </div>
+
+              <div className="sort-controls">
+                <label htmlFor="sortBy">Sort by</label>
+                <select
+                  id="sortBy"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option value="az">A-Z</option>
+                  <option value="za">Z-A</option>
+                  <option value="price-low">Price low</option>
+                  <option value="price-high">Price high</option>
+                </select>
+              </div>
+
+              <div className="product-count">Products: {displayedProducts.length}</div>
+            </div>
+
+            {loading ? (
+              <div className="loading">Loading products...</div>
+            ) : (
+              <>
+                <div className="products-grid">
+                  {displayedProducts.map((product) => (
+                    <div key={product._id} className="product-card">
+                      <div className="product-image">
+                        <img src={getProductImageSrc(product.image)} alt={product.title} />
+                        <div className="product-badges">
+                          <span className="badge badge-category">{product.category}</span>
+                          <span className="badge badge-cert">{product.ecocertification}</span>
+                        </div>
+                      </div>
+
+                      <div className="product-card-content">
+                        <h3>{product.title}</h3>
+
+                        <div className="eco-score-small">
+                          <div className="sustainability-score">
+                            <div className="score-circle" style={{ borderColor: getEcoRatingColor(product.ecoImpactScore?.sustainabilityRating || 0) }}>
+                              {product.ecoImpactScore?.sustainabilityRating || 0}%
+                            </div>
+                            <span>Eco Rating</span>
+                          </div>
+                        </div>
+
+                        <div className="product-footer">
+                          <div className="price">${product.price.toFixed(2)}</div>
+                          <div className={`stock-status ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}`}>
+                            {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                          </div>
+                        </div>
+
+                        <div className="product-card-actions">
+                          <button
+                            className="btn-view-details btn-view-details-wide"
+                            onClick={() => setSelectedProduct(product)}
+                          >
+                            View Details
+                          </button>
+                          <button
+                            className="btn-cart-icon"
+                            onClick={() => handleAddToCart(product._id)}
+                            aria-label="Add to cart"
+                            title="Add to cart"
+                          >
+                            <ShoppingCart size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="pagination">
+                    <button
+                      className="btn-pagination"
+                      onClick={() => setPage(page - 1)}
+                      disabled={page === 1}
+                    >
+                      Previous
+                    </button>
+
+                    <span className="page-info">Page {page} of {totalPages}</span>
+
+                    <button
+                      className="btn-pagination"
+                      onClick={() => setPage(page + 1)}
+                      disabled={page === totalPages}
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
             )}
-          </>
-        )}
+          </div>
+        </div>
       </div>
     </section>
   );
