@@ -1,41 +1,66 @@
-import React from 'react';
-import './MyReviewPage.css';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import StarRating from '../../components/Senara/StarRating';
-
-// Dummy data for now – later you can replace with API data
-const myDummyReviews = [
-  {
-    id: 'm1',
-    productTitle: 'Eco-Friendly Bamboo Water Bottle',
-    rating: 5,
-    comment: 'Love this bottle! I stopped buying plastic water bottles.',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'm2',
-    productTitle: 'Organic Cotton T‑Shirt',
-    rating: 4,
-    comment: 'Very comfortable and soft, sizing is a bit larger than expected.',
-    createdAt: new Date().toISOString(),
-  },
-];
+import reviewService from '../../services/Senara/reviewService';
+import './MyReviewPage.css';
 
 const MyReviewPage = () => {
-  const handleEdit = (reviewId) => {
-    console.log('Edit review (UI only):', reviewId);
-    alert('Edit review UI can open a modal or redirect (demo only).');
+  const navigate = useNavigate();
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchMyReviews();
+  }, []);
+
+  const fetchMyReviews = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await reviewService.getMyReviews();
+      setReviews(res.data?.data || []);
+    } catch (err) {
+      if (err.response?.status === 401) return;
+      setError(err.response?.data?.message || 'Failed to load your reviews');
+      setReviews([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (reviewId) => {
-    console.log('Delete review (UI only):', reviewId);
-    alert('Delete review can call an API (demo only).');
+  const handleReviewClick = (review) => {
+    const productId = review.product?._id || review.product;
+    if (productId) {
+      navigate(`/products/${productId}/review`);
+    }
   };
 
-  const totalReviews = myDummyReviews.length;
+  const handleDeleteReview = async (e, reviewId) => {
+    e.stopPropagation();
+    if (!window.confirm('Are you sure you want to delete this review?')) return;
+    setError('');
+    try {
+      await reviewService.deleteReview(reviewId);
+      fetchMyReviews();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete review');
+    }
+  };
+
+  const totalReviews = reviews.length;
   const average =
     totalReviews === 0
       ? 0
-      : myDummyReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews;
+      : reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalReviews;
+
+  if (loading) {
+    return (
+      <div className="my-reviews-container">
+        <div className="orders-loading">Loading your reviews...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="my-reviews-container">
@@ -43,7 +68,7 @@ const MyReviewPage = () => {
         <div>
           <h1>My Reviews</h1>
           <p>
-            Track and manage the reviews you have left for eco‑friendly
+            Track and manage the reviews you have left for eco-friendly
             products.
           </p>
         </div>
@@ -52,6 +77,8 @@ const MyReviewPage = () => {
         </div>
       </div>
 
+      {error && <div className="order-error">{error}</div>}
+
       <div className="my-reviews-layout">
         <section className="my-reviews-list-card">
           <div className="my-reviews-list-header">
@@ -59,42 +86,52 @@ const MyReviewPage = () => {
             <span>Most recent first</span>
           </div>
 
-          {myDummyReviews.map((review) => (
-            <div key={review.id} className="my-review-item">
-              <div className="my-review-item-header">
-                <div className="my-review-product">{review.productTitle}</div>
-                <div className="my-review-date">
-                  {new Date(review.createdAt).toLocaleDateString()}
+          {reviews.map((review) => {
+            const productTitle = review.product?.title || 'Product';
+            const reviewId = review._id;
+            return (
+              <div
+                key={review._id}
+                className="my-review-item my-review-item-clickable"
+                role="button"
+                tabIndex={0}
+                onClick={() => handleReviewClick(review)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') handleReviewClick(review);
+                }}
+              >
+                <div className="my-review-item-header">
+                  <div className="my-review-product">{productTitle}</div>
+                  <div className="my-review-date">
+                    {new Date(review.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+
+                <StarRating value={review.rating} readOnly />
+
+                <p className="my-review-comment">{review.comment}</p>
+
+                <div className="my-review-actions">
+                  <span className="btn-link btn-link-edit">
+                    View / Edit on product page →
+                  </span>
+                  <button
+                    type="button"
+                    className="btn-link btn-link-delete"
+                    onClick={(e) => handleDeleteReview(e, reviewId)}
+                    aria-label="Delete review"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
+            );
+          })}
 
-              <StarRating value={review.rating} readOnly />
-
-              <p className="my-review-comment">{review.comment}</p>
-
-              <div className="my-review-actions">
-                <button
-                  type="button"
-                  className="btn-link btn-link-edit"
-                  onClick={() => handleEdit(review.id)}
-                >
-                  Edit review
-                </button>
-                <button
-                  type="button"
-                  className="btn-link btn-link-delete"
-                  onClick={() => handleDelete(review.id)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-
-          {myDummyReviews.length === 0 && (
+          {reviews.length === 0 && (
             <p style={{ fontSize: 13, color: '#6b7280' }}>
-              You have not written any reviews yet. Start by reviewing a
-              product you have purchased.
+              You have not written any reviews yet. Start by reviewing a product
+              you have purchased from a delivered order.
             </p>
           )}
         </section>
@@ -123,4 +160,3 @@ const MyReviewPage = () => {
 };
 
 export default MyReviewPage;
-

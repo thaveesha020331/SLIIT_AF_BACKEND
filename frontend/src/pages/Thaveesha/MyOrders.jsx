@@ -137,6 +137,14 @@ export default function MyOrders() {
                   <Link to={`/my-orders/${order._id}`} className="btn-primary-link btn-small">
                     View details
                   </Link>
+                  {order.status === 'delivered' && order.items?.length > 0 && (
+                    <Link
+                      to={`/products/${order.items[0].product?._id || order.items[0].product}/review?orderId=${order._id}`}
+                      className="btn-primary-link btn-small"
+                    >
+                      Add review
+                    </Link>
+                  )}
                   {canCancel && (
                     <button
                       type="button"

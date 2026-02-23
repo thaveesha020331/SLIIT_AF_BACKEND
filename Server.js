@@ -8,6 +8,7 @@ import adminRoutes from './routes/Tudakshana/adminRoutes.js';
 import productRoutes from './routes/Lakna/productRoutes.js';
 import cartRoutes from './routes/Thaveesha/cartRoutes.js';
 import orderRoutes from './routes/Thaveesha/orderRoutes.js';
+import reviewRoutes from './routes/Senara/reviewRoutes.js';
 
 dotenv.config();
 
@@ -18,7 +19,7 @@ const corsOptions = {
   origin: ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
   optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
@@ -34,6 +35,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/senara/reviews', reviewRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
