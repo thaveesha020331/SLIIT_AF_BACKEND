@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import api from '../../services/Tudakshana/authService';
 import { cartAPI } from '../../services/Thaveesha';
+import { reviewService } from '../../services/Senara/reviewService';
+import ReviewList from '../../components/Senara/ReviewList';
 import './UserProducts.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const API_BASE_URL = API_URL.replace(/\/api\/?$/, '');
 
-const UserProducts = () => {
+const UserProducts = ({ user }) => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -29,6 +31,7 @@ const UserProducts = () => {
     fetchProducts();
   }, [page, searchQuery]);
 
+  // Fetch products
   const fetchProducts = async () => {
     setLoading(true);
     setError(null);
@@ -55,6 +58,7 @@ const UserProducts = () => {
     }
   };
 
+  // Add to cart
   const handleAddToCart = async (productId, quantity = 1) => {
     try {
       await cartAPI.addToCart(productId, quantity);
@@ -97,6 +101,7 @@ const UserProducts = () => {
     return `${API_BASE_URL}/${imagePath}`;
   };
 
+  // Category and Certification filters
   const handleCategoryToggle = (category) => {
     setSelectedCategories((prev) => (
       prev.includes(category)
@@ -113,6 +118,7 @@ const UserProducts = () => {
     ));
   };
 
+  // Memoized filtered and sorted products
   const displayedProducts = useMemo(() => {
     const categoryFiltered = products.filter((product) => {
       if (!selectedCategories.length) return true;
@@ -125,18 +131,28 @@ const UserProducts = () => {
     });
 
     return [...certificationFiltered].sort((first, second) => {
-      if (sortBy === 'za') {
-        return String(second.title || '').localeCompare(String(first.title || ''));
-      }
-      if (sortBy === 'price-low') {
-        return Number(first.price || 0) - Number(second.price || 0);
-      }
-      if (sortBy === 'price-high') {
-        return Number(second.price || 0) - Number(first.price || 0);
-      }
+      if (sortBy === 'za') return String(second.title || '').localeCompare(String(first.title || ''));
+      if (sortBy === 'price-low') return Number(first.price || 0) - Number(second.price || 0);
+      if (sortBy === 'price-high') return Number(second.price || 0) - Number(first.price || 0);
       return String(first.title || '').localeCompare(String(second.title || ''));
     });
   }, [products, selectedCategories, selectedCertifications, sortBy]);
+
+  // Fetch reviews when opening modal
+  const handleViewProduct = async (product) => {
+    setSelectedProduct({ ...product, reviews: [] }); // open modal immediately
+
+    try {
+      const res = await reviewService.getProductReviews(product._id);
+      setSelectedProduct((prev) => ({
+        ...prev,
+        reviews: res.data.data || [],
+      }));
+    } catch (err) {
+      console.error('Failed to fetch product reviews', err);
+      setSelectedProduct((prev) => ({ ...prev, reviews: [] }));
+    }
+  };
 
   return (
     <section className="mt-0 px-4 md:px-8 pt-2 pb-12">
@@ -148,6 +164,7 @@ const UserProducts = () => {
 
         {error && <div className="alert alert-error">{error}</div>}
 
+        {/* Product Modal */}
         {selectedProduct && (
           <div className="modal-overlay" onClick={() => setSelectedProduct(null)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -160,12 +177,10 @@ const UserProducts = () => {
 
                 <div className="product-detail-info">
                   <h2>{selectedProduct.title}</h2>
-
                   <div className="product-meta">
                     <span className="badge badge-category">{selectedProduct.category}</span>
                     <span className="badge badge-cert">{selectedProduct.ecocertification}</span>
                   </div>
-
                   <p className="product-description">{selectedProduct.description}</p>
 
                   <div className="product-pricing">
@@ -175,6 +190,7 @@ const UserProducts = () => {
                     </div>
                   </div>
 
+                  {/* Eco Impact Section */}
                   <div className="eco-impact-section">
                     <h3>Eco-Impact Score</h3>
                     <div className="eco-metrics">
@@ -217,6 +233,7 @@ const UserProducts = () => {
                     </button>
                   </div>
 
+                  {/* Manufacturer Info */}
                   {selectedProduct.manufacturerInfo && (
                     <div className="manufacturer-info">
                       <h3>Manufacturer</h3>
@@ -225,21 +242,24 @@ const UserProducts = () => {
                     </div>
                   )}
 
+                  {/* Reviews Section */}
                   <div className="reviews-section">
                     <h3>Customer Reviews ({selectedProduct.reviews?.length || 0})</h3>
 
-                    <button type="button" className="btn-add-review">
-                      View Reviews
+                    <button
+                      type="button"
+                      className="btn-add-review"
+                      onClick={() => navigate(`/products/${selectedProduct._id}/all-reviews`)}
+                    >
+                      View All Reviews
                     </button>
 
-                    <div className="reviews-list">
-                      {selectedProduct.reviews && selectedProduct.reviews.map((review, idx) => (
-                        <div key={idx} className="review-item">
-                          <div className="review-rating">{'⭐'.repeat(review.rating)}</div>
-                          <p>{review.comment}</p>
-                        </div>
-                      ))}
-                    </div>
+                    <ReviewList
+                      reviews={selectedProduct.reviews || []}
+                      currentUserId={user?._id}
+                    />
+
+                    
                   </div>
                 </div>
               </div>
@@ -247,6 +267,7 @@ const UserProducts = () => {
           </div>
         )}
 
+        {/* Products Layout */}
         <div className="products-layout">
           <aside className="filters-sidebar">
             <h3>Filters</h3>
@@ -348,7 +369,7 @@ const UserProducts = () => {
                         <div className="product-card-actions">
                           <button
                             className="btn-view-details btn-view-details-wide"
-                            onClick={() => setSelectedProduct(product)}
+                            onClick={() => handleViewProduct(product)}
                           >
                             View Details
                           </button>

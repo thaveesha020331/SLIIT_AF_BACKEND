@@ -3,6 +3,45 @@ import Product from '../../models/Lakna/Product.js';
 import Order from '../../models/Thaveesha/Order.js';
 
 /**
+ * Get all reviews (admin only)
+ * @route GET /api/senara/reviews
+ */
+export const getAllReviews = async (req, res) => {
+  try {
+    const reviews = await Review.find({})
+      .populate('user', 'name email')
+      .populate('product', 'title image category')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const formatted = reviews.map((r) => ({
+      _id: r._id,
+      id: r._id,
+      userName: r.user?.name || 'Unknown user',
+      userEmail: r.user?.email || '',
+      productTitle: r.product?.title || 'Unknown product',
+      productCategory: r.product?.category || '',
+      rating: r.rating,
+      title: r.title,
+      comment: r.comment,
+      createdAt: r.createdAt,
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: formatted,
+    });
+  } catch (error) {
+    console.error('Get all reviews (admin) error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch reviews',
+      error: error.message,
+    });
+  }
+};
+
+/**
  * Get my reviews (current user)
  * @route GET /api/senara/reviews/my-reviews
  */
