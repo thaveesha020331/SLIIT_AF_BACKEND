@@ -8,6 +8,28 @@ import RatingSummaryBar from '../../components/Senara/RatingSummaryBar';
 import ReviewList from '../../components/Senara/ReviewList';
 import ReviewForm from '../../components/Senara/ReviewForm';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = API_URL.replace(/\/api\/?$/, '');
+
+const getProductImageSrc = (imagePath) => {
+  if (!imagePath) return 'https://via.placeholder.com/400';
+
+  if (
+    imagePath.startsWith('http://') ||
+    imagePath.startsWith('https://') ||
+    imagePath.startsWith('blob:') ||
+    imagePath.startsWith('data:')
+  ) {
+    return imagePath;
+  }
+
+  if (imagePath.startsWith('/')) {
+    return `${API_BASE_URL}${imagePath}`;
+  }
+
+  return `${API_BASE_URL}/${imagePath}`;
+};
+
 const ProductReviewPage = () => {
   const { productId } = useParams();
   const [searchParams] = useSearchParams();
@@ -191,7 +213,7 @@ const ProductReviewPage = () => {
         <aside className="product-overview-card">
           <div className="product-overview-image">
             <img
-              src={productData.image || 'https://via.placeholder.com/400'}
+              src={getProductImageSrc(productData.image)}
               alt={productData.title}
             />
           </div>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { adminAPI } from '../../services/Tudakshana/adminService';
 import { authHelpers } from '../../services/Tudakshana/authService';
 import AdminProducts from '../Lakna/AdminProducts';
+import AdminReviewsPage from '../Senara/AdminReviewsPage';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -191,7 +192,7 @@ const AdminDashboard = () => {
       case 'products':
         return <AdminProducts mode="list" />;
       case 'reviews':
-        return <div className="coming-soon">Reviews - Coming Soon</div>;
+        return <AdminReviewsPage/>;
       case 'profile':
         return <div className="coming-soon">Profile - Coming Soon</div>;
       default:

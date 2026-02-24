@@ -7,6 +7,8 @@ import MyOrders from './pages/Thaveesha/MyOrders'
 import OrderDetail from './pages/Thaveesha/OrderDetail'
 import MyReviewPage from './pages/Senara/MyReviewPage'
 import ProductReviewPage from './pages/Senara/ProductReviewPage'
+import AllUserProductReviews from './pages/Senara/AllUserProductReviews'
+import AdminReviewsPage from './pages/Senara/AdminReviewsPage'
 import UserLogin from './pages/Tudakshana/UserLogin'
 import AdminLogin from './pages/Tudakshana/AdminLogin'
 import SellerLogin from './pages/Tudakshana/SellerLogin'
@@ -49,6 +51,8 @@ function AppContent() {
           <Route path="/my-orders/:orderId" element={<OrderDetail />} />
           <Route path="/my-reviews" element={<MyReviewPage />} />
           <Route path="/products/:productId/review" element={ <ProductReviewPage />}/>
+          <Route path="/products/:productId/all-reviews" element={<AllUserProductReviews />} />
+
           
           {/* Admin Only Routes */}
           <Route 
@@ -64,6 +68,14 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <AdminProducts />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/reviews" 
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminReviewsPage />
               </ProtectedRoute>
             } 
           />
