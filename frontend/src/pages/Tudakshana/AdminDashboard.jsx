@@ -160,7 +160,7 @@ const AdminDashboard = () => {
 
   const handleLogout = () => {
     authHelpers.clearAuth();
-    navigate('/admin/login');
+    navigate('/');
   };
 
   const getRoleBadgeColor = (role) => {

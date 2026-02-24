@@ -30,10 +30,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid - clear auth data
+      // Token expired or invalid - clear auth data but don't redirect
+      // Let each page handle the redirect appropriately
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
@@ -117,8 +117,12 @@ export const authHelpers = {
   getUserRole: () => {
     const userStr = localStorage.getItem('user');
     if (!userStr) return null;
-    const user = JSON.parse(userStr);
-    return user.role;
+    try {
+      const user = JSON.parse(userStr);
+      return user?.role || null;
+    } catch (error) {
+      return null;
+    }
   },
 
   // Check if user has specific role

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { orderAPI } from '../../services/Thaveesha';
 import OrderTrackingMap from '../../components/Thaveesha/OrderTrackingMap';
 import './Order.css';
@@ -21,12 +21,21 @@ function getStepIndex(status) {
 
 export default function OrderDetail() {
   const { orderId } = useParams();
+  const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cancelling, setCancelling] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setIsAuthenticated(false);
+      setLoading(false);
+      return;
+    }
     fetchOrder();
   }, [orderId]);
 
@@ -37,7 +46,11 @@ export default function OrderDetail() {
       const data = await orderAPI.getOrderById(orderId);
       setOrder(data);
     } catch (err) {
-      if (err.response?.status === 401) return;
+      if (err.response?.status === 401) {
+        setIsAuthenticated(false);
+        setLoading(false);
+        return;
+      }
       setError(err.response?.data?.message || 'Order not found');
       setOrder(null);
     } finally {
@@ -53,8 +66,11 @@ export default function OrderDetail() {
       const data = await orderAPI.cancelOrder(orderId);
       setOrder(data.order);
     } catch (err) {
-      if (err.response?.status === 401) return;
-      setError(err.response?.data?.message || 'Failed to cancel order');
+      if (err.response?.status === 401) {
+        setIsAuthenticated(false);
+      } else {
+        setError(err.response?.data?.message || 'Failed to cancel order');
+      }
     } finally {
       setCancelling(false);
     }
@@ -69,6 +85,24 @@ export default function OrderDetail() {
     return (
       <div className="order-page-container">
         <div className="orders-loading">Loading order...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="order-page-container">
+        <div className="orders-empty">
+          <div className="empty-icon">🔒</div>
+          <h2>Login Required</h2>
+          <p>Please log in to view order details</p>
+          <button 
+            className="btn-primary" 
+            onClick={() => navigate('/login')}
+          >
+            Go to Login
+          </button>
+        </div>
       </div>
     );
   }

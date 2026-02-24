@@ -19,7 +19,7 @@ const SellerDashboard = () => {
 
   const handleLogout = () => {
     authHelpers.clearAuth();
-    navigate('/login');
+    navigate('/');
   };
 
   if (!user) {

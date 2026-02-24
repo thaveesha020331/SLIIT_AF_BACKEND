@@ -75,20 +75,43 @@ const AdminLogin = () => {
         'admin' // Enforce admin role
       );
 
+      console.log('Login response:', response); // Debug log
+
       if (response.success) {
+        const token = response?.data?.token || response?.token;
+        const user = response?.data?.user || response?.user;
+
+        console.log('Token:', token); // Debug log
+        console.log('User:', user); // Debug log
+
+        if (!token || !user) {
+          setError('Login response is invalid. Please try again.');
+          setLoading(false);
+          return;
+        }
+
+        if (user.role !== 'admin') {
+          setError('This account does not have admin access.');
+          setLoading(false);
+          return;
+        }
+
         // Save auth data
-        authHelpers.saveAuth(response.data.token, response.data.user);
-        
+        authHelpers.saveAuth(token, user);
         setSuccess('Admin login successful! Redirecting...');
-        
-        // Navigate immediately to admin dashboard
-        navigate('/admin/dashboard', { replace: true });
+
+        // Redirect to admin dashboard
+        setTimeout(() => {
+          navigate('/admin/dashboard', { replace: true });
+        }, 500);
+      } else {
+        setError(response.message || 'Login failed. Please try again.');
+        setLoading(false);
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Login failed. Please try again.';
       setError(errorMessage);
       console.error('Admin login error:', err);
-    } finally {
       setLoading(false);
     }
   };
