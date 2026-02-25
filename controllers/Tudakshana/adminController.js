@@ -14,7 +14,7 @@ export const getAllUsers = async (req, res) => {
       query.role = role;
     }
 
-    if (isActive !== undefined) {
+    if (isActive === 'true' || isActive === 'false') {
       query.isActive = isActive === 'true';
     }
 
