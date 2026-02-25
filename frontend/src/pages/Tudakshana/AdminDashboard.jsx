@@ -92,7 +92,7 @@ const AdminDashboard = () => {
       console.log('Fetching users with filters:', filters);
       const response = await adminAPI.getAllUsers(filters);
       console.log('Users response:', response);
-      
+
       if (response && response.data && response.data.users) {
         setUsers(response.data.users);
         setPagination(response.data.pagination);
