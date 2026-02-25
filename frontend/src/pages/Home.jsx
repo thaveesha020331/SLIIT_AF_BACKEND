@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Search, Leaf } from 'lucide-react'
+import { Leaf, ShieldCheck, Truck, Recycle, Handshake, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
 import Hero1 from "@/assets/Hero1.png";
 import Hero2 from "@/assets/Hero2.png";
@@ -14,6 +14,30 @@ const CAROUSEL_IMAGES = [
   Hero4,
   Hero5,
 ]
+
+const WHY_CHOOSE_ITEMS = [
+  {
+    icon: ShieldCheck,
+    title: 'Trusted Green Standards',
+    description: 'Every listed item is reviewed for eco-certification, sourcing transparency, and safer production practices.',
+  },
+  {
+    icon: Truck,
+    title: 'Fast Local Delivery',
+    description: 'EcoMart prioritizes nearby suppliers to reduce travel emissions while getting fresh products to your door faster.',
+  },
+  {
+    icon: Recycle,
+    title: 'Low-Waste Packaging',
+    description: 'We encourage reusable, recyclable, and biodegradable packaging choices across our marketplace partners.',
+  },
+  {
+    icon: Handshake,
+    title: 'Support Local Communities',
+    description: 'Your purchases directly empower small local producers and sustainable businesses in your region.',
+  },
+]
+
 export function HomePage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const navigate = useNavigate()
@@ -172,6 +196,67 @@ export function HomePage() {
                   className="fill-transparent"
                 ></path>
               </svg>
+            </div>
+          </div>
+        </section>
+
+        {/* Why Choose */}
+        <section className="px-4 md:px-6 lg:px-8 pb-16 md:pb-20 max-w-8xl mx-auto">
+          <div className="relative overflow-hidden rounded-3xl border border-lime-200/70 bg-gradient-to-br from-white via-lime-50 to-lime-100 p-6 md:p-8 lg:p-12 shadow-[0_25px_80px_rgba(132,204,22,0.14)]">
+            <div className="pointer-events-none absolute -top-20 -right-16 h-64 w-64 rounded-full bg-lime-300/35 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-lime-400/25 blur-3xl" />
+
+            <div className="relative z-10 flex flex-col gap-10">
+              <div className="mx-auto max-w-3xl text-center">
+                <span className="inline-flex items-center gap-2 rounded-full border border-lime-300 bg-white/70 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-lime-800 backdrop-blur-sm">
+                  <Sparkles size={14} className="text-lime-700" />
+                  Why Choose EcoMart?
+                </span>
+                <h2 className="mt-4 text-3xl md:text-4xl lg:text-5xl font-serif font-bold leading-tight text-gray-900">
+                  A Smarter Way to Shop for a
+                  <span className="block text-lime-700">Greener Tomorrow</span>
+                </h2>
+                <p className="mt-4 text-sm md:text-base leading-relaxed text-gray-600">
+                  EcoMart blends sustainability, quality, and convenience in one beautifully curated marketplace designed for conscious living.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5">
+                {WHY_CHOOSE_ITEMS.map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <article
+                      key={item.title}
+                      className="group relative overflow-hidden rounded-2xl border border-lime-200/80 bg-white/85 p-5 md:p-6 shadow-[0_10px_35px_rgba(15,23,42,0.08)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-lime-400 hover:shadow-[0_18px_40px_rgba(132,204,22,0.18)]"
+                    >
+                      <div className="absolute -top-10 -right-8 h-24 w-24 rounded-full bg-lime-300/20 blur-2xl transition-opacity duration-300 group-hover:opacity-100 opacity-70" />
+                      <div className="relative z-10">
+                        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#0D0D0D] text-lime-300 shadow-lg ring-1 ring-black/10">
+                          <Icon size={22} />
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900">{item.title}</h3>
+                        <p className="mt-2 text-sm leading-relaxed text-gray-600">{item.description}</p>
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+
+              <div className="relative rounded-2xl border border-lime-300/70 bg-[#0D0D0D] p-6 md:p-8 text-white shadow-2xl">
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-lime-500/20 via-transparent to-lime-300/10" />
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-lime-300">Join the movement</p>
+                    <h3 className="mt-2 text-2xl md:text-3xl font-serif font-bold">Choose products that care for people and planet.</h3>
+                  </div>
+                  <button
+                    onClick={() => navigate('/products')}
+                    className="inline-flex items-center justify-center rounded-full bg-lime-300 px-7 py-3 text-sm font-bold uppercase tracking-wider text-black transition-colors hover:bg-lime-200"
+                  >
+                    Start Shopping
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </section>
