@@ -9,39 +9,28 @@ import {
   updateReview,
   deleteReview,
   getReviewById,
+  adminDeleteReview
 } from '../../controllers/Senara/ReviewController.js';
-import Review from '../../models/Senara/Review.js';
 
 const router = express.Router();
 
 // All routes require auth
 router.use(protect);
 
-// Admin: view all reviews
+// Admin: view all reviews (optional sentiment filter ?sentiment=Positive)
 router.get('/', restrictTo('admin'), getAllReviews);
 
+
 // Admin: delete any review
-router.delete('/admin/:id', restrictTo('admin'), async (req, res) => {
-  try {
-    const { id } = req.params;
-    const review = await Review.findById(id);
-    if (!review) {
-      return res.status(404).json({ success: false, message: 'Review not found' });
-    }
-    await Review.findByIdAndDelete(id);
-    res.status(200).json({ success: true, message: 'Review deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to delete review' });
-  }
-});
+router.delete('/admin/:id', restrictTo('admin'), adminDeleteReview);
 
 // customer, seller, admin can add/view their reviews
-router.get('/my-reviews', restrictTo('customer', 'seller', 'admin'), getMyReviews);
-router.get('/check/:productId', restrictTo('customer', 'seller', 'admin'), checkCanReview);
+router.get('/my-reviews', restrictTo('customer','admin'), getMyReviews);
+router.get('/check/:productId', restrictTo('customer','admin'), checkCanReview);
 router.get('/product/:productId', getProductReviews);
-router.post('/', restrictTo('customer', 'seller', 'admin'), addReview);
-router.get('/:id', restrictTo('customer', 'seller', 'admin'), getReviewById);
-router.patch('/:id', restrictTo('customer', 'seller', 'admin'), updateReview);
-router.delete('/:id', restrictTo('customer', 'seller', 'admin'), deleteReview);
+router.post('/', restrictTo('customer'), addReview);
+router.get('/:id', restrictTo('customer','admin'), getReviewById);
+router.patch('/:id', restrictTo('customer'), updateReview);
+router.delete('/:id', restrictTo('customer','admin'), deleteReview);
 
 export default router;
