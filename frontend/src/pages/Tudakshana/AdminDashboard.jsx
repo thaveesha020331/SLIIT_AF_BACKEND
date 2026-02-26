@@ -4,6 +4,7 @@ import { adminAPI } from '../../services/Tudakshana/adminService';
 import { authHelpers } from '../../services/Tudakshana/authService';
 import AdminProducts from '../Lakna/AdminProducts';
 import AdminReviewsPage from '../Senara/AdminReviewsPage';
+import AdminOrders from '../Thaveesha/AdminOrders';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -184,7 +185,7 @@ const AdminDashboard = () => {
       case 'users':
         return renderUsersView();
       case 'orders':
-        return <div className="coming-soon">Order Management - Coming Soon</div>;
+        return <AdminOrders/>;
       case 'customers':
         return <div className="coming-soon">Customers - Coming Soon</div>;
       case 'add-product':
