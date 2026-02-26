@@ -171,8 +171,10 @@ export const cancelOrder = async (req, res) => {
       });
     }
 
-    order.status = 'cancelled';
-    await order.save();
+    await Order.collection.updateOne(
+      { _id: order._id },
+      { $set: { status: 'cancelled', cancelledBy: 'user' } }
+    );
 
     // Restore stock for cancelled order
     for (const line of order.items) {
