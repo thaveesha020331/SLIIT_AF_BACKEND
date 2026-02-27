@@ -1,14 +1,45 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
+import path from 'path';
 import connectDB from './config/db.js';
+import authRoutes from './routes/Tudakshana/authRoutes.js';
+import adminRoutes from './routes/Tudakshana/adminRoutes.js';
+import productRoutes from './routes/Lakna/productRoutes.js';
+import cartRoutes from './routes/Thaveesha/cartRoutes.js';
+import orderRoutes from './routes/Thaveesha/orderRoutes.js';
+import adminOrderRoutes from './routes/Thaveesha/adminOrderRoutes.js';
+import paymentRoutes from './routes/Thaveesha/paymentRoutes.js';
+import reviewRoutes from './routes/Senara/reviewRoutes.js';
 
 dotenv.config();
 
 const app = express();
 
+// CORS Configuration
+const corsOptions = {
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
 // Middleware
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.resolve('uploads')));
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/admin/orders', adminOrderRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/senara/reviews', reviewRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -60,6 +91,9 @@ const startServer = async () => {
   }
 };
 
-startServer();
+// Do not start server when running integration tests (supertest uses app directly)
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
 
 export default app;
