@@ -4,3 +4,4 @@
  */
 export { cartAPI } from './cartService';
 export { orderAPI } from './orderService';
+export { default as paymentAPI } from './paymentService';

@@ -3,6 +3,11 @@ import User from '../../models/Tudakshana/User.js';
 
 // Middleware to protect routes - verify JWT token
 export const protect = async (req, res, next) => {
+  // Skip OPTIONS preflight requests (CORS)
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+
   try {
     let token;
 

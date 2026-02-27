@@ -7,7 +7,7 @@ import ReviewList from '../../components/Senara/ReviewList';
 import RatingSummaryBar from '../../components/Senara/RatingSummaryBar';
 import '../../pages/Senara/ProductReviewPage.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 const API_BASE_URL = API_URL.replace(/\/api\/?$/, '');
 
 const getProductImageSrc = (imagePath) => {

@@ -205,10 +205,6 @@ const UserLogin = () => {
         <div className="login-type-switch">
           Are you a seller? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/seller/login'); }}>Login as Seller</a>
         </div>
-
-        <div className="admin-credentials-info">
-          <p className="credentials-note">Admin Access: Use admin@glowy.com / Admin@123</p>
-        </div>
       </div>
     </div>
   );
