@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import api from '../../services/Tudakshana/authService';
 import { cartAPI } from '../../services/Thaveesha';
@@ -12,6 +12,7 @@ const API_BASE_URL = API_URL.replace(/\/api\/?$/, '');
 
 const UserProducts = ({ user }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -20,16 +21,33 @@ const UserProducts = ({ user }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedProductCategories, setSelectedProductCategories] = useState([]);
   const [selectedCertifications, setSelectedCertifications] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('az');
 
   const categories = ['Reusable', 'Organic', 'Handmade', 'Biodegradable', 'Sustainable', 'Ecofriendly'];
+  const productCategories = ['Kitchen', 'Personal Care', 'Bags & School Items', 'Home & Living', 'Gifts'];
   const certifications = ['FSC', 'USDA Organic', 'Fair Trade', 'Carbon Neutral', 'B Corp', 'Cradle to Cradle', 'EU Ecolabel', 'Green Seal'];
 
   useEffect(() => {
+    const preselectedProductCategory = searchParams.get('productCategory');
+
+    if (preselectedProductCategory && productCategories.includes(preselectedProductCategory)) {
+      setSelectedProductCategories([preselectedProductCategory]);
+      return;
+    }
+
+    setSelectedProductCategories([]);
+  }, [searchParams]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [selectedCategories, selectedProductCategories, selectedCertifications]);
+
+  useEffect(() => {
     fetchProducts();
-  }, [page, searchQuery]);
+  }, [page, searchQuery, selectedCategories, selectedProductCategories, selectedCertifications]);
 
   // Fetch products
   const fetchProducts = async () => {
@@ -39,6 +57,9 @@ const UserProducts = ({ user }) => {
     try {
       let url = `/products?page=${page}&limit=12`;
       if (searchQuery) url += `&search=${searchQuery}`;
+      if (selectedCategories.length === 1) url += `&category=${encodeURIComponent(selectedCategories[0])}`;
+      if (selectedProductCategories.length === 1) url += `&productCategory=${encodeURIComponent(selectedProductCategories[0])}`;
+      if (selectedCertifications.length === 1) url += `&ecocertification=${encodeURIComponent(selectedCertifications[0])}`;
 
       const response = await api.get(url, { timeout: 5000 });
       if (response.data?.data && response.data?.pagination) {
@@ -110,6 +131,14 @@ const UserProducts = ({ user }) => {
     ));
   };
 
+  const handleProductCategoryToggle = (category) => {
+    setSelectedProductCategories((prev) => (
+      prev.includes(category)
+        ? prev.filter((item) => item !== category)
+        : [...prev, category]
+    ));
+  };
+
   const handleCertificationToggle = (certification) => {
     setSelectedCertifications((prev) => (
       prev.includes(certification)
@@ -130,13 +159,19 @@ const UserProducts = ({ user }) => {
       return selectedCertifications.includes(product.ecocertification);
     });
 
-    return [...certificationFiltered].sort((first, second) => {
+    const productCategoryFiltered = certificationFiltered.filter((product) => {
+      if (!selectedProductCategories.length) return true;
+      const productCategory = product.productCategory || product.productcategory || '';
+      return selectedProductCategories.includes(productCategory);
+    });
+
+    return [...productCategoryFiltered].sort((first, second) => {
       if (sortBy === 'za') return String(second.title || '').localeCompare(String(first.title || ''));
       if (sortBy === 'price-low') return Number(first.price || 0) - Number(second.price || 0);
       if (sortBy === 'price-high') return Number(second.price || 0) - Number(first.price || 0);
       return String(first.title || '').localeCompare(String(second.title || ''));
     });
-  }, [products, selectedCategories, selectedCertifications, sortBy]);
+  }, [products, selectedCategories, selectedCertifications, selectedProductCategories, sortBy]);
 
   // Fetch reviews when opening modal
   const handleViewProduct = async (product) => {
@@ -179,6 +214,7 @@ const UserProducts = ({ user }) => {
                   <h2>{selectedProduct.title}</h2>
                   <div className="product-meta">
                     <span className="badge badge-category">{selectedProduct.category}</span>
+                    <span className="badge badge-category">{selectedProduct.productCategory || 'Uncategorized'}</span>
                     <span className="badge badge-cert">{selectedProduct.ecocertification}</span>
                   </div>
                   <p className="product-description">{selectedProduct.description}</p>
@@ -273,13 +309,27 @@ const UserProducts = ({ user }) => {
             <h3>Filters</h3>
 
             <div className="sidebar-filter-group">
-              <h4>Category</h4>
+              <h4>Filter by Eco-Tag</h4>
               {categories.map((category) => (
                 <label key={category} className="checkbox-option">
                   <input
                     type="checkbox"
                     checked={selectedCategories.includes(category)}
                     onChange={() => handleCategoryToggle(category)}
+                  />
+                  <span>{category}</span>
+                </label>
+              ))}
+            </div>
+
+            <div className="sidebar-filter-group">
+              <h4>Filter by Category</h4>
+              {productCategories.map((category) => (
+                <label key={category} className="checkbox-option">
+                  <input
+                    type="checkbox"
+                    checked={selectedProductCategories.includes(category)}
+                    onChange={() => handleProductCategoryToggle(category)}
                   />
                   <span>{category}</span>
                 </label>

@@ -23,6 +23,7 @@ describe('Product Controller', () => {
         price: 29.99,
         stock: 100,
         category: 'Reusable',
+        productCategory: 'Kitchen',
         ecocertification: 'Carbon Neutral',
         image: 'url',
         ecoImpactScore: {

@@ -38,6 +38,34 @@ const WHY_CHOOSE_ITEMS = [
   },
 ]
 
+const PRODUCT_CATEGORIES = [
+  {
+    title: 'Kitchen',
+    subtitle: 'Eco-friendly cooking and dining essentials',
+    icon: Sparkles,
+  },
+  {
+    title: 'Personal Care',
+    subtitle: 'Daily care products with cleaner ingredients',
+    icon: Leaf,
+  },
+  {
+    title: 'Bags & School Items',
+    subtitle: 'Reusable carry options and student needs',
+    icon: Recycle,
+  },
+  {
+    title: 'Home & Living',
+    subtitle: 'Greener choices for a healthier home',
+    icon: Handshake,
+  },
+  {
+    title: 'Gifts',
+    subtitle: 'Meaningful sustainable gift picks',
+    icon: Truck,
+  },
+]
+
 export function HomePage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const navigate = useNavigate()
@@ -256,6 +284,67 @@ export function HomePage() {
                     Start Shopping
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Filter By Category */}
+        <section className="px-4 md:px-6 lg:px-8 pb-16 md:pb-20 max-w-8xl mx-auto">
+          <div className="relative overflow-hidden rounded-3xl border border-lime-200/80 bg-gradient-to-br from-white via-lime-50 to-lime-100 p-6 md:p-8 lg:p-10 shadow-[0_20px_55px_rgba(132,204,22,0.14)]">
+            <div className="pointer-events-none absolute -top-16 -right-10 h-56 w-56 rounded-full bg-lime-300/30 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-16 -left-10 h-52 w-52 rounded-full bg-lime-400/20 blur-3xl" />
+
+            <div className="relative z-10 text-center">
+              <span className="inline-flex items-center gap-2 rounded-full border border-lime-300 bg-white/75 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-lime-800">
+                <Sparkles size={14} className="text-lime-700" />
+                Filter By Category
+              </span>
+              <h2 className="mt-4 text-2xl md:text-3xl lg:text-4xl font-serif font-bold text-gray-900">
+                Pick Your Shopping Focus
+              </h2>
+              <p className="mt-3 text-sm md:text-base text-gray-600">
+                Open products with your selected category already checked in the sidebar.
+              </p>
+            </div>
+
+            <div className="relative z-10 mt-8 overflow-x-auto pb-2">
+              <div className="flex flex-nowrap gap-4 min-w-max">
+              {PRODUCT_CATEGORIES.map((category) => {
+                const Icon = category.icon
+                return (
+                  <article
+                    key={category.title}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => navigate(`/products?productCategory=${encodeURIComponent(category.title)}`)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        navigate(`/products?productCategory=${encodeURIComponent(category.title)}`)
+                      }
+                    }}
+                    className="group relative w-[240px] md:w-[250px] overflow-hidden rounded-2xl border border-lime-300/40 bg-gradient-to-br from-gray-900 via-black to-gray-800 p-5 text-white shadow-2xl transition-all duration-300 hover:-translate-y-1.5 hover:border-lime-300/80"
+                  >
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-lime-500/15 via-transparent to-white/5 opacity-90" />
+                    <div className="pointer-events-none absolute -top-16 -right-10 h-28 w-28 rounded-full bg-lime-300/25 blur-2xl transition-all duration-300 group-hover:scale-110" />
+                    <div className="pointer-events-none absolute -bottom-16 -left-10 h-28 w-28 rounded-full bg-lime-500/20 blur-2xl" />
+
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="relative z-10 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-lime-300/40 bg-white/10 text-lime-200 backdrop-blur-sm">
+                        <Icon size={20} />
+                      </div>
+                      <span className="relative z-10 text-lime-200 transition-transform duration-300 group-hover:translate-x-1">↗</span>
+                    </div>
+
+                    <h3 className="relative z-10 mt-6 text-lg font-bold leading-snug tracking-wide text-white">{category.title}</h3>
+                    <p className="relative z-10 mt-2 text-sm leading-relaxed text-gray-200/90">{category.subtitle}</p>
+
+                    <div className="relative z-10 mt-4 h-px w-full bg-gradient-to-r from-lime-300/60 via-lime-200/20 to-transparent" />
+                    <p className="relative z-10 mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-lime-200/90">Tap to Explore</p>
+                  </article>
+                )
+              })}
               </div>
             </div>
           </div>

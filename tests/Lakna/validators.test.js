@@ -16,6 +16,7 @@ describe('Product Validators', () => {
         price: 29.99,
         stock: 100,
         category: 'Reusable',
+        productCategory: 'Kitchen',
         ecocertification: 'Carbon Neutral',
         image: 'https://example.com/image.jpg',
       };
@@ -36,6 +37,7 @@ describe('Product Validators', () => {
       expect(errors).toHaveProperty('price');
       expect(errors).toHaveProperty('stock');
       expect(errors).toHaveProperty('category');
+      expect(errors).toHaveProperty('productCategory');
       expect(errors).toHaveProperty('ecocertification');
     });
 
@@ -46,6 +48,7 @@ describe('Product Validators', () => {
         price: -10,
         stock: 100,
         category: 'Reusable',
+        productCategory: 'Kitchen',
         ecocertification: 'Carbon Neutral',
       };
 
@@ -61,6 +64,7 @@ describe('Product Validators', () => {
         price: 29.99,
         stock: -5,
         category: 'Reusable',
+        productCategory: 'Kitchen',
         ecocertification: 'Carbon Neutral',
       };
 
@@ -76,6 +80,7 @@ describe('Product Validators', () => {
         price: 29.99,
         stock: 100,
         category: 'InvalidCategory',
+        productCategory: 'Kitchen',
         ecocertification: 'Carbon Neutral',
       };
 
@@ -91,12 +96,29 @@ describe('Product Validators', () => {
         price: 29.99,
         stock: 100,
         category: 'Reusable',
+        productCategory: 'Kitchen',
         ecocertification: 'InvalidCert',
       };
 
       const { isValid, errors } = validateProductInput(invalidData);
       expect(isValid).toBe(false);
       expect(errors.ecocertification).toBeDefined();
+    });
+
+    test('should reject invalid product category', () => {
+      const invalidData = {
+        title: 'Eco Bottle',
+        description: 'A sustainable water bottle',
+        price: 29.99,
+        stock: 100,
+        category: 'Reusable',
+        productCategory: 'InvalidCategory',
+        ecocertification: 'Carbon Neutral',
+      };
+
+      const { isValid, errors } = validateProductInput(invalidData);
+      expect(isValid).toBe(false);
+      expect(errors.productCategory).toBeDefined();
     });
 
     test('should validate update with partial data', () => {

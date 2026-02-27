@@ -28,11 +28,13 @@ const AdminProducts = ({ mode = 'both' }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [page, setPage] = useState(1);
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [productCategoryFilter, setProductCategoryFilter] = useState('');
   const [certificationFilter, setCertificationFilter] = useState('');
   const canShowForm = mode === 'both' || isAddMode || (isListMode && editingId !== null);
   const canShowList = mode === 'both' || isListMode;
 
   const categories = ['Reusable', 'Organic', 'Handmade', 'Biodegradable', 'Sustainable', 'Ecofriendly'];
+  const productCategories = ['Kitchen', 'Personal Care', 'Bags & School Items', 'Home & Living', 'Gifts'];
   const certifications = ['FSC', 'USDA Organic', 'Fair Trade', 'Carbon Neutral', 'B Corp', 'Cradle to Cradle', 'EU Ecolabel', 'Green Seal'];
 
   const [formData, setFormData] = useState({
@@ -41,6 +43,7 @@ const AdminProducts = ({ mode = 'both' }) => {
     price: '',
     stock: '',
     category: '',
+    productCategory: '',
     ecocertification: '',
     image: '',
     manufacturerInfo: {
@@ -58,6 +61,7 @@ const AdminProducts = ({ mode = 'both' }) => {
       price: '',
       stock: '',
       category: '',
+      productCategory: '',
       ecocertification: '',
       image: '',
       manufacturerInfo: {
@@ -91,7 +95,7 @@ const AdminProducts = ({ mode = 'both' }) => {
       return;
     }
     fetchProducts();
-  }, [page, categoryFilter, certificationFilter, canShowList]);
+  }, [page, categoryFilter, productCategoryFilter, certificationFilter, canShowList]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -99,6 +103,7 @@ const AdminProducts = ({ mode = 'both' }) => {
     try {
       let url = `${API_URL}/products?page=${page}`;
       if (categoryFilter) url += `&category=${categoryFilter}`;
+      if (productCategoryFilter) url += `&productCategory=${productCategoryFilter}`;
       if (certificationFilter) url += `&ecocertification=${certificationFilter}`;
 
       const response = await axios.get(url);
@@ -158,7 +163,7 @@ const AdminProducts = ({ mode = 'both' }) => {
     const priceValue = Number(formData.price);
     const stockValue = Number(formData.stock);
 
-    if (!trimmedTitle || !trimmedDescription || formData.price === '' || formData.stock === '' || !formData.category || !formData.ecocertification) {
+    if (!trimmedTitle || !trimmedDescription || formData.price === '' || formData.stock === '' || !formData.category || !formData.productCategory || !formData.ecocertification) {
       setError('All required fields must be filled');
       return;
     }
@@ -258,6 +263,7 @@ const AdminProducts = ({ mode = 'both' }) => {
       price: product.price,
       stock: product.stock,
       category: product.category,
+      productCategory: product.productCategory || '',
       ecocertification: product.ecocertification,
       image: product.image,
       manufacturerInfo: product.manufacturerInfo || { name: '', location: '' },
@@ -308,6 +314,9 @@ const AdminProducts = ({ mode = 'both' }) => {
       let url = `${API_URL}/products?page=${reportPage}&limit=${reportLimit}`;
       if (categoryFilter) {
         url += `&category=${encodeURIComponent(categoryFilter)}`;
+      }
+      if (productCategoryFilter) {
+        url += `&productCategory=${encodeURIComponent(productCategoryFilter)}`;
       }
       if (certificationFilter) {
         url += `&ecocertification=${encodeURIComponent(certificationFilter)}`;
@@ -371,7 +380,8 @@ const AdminProducts = ({ mode = 'both' }) => {
       const pageWidth = doc.internal.pageSize.getWidth();
       const generatedAt = new Date();
       const filterSummary = [
-        `Category: ${categoryFilter || 'All'}`,
+        `Eco-Tag: ${categoryFilter || 'All'}`,
+        `Category: ${productCategoryFilter || 'All'}`,
         `Certification: ${certificationFilter || 'All'}`,
       ].join('  |  ');
 
@@ -399,10 +409,11 @@ const AdminProducts = ({ mode = 'both' }) => {
 
       autoTable(doc, {
         startY: 176,
-        head: [['Title', 'Category', 'Certification', 'Price (USD)', 'Stock', 'Manufacturer', 'Location']],
+        head: [['Title', 'Eco-Tag', 'Category', 'Certification', 'Price (USD)', 'Stock', 'Manufacturer', 'Location']],
         body: reportProducts.map((product) => ([
           product.title || '-',
           product.category || '-',
+          product.productCategory || '-',
           product.ecocertification || '-',
           Number(product.price || 0).toFixed(2),
           String(product.stock ?? 0),
@@ -518,14 +529,14 @@ const AdminProducts = ({ mode = 'both' }) => {
 
             <div className="form-row">
               <div className="form-group">
-                <label>Category *</label>
+                <label>Eco-Tag *</label>
                 <select
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
                   required
                 >
-                  <option value="">Select category</option>
+                  <option value="">Select eco-tag</option>
                   {categories.map((cat) => (
                     <option key={cat} value={cat}>
                       {cat}
@@ -534,6 +545,25 @@ const AdminProducts = ({ mode = 'both' }) => {
                 </select>
               </div>
 
+              <div className="form-group">
+                <label>Product Category *</label>
+                <select
+                  name="productCategory"
+                  value={formData.productCategory}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select product category</option>
+                  {productCategories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row">
               <div className="form-group">
                 <label>Eco-Certification *</label>
                 <select
@@ -623,13 +653,28 @@ const AdminProducts = ({ mode = 'both' }) => {
         <>
           <div className="filters-section">
             <div className="filter-group">
-              <label>Filter by Category:</label>
+              <label>Filter by Eco-Tag:</label>
               <select value={categoryFilter} onChange={(e) => {
                 setCategoryFilter(e.target.value);
                 setPage(1);
               }}>
-                <option value="">All Categories</option>
+                <option value="">All Eco-Tags</option>
                 {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label>Filter by Category:</label>
+              <select value={productCategoryFilter} onChange={(e) => {
+                setProductCategoryFilter(e.target.value);
+                setPage(1);
+              }}>
+                <option value="">All Categories</option>
+                {productCategories.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
                   </option>
@@ -674,6 +719,7 @@ const AdminProducts = ({ mode = 'both' }) => {
                   <tr>
                     <th>Title</th>
                     <th>Image</th>
+                    <th>Eco-Tag</th>
                     <th>Category</th>
                     <th>Certification</th>
                     <th>Price</th>
@@ -698,6 +744,7 @@ const AdminProducts = ({ mode = 'both' }) => {
                         )}
                       </td>
                       <td>{product.category}</td>
+                      <td>{product.productCategory || '-'}</td>
                       <td>{product.ecocertification}</td>
                       <td>${product.price.toFixed(2)}</td>
                       <td>{product.stock}</td>
