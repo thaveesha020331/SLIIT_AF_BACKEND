@@ -5,7 +5,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
 
-// ─── Sentiment via API Ninjas ONLY ───────────────────────────────────────────
+
 const getSentimentFromAPI = async (text, rating) => {
   try {
     const sentimentRes = await axios.get(
@@ -40,7 +40,6 @@ const getSentimentFromAPI = async (text, rating) => {
 
 /**
  * Get all reviews (admin only)
- * @route GET /api/senara/reviews
  */
 export const getAllReviews = async (req, res) => {
   try {
@@ -77,7 +76,6 @@ export const getAllReviews = async (req, res) => {
 
 /**
  * Get my reviews (current user)
- * @route GET /api/senara/reviews/my-reviews
  */
 export const getMyReviews = async (req, res) => {
   try {
@@ -103,7 +101,6 @@ export const getMyReviews = async (req, res) => {
 
 /**
  * Get reviews for a product
- * @route GET /api/senara/reviews/product/:productId
  */
 export const getProductReviews = async (req, res) => {
   try {
@@ -140,8 +137,6 @@ export const getProductReviews = async (req, res) => {
 
 /**
  * Check if user can add review for product (delivered order, no existing review)
- * @route GET /api/senara/reviews/check/:productId
- * Query: orderId (optional) - to validate specific order
  */
 export const checkCanReview = async (req, res) => {
   try {
@@ -206,8 +201,6 @@ export const checkCanReview = async (req, res) => {
 
 /**
  * Add review (customer only, delivered order, one per product)
- * @route POST /api/senara/reviews
- * Body: { productId, orderId (optional), rating, title (optional), comment }
  */
 export const addReview = async (req, res) => {
   try {
@@ -273,7 +266,7 @@ export const addReview = async (req, res) => {
       });
     }
 
-    // ── Sentiment via API Ninjas ──
+    
     const sentiment = await getSentimentFromAPI(comment.trim(), Math.round(rating));
 
     const review = await Review.create({
@@ -324,8 +317,6 @@ export const addReview = async (req, res) => {
 
 /**
  * Update own review
- * @route PATCH /api/senara/reviews/:id
- * Body: { rating (1-5), title (optional), comment (min 10 chars) }
  */
 export const updateReview = async (req, res) => {
   try {
@@ -370,7 +361,7 @@ export const updateReview = async (req, res) => {
       }
       review.comment = c;
 
-      // ── Sentiment via API Ninjas ──
+      
       review.sentiment = await getSentimentFromAPI(c, review.rating);
     }
 
@@ -397,7 +388,6 @@ export const updateReview = async (req, res) => {
 
 /**
  * Delete own review
- * @route DELETE /api/senara/reviews/:id
  */
 export const deleteReview = async (req, res) => {
   try {
@@ -436,7 +426,6 @@ export const deleteReview = async (req, res) => {
 
 /**
  * Get single review by ID (for edit form)
- * @route GET /api/senara/reviews/:id
  */
 export const getReviewById = async (req, res) => {
   try {
@@ -470,7 +459,6 @@ export const getReviewById = async (req, res) => {
 
 /**
  * Admin delete any review
- * @route DELETE /api/senara/reviews/admin/:id
  */
 export const adminDeleteReview = async (req, res) => {
   try {

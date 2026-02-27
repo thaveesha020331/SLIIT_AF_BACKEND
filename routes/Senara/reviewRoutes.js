@@ -14,17 +14,17 @@ import {
 
 const router = express.Router();
 
-// All routes require auth
+
 router.use(protect);
 
-// Admin: view all reviews (optional sentiment filter ?sentiment=Positive)
+
 router.get('/', restrictTo('admin'), getAllReviews);
 
 
 // Admin: delete any review
 router.delete('/admin/:id', restrictTo('admin'), adminDeleteReview);
 
-// customer, seller, admin can add/view their reviews
+// customer,admin can add/view their reviews
 router.get('/my-reviews', restrictTo('customer','admin'), getMyReviews);
 router.get('/check/:productId', restrictTo('customer','admin'), checkCanReview);
 router.get('/product/:productId', getProductReviews);
