@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { HomePage } from './pages/Home'
 import UserProducts from './pages/Lakna/UserProducts'
 import Cart from './pages/Thaveesha/Cart'
+import Checkout from './pages/Thaveesha/Checkout'
 import MyOrders from './pages/Thaveesha/MyOrders'
 import OrderDetail from './pages/Thaveesha/OrderDetail'
 import MyReviewPage from './pages/Senara/MyReviewPage'
@@ -46,6 +47,14 @@ function AppContent() {
                 <Cart />
               </ProtectedRoute>
             }
+          />
+          <Route 
+            path="/checkout/:orderId" 
+            element={
+              <ProtectedRoute>
+                <Checkout />
+              </ProtectedRoute>
+            } 
           />
           <Route path="/my-orders" element={<MyOrders />} />
           <Route path="/my-orders/:orderId" element={<OrderDetail />} />

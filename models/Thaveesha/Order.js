@@ -27,6 +27,16 @@ const orderSchema = new mongoose.Schema(
     shippingLng: { type: Number, default: null },
     trackingLat: { type: Number, default: null },
     trackingLng: { type: Number, default: null },
+    payment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Payment',
+      default: null,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'completed', 'failed'],
+      default: 'pending',
+    },
   },
   { timestamps: true }
 );

@@ -9,6 +9,7 @@ import productRoutes from './routes/Lakna/productRoutes.js';
 import cartRoutes from './routes/Thaveesha/cartRoutes.js';
 import orderRoutes from './routes/Thaveesha/orderRoutes.js';
 import adminOrderRoutes from './routes/Thaveesha/adminOrderRoutes.js';
+import paymentRoutes from './routes/Thaveesha/paymentRoutes.js';
 import reviewRoutes from './routes/Senara/reviewRoutes.js';
 
 dotenv.config();
@@ -37,6 +38,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin/orders', adminOrderRoutes);
+app.use('/api/payments', paymentRoutes);
 app.use('/api/senara/reviews', reviewRoutes);
 
 // Health check endpoint

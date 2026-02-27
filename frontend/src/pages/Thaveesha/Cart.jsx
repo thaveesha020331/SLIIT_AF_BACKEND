@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { cartAPI, orderAPI } from '../../services/Thaveesha';
 import { authAPI } from '../../services/Tudakshana/authService';
 import MapAddressPicker from '../../components/Thaveesha/MapAddressPicker';
@@ -12,6 +12,7 @@ function formatProfileAddress(addr) {
 }
 
 export default function Cart() {
+  const navigate = useNavigate();
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -119,7 +120,7 @@ export default function Cart() {
     setError(null);
     setFieldErrors({});
     try {
-      await orderAPI.createOrder({
+      const response = await orderAPI.createOrder({
         items: cart.map((item) => ({
           productId: (item.product && item.product._id) || item._id,
           quantity: item.quantity || 1,
@@ -129,8 +130,21 @@ export default function Cart() {
         notes: checkoutForm.notes.trim(),
         ...(shippingLat != null && shippingLng != null && { shippingLat, shippingLng }),
       });
-      setOrderSuccess(true);
-      setCart([]);
+
+      // Get order ID from response
+      const orderId = response.order?._id || response._id;
+      
+      if (orderId) {
+        setOrderSuccess(true);
+        setCart([]);
+        // Redirect to checkout page after 1 second
+        setTimeout(() => {
+          navigate(`/checkout/${orderId}`);
+        }, 1000);
+      } else {
+        setError('Order created but ID not found. Please try again.');
+        setOrderSuccess(false);
+      }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Checkout failed.');
       if (err.response?.status !== 401) {
