@@ -334,14 +334,14 @@ export function HomePage() {
                       <div className="relative z-10 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-lime-300/40 bg-white/10 text-lime-200 backdrop-blur-sm">
                         <Icon size={20} />
                       </div>
-                      <span className="relative z-10 text-lime-200 transition-transform duration-300 group-hover:translate-x-1">↗</span>
+                      
                     </div>
 
                     <h3 className="relative z-10 mt-6 text-lg font-bold leading-snug tracking-wide text-white">{category.title}</h3>
                     <p className="relative z-10 mt-2 text-sm leading-relaxed text-gray-200/90">{category.subtitle}</p>
 
                     <div className="relative z-10 mt-4 h-px w-full bg-gradient-to-r from-lime-300/60 via-lime-200/20 to-transparent" />
-                    <p className="relative z-10 mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-lime-200/90">Tap to Explore</p>
+                    
                   </article>
                 )
               })}
