@@ -92,6 +92,7 @@ describe('Admin Order Endpoints – Thaveesha', () => {
       price: 49.99,
       stock: 20,
       category: 'Reusable',
+      productCategory: 'Kitchen',
       image: 'https://example.com/admin-order.jpg',
       ecocertification: 'Carbon Neutral',
       createdBy: adminUserId,
