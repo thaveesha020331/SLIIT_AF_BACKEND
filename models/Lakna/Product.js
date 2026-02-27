@@ -41,6 +41,11 @@ const productSchema = new mongoose.Schema(
       enum: ['Reusable', 'Organic', 'Handmade', 'Biodegradable', 'Sustainable', 'Ecofriendly'],
       required: [true, 'Category is required'],
     },
+    productCategory: {
+      type: String,
+      enum: ['Kitchen', 'Personal Care', 'Bags & School Items', 'Home & Living', 'Gifts'],
+      required: [true, 'Product category is required'],
+    },
     image: {
       type: String,
       required: [true, 'Product image is required'],
@@ -117,6 +122,7 @@ const productSchema = new mongoose.Schema(
 
 // Index for faster queries
 productSchema.index({ category: 1, isActive: 1 });
+productSchema.index({ productCategory: 1, isActive: 1 });
 productSchema.index({ title: 'text', description: 'text' });
 productSchema.index({ ecocertification: 1 });
 

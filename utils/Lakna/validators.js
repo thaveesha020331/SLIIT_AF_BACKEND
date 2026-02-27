@@ -100,6 +100,19 @@ export const validateProductInput = (data, isUpdate = false) => {
     }
   }
 
+  // Product category validation
+  if (!isUpdate || data.productCategory !== undefined) {
+    const validProductCategories = ['Kitchen', 'Personal Care', 'Bags & School Items', 'Home & Living', 'Gifts'];
+
+    if (!data.productCategory) {
+      errors.productCategory = 'Product category is required';
+      isValid = false;
+    } else if (!validProductCategories.includes(data.productCategory)) {
+      errors.productCategory = `Product category must be one of: ${validProductCategories.join(', ')}`;
+      isValid = false;
+    }
+  }
+
   // Eco-certification validation
   if (!isUpdate || data.ecocertification !== undefined) {
     const validCertifications = [

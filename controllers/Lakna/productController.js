@@ -96,6 +96,7 @@ export const getAllProducts = async (req, res) => {
   try {
     const {
       category,
+      productCategory,
       ecocertification,
       minPrice = 0,
       maxPrice = Number.MAX_VALUE,
@@ -110,6 +111,10 @@ export const getAllProducts = async (req, res) => {
 
     if (category) {
       filters.category = category;
+    }
+
+    if (productCategory) {
+      filters.productCategory = productCategory;
     }
 
     if (ecocertification) {
@@ -269,6 +274,7 @@ export const updateProduct = async (req, res) => {
       'price',
       'stock',
       'category',
+      'productCategory',
       'ecocertification',
       'isActive',
     ];

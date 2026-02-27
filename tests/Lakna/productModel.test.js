@@ -6,6 +6,7 @@ const validProductPayload = {
   price: 19.99,
   stock: 10,
   category: 'Reusable',
+  productCategory: 'Kitchen',
   image: 'https://example.com/bottle.jpg',
   ecocertification: 'FSC',
 };
@@ -25,6 +26,7 @@ describe('Lakna Product Model', () => {
     expect(error.errors.description).toBeDefined();
     expect(error.errors.price).toBeDefined();
     expect(error.errors.category).toBeDefined();
+    expect(error.errors.productCategory).toBeDefined();
     expect(error.errors.image).toBeDefined();
     expect(error.errors.ecocertification).toBeDefined();
   });
@@ -45,6 +47,12 @@ describe('Lakna Product Model', () => {
     const product = new Product({ ...validProductPayload, ecocertification: 'Unknown Cert' });
     const error = product.validateSync();
     expect(error.errors.ecocertification).toBeDefined();
+  });
+
+  test('should fail validation for invalid product category enum', () => {
+    const product = new Product({ ...validProductPayload, productCategory: 'Unknown' });
+    const error = product.validateSync();
+    expect(error.errors.productCategory).toBeDefined();
   });
 
   test('should apply schema defaults for stock, isActive and ecoImpactScore fields', () => {
@@ -73,10 +81,12 @@ describe('Lakna Product Model', () => {
   test('should define expected indexes', () => {
     const indexes = Product.schema.indexes();
     const hasCategoryIndex = indexes.some(([fields]) => fields.category === 1 && fields.isActive === 1);
+    const hasProductCategoryIndex = indexes.some(([fields]) => fields.productCategory === 1 && fields.isActive === 1);
     const hasTextIndex = indexes.some(([fields]) => fields.title === 'text' && fields.description === 'text');
     const hasCertIndex = indexes.some(([fields]) => fields.ecocertification === 1);
 
     expect(hasCategoryIndex).toBe(true);
+    expect(hasProductCategoryIndex).toBe(true);
     expect(hasTextIndex).toBe(true);
     expect(hasCertIndex).toBe(true);
   });
