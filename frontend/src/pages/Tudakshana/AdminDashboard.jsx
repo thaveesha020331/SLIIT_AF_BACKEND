@@ -178,6 +178,70 @@ const AdminDashboard = () => {
     }
   };
 
+  const downloadUsersAsCSV = async () => {
+    try {
+      setLoading(true);
+      // Fetch all users without pagination
+      const response = await adminAPI.getAllUsers({
+        role: filters.role,
+        isActive: filters.isActive,
+        search: filters.search,
+        limit: 10000, // Large limit to get all users
+      });
+
+      if (!response.data || !response.data.users) {
+        setError('No users data to download');
+        setTimeout(() => setError(''), 3000);
+        return;
+      }
+
+      const usersData = response.data.users;
+
+      // Prepare CSV headers
+      const headers = ['Name', 'Email', 'Role', 'Status', 'Phone', 'Created Date'];
+
+      // Prepare CSV rows
+      const rows = usersData.map((user) => [
+        user.name || '',
+        user.email || '',
+        user.role || '',
+        user.isActive ? 'Active' : 'Inactive',
+        user.phone || '',
+        new Date(user.createdAt).toLocaleDateString(),
+      ]);
+
+      // Create CSV content
+      const csvContent = [
+        headers.join(','),
+        ...rows.map((row) =>
+          row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+        ),
+      ].join('\n');
+
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `users_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setSuccess('Users list downloaded successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      console.error('Error downloading users:', err);
+      setError('Error downloading users. Please try again.');
+      setTimeout(() => setError(''), 3000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const renderMainContent = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -354,6 +418,15 @@ const AdminDashboard = () => {
           <option value="true">Active</option>
           <option value="false">Inactive</option>
         </select>
+
+        <button 
+          onClick={downloadUsersAsCSV}
+          disabled={loading || users.length === 0}
+          className="btn-download"
+          title="Download user list as CSV"
+        >
+          ⬇️ Download
+        </button>
       </div>
 
       {/* Users Table */}
