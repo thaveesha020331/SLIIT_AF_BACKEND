@@ -1,9 +1,5 @@
 import mongoose from "mongoose";
 
-/**
- * Review model – Senara
- * Users can add one review per product, only for delivered orders.
- */
 const reviewSchema = new mongoose.Schema(
   {
     user: {
