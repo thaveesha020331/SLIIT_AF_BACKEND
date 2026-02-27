@@ -55,6 +55,7 @@ describe('Cart & Order Endpoints – Thaveesha', () => {
       price: 19.99,
       stock: 100,
       category: 'Reusable',
+      productCategory: 'Kitchen',
       image: 'https://example.com/test.jpg',
       ecocertification: 'Carbon Neutral',
       createdBy: testUserId,

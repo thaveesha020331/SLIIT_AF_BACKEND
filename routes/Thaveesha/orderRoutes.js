@@ -1,8 +1,3 @@
-/**
- * Order routes – Thaveesha
- * Mounted at /api/orders. All routes require auth (protect – Tudakshana).
- * Uses User (Tudakshana), Product (Lakna), Cart (Thaveesha).
- */
 import express from 'express';
 import {
   createOrder,
@@ -13,7 +8,6 @@ import {
 import { protect } from '../../utils/Tudakshana/authMiddleware.js';
 
 const router = express.Router();
-
 router.use(protect);
 
 router.post('/', createOrder);

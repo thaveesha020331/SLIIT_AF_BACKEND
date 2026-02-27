@@ -1,9 +1,5 @@
 import mongoose from 'mongoose';
 
-/**
- * Cart model – one per user. Items reference Product (Lakna).
- * User ref matches Tudakshana User model.
- */
 const cartItemSchema = new mongoose.Schema(
   {
     product: {
