@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { orderAPI } from '../../services/Thaveesha';
 import PaymentForm from '../../components/Thaveesha/PaymentForm';
+import { downloadReceiptHTML, downloadReceiptCSV, printReceipt } from '../../utils/receiptGenerator';
 import './Checkout.css';
 
 export default function Checkout() {
@@ -53,6 +54,39 @@ export default function Checkout() {
     console.log('❌ Checkout: Payment error!', errorMessage);
     setError(errorMessage);
     setPaymentSuccess(false);
+  };
+
+  const handleDownloadReceipt = () => {
+    if (order && paymentDetails) {
+      const success = downloadReceiptHTML(order, paymentDetails);
+      if (success) {
+        console.log('✅ Receipt downloaded successfully');
+      } else {
+        console.error('❌ Failed to download receipt');
+      }
+    }
+  };
+
+  const handleDownloadReceiptCSV = () => {
+    if (order && paymentDetails) {
+      const success = downloadReceiptCSV(order, paymentDetails);
+      if (success) {
+        console.log('✅ Receipt CSV downloaded successfully');
+      } else {
+        console.error('❌ Failed to download receipt CSV');
+      }
+    }
+  };
+
+  const handlePrintReceipt = () => {
+    if (order && paymentDetails) {
+      const success = printReceipt(order, paymentDetails);
+      if (success) {
+        console.log('✅ Receipt printed successfully');
+      } else {
+        console.error('❌ Failed to print receipt');
+      }
+    }
   };
 
   if (loading) {
@@ -134,8 +168,33 @@ export default function Checkout() {
                 <div className="payment-info">
                   <p><strong>Payment Method:</strong> {paymentDetails?.method === 'card' ? 'Credit/Debit Card' : 'Cash on Delivery'}</p>
                   <p><strong>Transaction ID:</strong> {paymentDetails?.transactionId}</p>
-                  <p><strong>Amount:</strong> ${order.total.toFixed(2)}</p>
+                  <p><strong>Amount:</strong> LKR {order.total.toFixed(2)}</p>
                 </div>
+                
+                <div className="receipt-actions">
+                  <button 
+                    className="btn-download-receipt"
+                    onClick={handleDownloadReceipt}
+                    title="Download receipt as HTML"
+                  >
+                    📥 Download Receipt
+                  </button>
+                  <button 
+                    className="btn-download-receipt btn-download-csv"
+                    onClick={handleDownloadReceiptCSV}
+                    title="Download receipt as CSV"
+                  >
+                    📊 Download CSV
+                  </button>
+                  <button 
+                    className="btn-download-receipt btn-print"
+                    onClick={handlePrintReceipt}
+                    title="Print receipt"
+                  >
+                    🖨️ Print Receipt
+                  </button>
+                </div>
+                
                 <p className="redirect-message">Redirecting to order details...</p>
               </div>
             ) : (
