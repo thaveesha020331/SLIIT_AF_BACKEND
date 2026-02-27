@@ -55,6 +55,10 @@ const orderSchema = new mongoose.Schema(
       default: '',
       trim: true,
     },
+    shippingLat: { type: Number, default: null },
+    shippingLng: { type: Number, default: null },
+    trackingLat: { type: Number, default: null },
+    trackingLng: { type: Number, default: null },
   },
   { timestamps: true }
 );

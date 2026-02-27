@@ -47,7 +47,8 @@ export const getCart = async (req, res) => {
       quantity: item.quantity,
     }));
 
-    res.status(200).json({ items });
+    const totalItems = items.reduce((sum, i) => sum + (i.quantity || 1), 0);
+    res.status(200).json({ items, totalItems });
   } catch (error) {
     console.error('Get cart error:', error);
     res.status(500).json({

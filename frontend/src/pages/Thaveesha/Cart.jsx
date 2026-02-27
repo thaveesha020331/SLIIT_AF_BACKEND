@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { cartAPI, orderAPI } from '../../services/Thaveesha';
+import { authAPI } from '../../services/Tudakshana/authService';
 import MapAddressPicker from '../../components/Thaveesha/MapAddressPicker';
 import './Order.css';
+
+function formatProfileAddress(addr) {
+  if (!addr || typeof addr !== 'object') return '';
+  const parts = [addr.street, addr.city, addr.state, addr.zipCode, addr.country].filter(Boolean);
+  return parts.join(', ');
+}
 
 export default function Cart() {
   const [cart, setCart] = useState([]);
@@ -19,10 +26,24 @@ export default function Cart() {
     phone: '',
     notes: '',
   });
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     fetchCart();
   }, []);
+
+  useEffect(() => {
+    if (!cart.length) return;
+    authAPI.getProfile().then((res) => {
+      const user = res?.data?.user;
+      if (!user) return;
+      setCheckoutForm((prev) => ({
+        ...prev,
+        ...(user.phone && { phone: user.phone }),
+        ...(user.address && { shippingAddress: formatProfileAddress(user.address) || prev.shippingAddress }),
+      }));
+    }).catch(() => {});
+  }, [cart.length]);
 
   async function fetchCart() {
     setLoading(true);
@@ -44,6 +65,7 @@ export default function Cart() {
     if (!item) return;
     const newQty = Math.max(1, (item.quantity || 1) + delta);
     if (newQty === item.quantity) return;
+    setError(null);
     setUpdating(itemId);
     try {
       const data = await cartAPI.updateItem(itemId, newQty);
@@ -57,6 +79,7 @@ export default function Cart() {
   }
 
   async function removeItem(itemId) {
+    setError(null);
     setUpdating(itemId);
     try {
       const data = await cartAPI.removeItem(itemId);
@@ -78,19 +101,32 @@ export default function Cart() {
   const tax = subtotal * 0.05;
   const total = subtotal + tax;
 
+  function validateCheckout() {
+    const errs = {};
+    const addr = (checkoutForm.shippingAddress || '').trim();
+    const phone = (checkoutForm.phone || '').trim();
+    if (addr.length < 10) errs.shippingAddress = 'Please enter a full address (at least 10 characters).';
+    const digitsOnly = phone.replace(/\D/g, '');
+    if (digitsOnly.length < 9) errs.phone = 'Please enter a valid phone number (at least 9 digits).';
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
+  }
+
   async function handleCheckout(e) {
     e.preventDefault();
+    if (!validateCheckout()) return;
     setPlacing(true);
     setError(null);
+    setFieldErrors({});
     try {
       await orderAPI.createOrder({
         items: cart.map((item) => ({
           productId: (item.product && item.product._id) || item._id,
           quantity: item.quantity || 1,
         })),
-        shippingAddress: checkoutForm.shippingAddress,
-        phone: checkoutForm.phone,
-        notes: checkoutForm.notes,
+        shippingAddress: checkoutForm.shippingAddress.trim(),
+        phone: checkoutForm.phone.trim(),
+        notes: checkoutForm.notes.trim(),
         ...(shippingLat != null && shippingLng != null && { shippingLat, shippingLng }),
       });
       setOrderSuccess(true);
@@ -223,10 +259,12 @@ export default function Cart() {
                   <input
                     type="text"
                     value={checkoutForm.shippingAddress}
-                    onChange={(e) => setCheckoutForm({ ...checkoutForm, shippingAddress: e.target.value })}
+                    onChange={(e) => { setCheckoutForm({ ...checkoutForm, shippingAddress: e.target.value }); setFieldErrors((f) => ({ ...f, shippingAddress: undefined })); }}
                     placeholder="Street, City, Postal code"
                     required
+                    className={fieldErrors.shippingAddress ? 'input-error' : ''}
                   />
+                  {fieldErrors.shippingAddress && <span className="field-error">{fieldErrors.shippingAddress}</span>}
                   <button
                     type="button"
                     className="btn-map-pick"
@@ -240,10 +278,12 @@ export default function Cart() {
                   <input
                     type="tel"
                     value={checkoutForm.phone}
-                    onChange={(e) => setCheckoutForm({ ...checkoutForm, phone: e.target.value })}
+                    onChange={(e) => { setCheckoutForm({ ...checkoutForm, phone: e.target.value }); setFieldErrors((f) => ({ ...f, phone: undefined })); }}
                     placeholder="+94 7x xxx xxxx"
                     required
+                    className={fieldErrors.phone ? 'input-error' : ''}
                   />
+                  {fieldErrors.phone && <span className="field-error">{fieldErrors.phone}</span>}
                 </div>
                 <div className="form-group">
                   <label>Notes</label>

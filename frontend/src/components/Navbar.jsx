@@ -43,8 +43,8 @@ export function Navbar() {
   useEffect(() => {
     if (!isAuthenticated) return
     cartAPI.getCart()
-      .then(({ items }) => {
-        setCartCount((items || []).reduce((sum, i) => sum + (i.quantity || 1), 0))
+      .then(({ totalItems, items }) => {
+        setCartCount(totalItems ?? (items || []).reduce((sum, i) => sum + (i.quantity || 1), 0))
       })
       .catch(() => setCartCount(0))
   }, [isAuthenticated, location.pathname])
