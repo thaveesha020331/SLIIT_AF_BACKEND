@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { orderAPI } from '../../services/Thaveesha';
 import OrderTrackingMap from '../../components/Thaveesha/OrderTrackingMap';
+import CancelConfirmModal from '../../components/Thaveesha/CancelConfirmModal';
 import './Order.css';
 
 const STATUS_LABELS = {
@@ -26,6 +27,7 @@ export default function OrderDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cancelling, setCancelling] = useState(false);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   useEffect(() => {
@@ -58,13 +60,17 @@ export default function OrderDetail() {
     }
   }
 
+  function openCancelModal() {
+    setCancelModalOpen(true);
+  }
+
   async function handleCancel() {
     if (!order || !['pending', 'processing'].includes(order.status)) return;
-    if (!window.confirm('Cancel this order?')) return;
     setCancelling(true);
     try {
       const data = await orderAPI.cancelOrder(orderId);
       setOrder(data.order);
+      setCancelModalOpen(false);
     } catch (err) {
       if (err.response?.status === 401) {
         setIsAuthenticated(false);
@@ -110,7 +116,12 @@ export default function OrderDetail() {
   if (error && !order) {
     return (
       <div className="order-page-container">
-        <div className="order-error">{error}</div>
+        <div className="order-error">
+          {error}
+          <button type="button" className="btn-try-again" onClick={() => { setError(null); fetchOrder(); }}>
+            Try again
+          </button>
+        </div>
         <p style={{ marginTop: 16, textAlign: 'center' }}>
           <Link to="/my-orders" className="btn-primary-link">Back to My Orders</Link>
         </p>
@@ -214,13 +225,22 @@ export default function OrderDetail() {
             type="button"
             className="cart-item-remove"
             style={{ marginTop: 16 }}
-            onClick={handleCancel}
+            onClick={openCancelModal}
             disabled={cancelling}
           >
             {cancelling ? 'Cancelling...' : 'Cancel order'}
           </button>
         )}
       </div>
+
+      <CancelConfirmModal
+        open={cancelModalOpen}
+        title="Cancel order?"
+        message="This action cannot be undone."
+        onConfirm={handleCancel}
+        onCancel={() => !cancelling && setCancelModalOpen(false)}
+        loading={cancelling}
+      />
 
       <p style={{ marginTop: 24, textAlign: 'center' }}>
         <Link to="/my-orders" className="btn-primary-link">Back to My Orders</Link>

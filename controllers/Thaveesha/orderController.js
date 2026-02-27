@@ -14,7 +14,7 @@ import Product from '../../models/Lakna/Product.js';
 export const createOrder = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { items, shippingAddress, phone, notes } = req.body;
+    const { items, shippingAddress, phone, notes, shippingLat, shippingLng } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
@@ -57,7 +57,7 @@ export const createOrder = async (req, res) => {
       total += priceSnapshot * quantity;
     }
 
-    const order = await Order.create({
+    const orderPayload = {
       user: userId,
       items: orderItems,
       total,
@@ -65,7 +65,12 @@ export const createOrder = async (req, res) => {
       shippingAddress: shippingAddress.trim(),
       phone: String(phone).trim(),
       notes: (notes && String(notes).trim()) || '',
-    });
+    };
+    if (shippingLat != null && shippingLng != null) {
+      orderPayload.shippingLat = Number(shippingLat);
+      orderPayload.shippingLng = Number(shippingLng);
+    }
+    const order = await Order.create(orderPayload);
 
     // Decrement stock (optional – align with Lakna Product schema)
     for (const line of orderItems) {

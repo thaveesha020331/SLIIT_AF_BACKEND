@@ -12,7 +12,9 @@ export const cartAPI = {
    */
   getCart: async () => {
     const response = await api.get('/cart');
-    return { items: response.data?.items ?? [] };
+    const items = response.data?.items ?? [];
+    const totalItems = response.data?.totalItems ?? items.reduce((s, i) => s + (i.quantity || 1), 0);
+    return { items, totalItems };
   },
 
   /**

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { orderAPI } from '../../services/Thaveesha';
+import CancelConfirmModal from '../../components/Thaveesha/CancelConfirmModal';
 import './Order.css';
 
 const STATUS_LABELS = {
@@ -18,11 +19,17 @@ function getStepIndex(status) {
   return map[status] ?? 0;
 }
 
+function shortOrderId(id) {
+  if (!id || typeof id !== 'string') return id;
+  return id.length > 8 ? `...${id.slice(-8)}` : id;
+}
+
 export default function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
+  const [cancelModalOrderId, setCancelModalOrderId] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   useEffect(() => {
@@ -55,8 +62,15 @@ export default function MyOrders() {
     }
   }
 
+  function openCancelModal(orderId) {
+    setCancelModalOrderId(orderId);
+  }
+
+  function closeCancelModal() {
+    if (!cancellingId) setCancelModalOrderId(null);
+  }
+
   async function handleCancel(orderId) {
-    if (!window.confirm('Cancel this order?')) return;
     setCancellingId(orderId);
     try {
       await orderAPI.cancelOrder(orderId);
@@ -65,6 +79,7 @@ export default function MyOrders() {
           o._id === orderId ? { ...o, status: 'cancelled' } : o
         )
       );
+      setCancelModalOrderId(null);
     } catch (err) {
       if (err.response?.status === 401) {
         setIsAuthenticated(false);
@@ -125,7 +140,23 @@ export default function MyOrders() {
         <p>Order history & tracking – Order & Cart (Thaveesha)</p>
       </div>
 
-      {error && <div className="order-error">{error}</div>}
+      {error && (
+        <div className="order-error">
+          {error}
+          <button type="button" className="btn-try-again" onClick={() => { setError(null); fetchOrders(); }}>
+            Try again
+          </button>
+        </div>
+      )}
+
+      <CancelConfirmModal
+        open={!!cancelModalOrderId}
+        title="Cancel order?"
+        message="This action cannot be undone. Your payment will not be charged if applicable."
+        onConfirm={() => cancelModalOrderId && handleCancel(cancelModalOrderId)}
+        onCancel={closeCancelModal}
+        loading={cancellingId === cancelModalOrderId}
+      />
 
       {orders.length === 0 ? (
         <div className="orders-empty">
@@ -141,8 +172,8 @@ export default function MyOrders() {
               <div key={order._id} className="order-card">
                 <div className="order-card-header">
                   <span className="order-id">
-                    <Link to={`/my-orders/${order._id}`} className="order-detail-link">
-                      {order._id}
+                    <Link to={`/my-orders/${order._id}`} className="order-detail-link" title={order._id}>
+                      {shortOrderId(order._id)}
                     </Link>
                   </span>
                   <span className="order-date">{formatDate(order.createdAt)}</span>
@@ -190,7 +221,7 @@ export default function MyOrders() {
                     <button
                       type="button"
                       className="cart-item-remove"
-                      onClick={() => handleCancel(order._id)}
+                      onClick={() => openCancelModal(order._id)}
                       disabled={busy}
                     >
                       {busy ? 'Cancelling...' : 'Cancel order'}

@@ -19,6 +19,8 @@ const STATUS_COLORS = {
   cancelled:  'bg-red-50 text-red-700',
 };
 
+const PAGE_SIZE = 20;
+
 export default function AdminOrders() {
   const [orders, setOrders]             = useState([]);
   const [loading, setLoading]           = useState(true);
@@ -27,18 +29,28 @@ export default function AdminOrders() {
   const [filterStatus, setFilterStatus] = useState('');
   const [searchTerm, setSearchTerm]     = useState('');
   const [updatingId, setUpdatingId]     = useState(null);
+  const [page, setPage]                 = useState(1);
+  const [total, setTotal]               = useState(0);
+  const [pages, setPages]               = useState(0);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filterStatus]);
 
   useEffect(() => {
     fetchOrders();
-  }, [filterStatus]);
+  }, [filterStatus, page]);
 
   async function fetchOrders() {
     setLoading(true);
     setError(null);
     try {
-      const params = filterStatus ? { status: filterStatus } : {};
+      const params = { page, limit: PAGE_SIZE };
+      if (filterStatus) params.status = filterStatus;
       const data = await adminOrderAPI.getAllOrders(params);
       setOrders(data.orders || []);
+      setTotal(data.total ?? 0);
+      setPages(data.pages ?? 1);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load orders');
     } finally {
@@ -106,8 +118,19 @@ export default function AdminOrders() {
           background: '#fef2f2', border: '1px solid #fca5a5',
           color: '#dc2626', padding: '12px 16px', borderRadius: '8px',
           marginBottom: '16px', fontSize: '14px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap',
         }}>
-          {error}
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => { setError(null); fetchOrders(); }}
+            style={{
+              padding: '6px 12px', border: '1px solid #dc2626', background: 'transparent',
+              color: '#dc2626', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+            }}
+          >
+            Try again
+          </button>
         </div>
       )}
 
@@ -146,10 +169,35 @@ export default function AdminOrders() {
         </select>
 
         <span className="ml-auto text-xs text-gray-500">
-          {filteredOrders.length} order{filteredOrders.length !== 1 ? 's' : ''}
-          {searchTerm ? ` for "${searchTerm}"` : ''}
+          {total} order{total !== 1 ? 's' : ''} total
+          {searchTerm ? ` · ${filteredOrders.length} match in page` : ''}
         </span>
       </div>
+
+      {/* Pagination */}
+      {pages > 1 && (
+        <div className="mb-4 flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1 || loading}
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <span className="text-sm text-gray-600">
+            Page {page} of {pages}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.min(pages, p + 1))}
+            disabled={page >= pages || loading}
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Table */}
       {filteredOrders.length === 0 ? (
