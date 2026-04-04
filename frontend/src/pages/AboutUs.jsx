@@ -1,11 +1,10 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, Handshake, Leaf, Recycle, ShieldCheck, Sparkles, Truck } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Handshake, Recycle, ShieldCheck, Truck } from 'lucide-react'
 import hero from '@/assets/AboutHero.png'
-import mission from '@/assets/Hero2.png'
-import service1 from '@/assets/Hero1.png'
-import service2 from '@/assets/Hero5.png'
-import vision from '@/assets/Hero3.png'
-import journey from '@/assets/Hero4.png'
+import mission from '@/assets/Mission.png'
+import choose from '@/assets/Choose.png'
+import vision from '@/assets/Vision.png'
 import know from '@/assets/KnowAbout.png'
 
 const JourneyStats = ({ destinationsSearched = '34K', successfulTrips = 400, travelExperts = 50 }) => {
@@ -53,30 +52,32 @@ const featureItems = [
 const AboutUsPage = () => {
 	return (
 		<div className="min-h-screen flex flex-col overflow-x-hidden bg-white font-sans selection:bg-lime-500 selection:text-white">
-			<section className="pt-4 pb-12 px-4 md:px-8 bg-white">
-				<div
-					className="container mx-auto rounded-[3rem] relative overflow-hidden h-[800px] md:h-[560px] 2xl:h-[500px] flex items-center justify-center text-center px-6"
-					style={{
-						backgroundImage: `url(${hero})`,
-						backgroundSize: 'cover',
-						backgroundPosition: 'center',
-						backgroundRepeat: 'no-repeat',
-					}}
-				>
-					<div className="absolute inset-0 bg-[#0F1D14]/55"></div>
-					<div className="relative z-10 max-w-4xl mx-auto text-white">
-						<h1 className="text-3xl md:text-5xl lg:text-6xl font-inter font-bold mb-6">
-							Where Smart Shopping Meets Sustainable Living
-						</h1>
-						<p className="text-md md:text-lg font-inter font-normal leading-relaxed text-white/80">
-							Eco Mart is more than a marketplace. It is a practical way to discover products that are better for your home, your routine, and the planet. We bring together trusted local vendors, eco-conscious essentials, and reliable delivery in one simple experience so shopping feels easier and more intentional.
-						</p>
+			<section className="pt-4 pb-12 bg-white">
+				<div className="px-6 sm:px-8 lg:px-12 xl:px-16">
+					<div
+						className="container rounded-[3rem] relative overflow-hidden h-[800px] md:h-[560px] 2xl:h-[500px] flex items-center justify-center text-center"
+						style={{
+							backgroundImage: `url(${hero})`,
+							backgroundSize: 'cover',
+							backgroundPosition: 'center',
+							backgroundRepeat: 'no-repeat',
+						}}
+					>
+						<div className="absolute inset-0 bg-[#0F1D14]/55"></div>
+						<div className="relative z-10 max-w-4xl mx-auto text-white">
+							<h1 className="text-3xl md:text-5xl lg:text-6xl font-inter font-bold mb-6">
+								Where Smart Shopping Meets Sustainable Living
+							</h1>
+							<p className="text-md md:text-lg font-inter font-normal leading-relaxed text-white/80">
+								Eco Mart is more than a marketplace. It is a practical way to discover products that are better for your home, your routine, and the planet. We bring together trusted local vendors, eco-conscious essentials, and reliable delivery in one simple experience so shopping feels easier and more intentional.
+							</p>
+						</div>
 					</div>
 				</div>
 			</section>
 
 			<section className="relative w-full bg-white py-16 md:py-16">
-				<div className="container mx-auto px-4 sm:px-6 lg:px-8">
+				<div className="container px-6 sm:px-8 lg:px-12 xl:px-16">
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 						<div className="relative w-full max-w-xl mx-auto lg:mx-0 order-2 lg:order-1">
 							<img src={know} alt="Eco Mart sustainable products" className="w-full h-full rounded-none mt-10 2xl:mt-0" />
@@ -100,7 +101,7 @@ const AboutUsPage = () => {
 							</p>
 
 							<Link to="/products" className="inline-block mt-6">
-								<button className="rounded-full bg-[#4F9D69] px-8 py-6 text-base font-inter font-medium text-white transition-all duration-300 hover:bg-[#3f8256]">
+								<button className="bg-[#0D0D0D] text-white px-8 py-4 rounded-full text-sm font-bold tracking-wider hover:bg-gray-800 transition-colors uppercase shadow-lg">
 									Explore More
 								</button>
 							</Link>
@@ -109,150 +110,220 @@ const AboutUsPage = () => {
 				</div>
 			</section>
 
-			<section className="relative w-full bg-white py-16 md:py-16">
-				<div className="w-full px-0 md:px-0 mx-auto container">
-					<div className="flex flex-col lg:flex-row gap-12 items-center">
-						<div className="lg:w-2/3 -mt-24 2xl:-mt-32 relative z-10">
-							<div className="relative overflow-hidden">
-								<img src={vision} alt="Eco Mart vision" className="w-full h-auto object-cover" />
+			{/* Vision Section */}
+			<motion.section 
+				className="relative w-full bg-white py-16 md:py-16"
+				initial={{ opacity: 0, y: 40 }}
+				whileInView={{ opacity: 1, y: 0 }}
+				viewport={{ once: false, margin: "-10% 0px" }}
+				transition={{ duration: 0.8, ease: "easeOut" }}
+			>
+				<div className="container px-6 sm:px-8 lg:px-12 xl:px-16">
+					<div className="flex flex-col lg:flex-row-reverse gap-12 items-center">
+						{/* Right Side - Image with overlap */}
+						<motion.div 
+							className="lg:w-2/3 -mt-12 2xl:mt-0 relative z-10"
+							initial={{ opacity: 0, x: -50 }}
+							whileInView={{ opacity: 1, x: 0 }}
+							viewport={{ once: false }}
+							transition={{ duration: 0.8, delay: 0.1 }}
+						>
+							<div className="relative overflow-hidden rounded-3xl" style={{ maxHeight: '400px' }}>
+								<img 
+									src={vision} 
+									alt="Our Vision"
+									className="w-full h-full object-cover object-center"
+									style={{ maxHeight: '100%', objectFit: 'cover', borderRadius: '1rem' }}
+								/>
 							</div>
-						</div>
-
-						<div className="lg:w-1/2 lg:pl-16 2xl:-mt-24 relative">
-							<div className="absolute right-10 top-1/2 -translate-y-1/2 w-[600px] h-[400px] -translate-x-1/3 z-0">
-								<div className="w-full h-full bg-gradient-to-r from-lime-300/40 via-lime-500/20 to-transparent rounded-full blur-3xl"></div>
-							</div>
-							<div className="mb-6">
+						</motion.div>
+						
+						{/* Left Side - Content */}
+						<motion.div 
+							className="lg:w-1/2 lg:pr-16 2xl:-mt-24"
+							initial={{ opacity: 0, x: 50 }}
+							whileInView={{ opacity: 1, x: 0 }}
+							viewport={{ once: false }}
+							transition={{ duration: 0.8, delay: 0.2 }}
+						>
+							<motion.div 
+								className="mb-6"
+								initial={{ opacity: 0, y: 20 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: false }}
+								transition={{ duration: 0.6, delay: 0.3 }}
+							>
 								<div className="flex items-center">
 									<span className="text-black text-sm font-inter font-bold tracking-widest">OUR VISION</span>
 								</div>
-							</div>
-							<h2 className="text-3xl md:text-4xl font-inter font-bold text-black mb-6 leading-tight">
+							</motion.div>
+							<motion.h2 
+								className="text-3xl md:text-4xl font-inter font-bold text-black mb-6 leading-tight"
+								initial={{ opacity: 0, y: 20 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: false }}
+								transition={{ duration: 0.6, delay: 0.4 }}
+							>
 								To inspire meaningful eco-conscious shopping across the globe
-							</h2>
-							<p className="text-black/70 font-inter italic text-lg mb-0">
-								To become a trusted symbol of sustainable, affordable, and practical everyday shopping.
-							</p>
-							<p className="text-black/70 font-inter italic text-lg mb-0">
-								Where every purchase supports a cleaner future and a better local economy.
-							</p>
-						</div>
+							</motion.h2>
+							<motion.p 
+								className="text-black/70 font-inter italic text-lg mb-0"
+								initial={{ opacity: 0, y: 20 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: false }}
+								transition={{ duration: 0.6, delay: 0.5 }}
+							>
+								To become a trusted symbol of sustainable, affordable, and practical everyday shopping —
+							</motion.p>
+							<motion.p 
+								className="text-black/70 font-inter italic text-lg mb-0"
+								initial={{ opacity: 0, y: 20 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: false }}
+								transition={{ duration: 0.6, delay: 0.6 }}
+							>
+								where every purchase supports a cleaner future and a better local economy.
+							</motion.p>
+						</motion.div>
 					</div>
 				</div>
-			</section>
+			</motion.section>
 
-			<section className="relative w-full bg-white pt-0 pb-8 md:pt-0 md:pb-24 mt-0 2xl:-mt-28">
-				<div className="w-full px-0 md:px-0 mx-auto container">
-					<div className="flex flex-col lg:flex-row-reverse gap-12 items-center">
-						<div className="lg:w-2/3 relative z-10 2xl:ml-20 2xl:transform 2xl:scale-110">
-							<div className="relative overflow-hidden">
-								<img src={mission} alt="Eco Mart mission" className="w-full h-auto object-cover" />
-								<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+			{/* Mission Section */}
+			<motion.section 
+				className="relative w-full bg-white pt-0 pb-8 md:pt-0 md:pb-24 mt-0 2xl:-mt-28"
+				initial={{ opacity: 0, y: 40 }}
+				whileInView={{ opacity: 1, y: 0 }}
+				viewport={{ once: false, margin: "-10% 0px" }}
+				transition={{ duration: 0.8, ease: "easeOut" }}
+			>
+				<div className="container px-6 sm:px-8 lg:px-12 xl:px-16">
+					<div className="flex flex-col lg:flex-row gap-12 items-center">
+						{/* Left Side - Image */}
+						<motion.div 
+							className="lg:w-2/3 relative z-10"
+							initial={{ opacity: 0, x: -50 }}
+							whileInView={{ opacity: 1, x: 0 }}
+							viewport={{ once: false }}
+							transition={{ duration: 0.8, delay: 0.1 }}
+						>
+							<div className="relative overflow-hidden rounded-3xl" style={{ maxHeight: '400px' }}>
+								<img 
+									src={mission} 
+									alt="Our Mission"
+									className="w-full h-full object-cover object-center"
+									style={{ maxHeight: '100%', objectFit: 'cover', borderRadius: '1rem' }}
+								/>
+								{/* Subtle overlay on image */}
+								<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl"></div>
 							</div>
-						</div>
-
-						<div className="lg:w-1/2 lg:pr-16 2xl:mt-12 relative">
-							<div className="absolute left-0 top-1/2 -translate-y-1/2 w-[600px] h-[400px] translate-x-1/3 z-0">
-								<div className="w-full h-full bg-gradient-to-l from-lime-300/40 via-lime-500/20 to-transparent rounded-full blur-3xl"></div>
-							</div>
-							<div className="mb-6">
+						</motion.div>
+						
+						{/* Right Side - Content */}
+						<motion.div 
+							className="lg:w-1/2 lg:pl-16 2xl:mt-12"
+							initial={{ opacity: 0, x: 50 }}
+							whileInView={{ opacity: 1, x: 0 }}
+							viewport={{ once: false }}
+							transition={{ duration: 0.8, delay: 0.2 }}
+						>
+							<motion.div 
+								className="mb-6"
+								initial={{ opacity: 0, y: 20 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: false }}
+								transition={{ duration: 0.6, delay: 0.3 }}
+							>
 								<div className="flex items-center">
 									<span className="text-black text-sm font-inter font-bold tracking-widest">OUR MISSION</span>
 								</div>
-							</div>
-							<h2 className="text-3xl md:text-4xl font-inter font-bold text-black mb-6 leading-tight">
+							</motion.div>
+							<motion.h2 
+								className="text-3xl md:text-4xl font-inter font-bold text-black mb-6 leading-tight"
+								initial={{ opacity: 0, y: 20 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: false }}
+								transition={{ duration: 0.6, delay: 0.4 }}
+							>
 								We make greener choices easy, affordable, and practical
-							</h2>
-							<p className="text-black/70 font-inter italic text-lg mb-0">
-								To connect shoppers with reliable eco-friendly products and local vendors they can trust.
-							</p>
-							<p className="text-black/70 font-inter italic text-lg mb-0">
-								To make conscious buying feel natural in everyday life, not complicated or exclusive.
-							</p>
-						</div>
+							</motion.h2>
+							<motion.p 
+								className="text-black/70 font-inter italic text-lg mb-0"
+								initial={{ opacity: 0, y: 20 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: false }}
+								transition={{ duration: 0.6, delay: 0.5 }}
+							>
+								To connect shoppers with reliable eco-friendly products and local vendors they can trust —
+							</motion.p>
+							<motion.p 
+								className="text-black/70 font-inter italic text-lg mb-0"
+								initial={{ opacity: 0, y: 20 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: false }}
+								transition={{ duration: 0.6, delay: 0.6 }}
+							>
+								where conscious buying feels natural in everyday life, not complicated or exclusive.
+							</motion.p>
+						</motion.div>
 					</div>
 				</div>
-			</section>
-
-			<section className="relative bg-white pt-12">
-				<div className="w-full max-w-[1440px] mx-auto px-6 2xl:px-10 -mt-4 md:-mt-16">
-					<div className="relative">
-						<div className="bg-[#0E1A12] rounded-3xl overflow-hidden 2xl:max-w-[70%] min-h-[400px] flex items-center">
-							<div className="w-full p-8 md:p-12 2xl:pr-60 text-white">
-								<div className="flex items-center gap-4 mb-6">
-									<span className="text-sm font-inter font-bold tracking-widest">OUR JOURNEY</span>
-								</div>
-								<h2 className="text-3xl md:text-5xl font-inter font-bold mb-6">How Eco Mart Helps People Shop Smarter</h2>
-								<p className="text-white/60 font-inter font-regular mb-10 text-md md:text-lg">
-									Since launching, we have focused on making sustainable shopping easier by connecting customers to products, brands, and ideas that support a better way of living.
-								</p>
-
-								<JourneyStats destinationsSearched="34K" successfulTrips={400} travelExperts={50} />
-							</div>
-						</div>
-
-						<div className="relative z-10 2xl:absolute right-0 top-8 2xl:top-40 w-full 2xl:w-[48%] 2xl:h-[600px]">
-							<img src={journey} alt="Eco Mart journey" className="w-full h-full object-cover rounded-sm" />
-						</div>
-					</div>
-				</div>
-			</section>
-
-			<section className="relative w-full bg-white pt-20 md:pt-12 pb-12">
-				<div className="w-full max-w-[1440px] mx-auto px-6 2xl:px-10">
-					<div className="flex flex-col lg:flex-row gap-8 items-start">
-						<div className="w-full 2xl:w-7/12">
-							<div className="relative">
-								<img src={service1} alt="Eco Mart products" className="w-full h-auto object-cover rounded-lg" />
-							</div>
-							<div className="mt-6 w-full relative">
-								<img src={service2} alt="Eco Mart shopping" className="w-full h-auto object-cover rounded-lg" />
-								<ArrowRight className="absolute bottom-4 right-4 w-16 h-16 md:w-32 md:h-32 lg:w-24 lg:h-24 2xl:w-32 2xl:h-32 text-[#6DBE7B] bg-[#0E1A12] rounded-full p-2" />
-							</div>
-						</div>
-
-						<div className="w-full lg:w-7/12 bg-transparent p-0 px-4 2xl:px-24 mt-8 lg:mt-[20rem] 2xl:mt-[30rem]">
-							<div className="flex items-center gap-2 mb-4">
-								<span className="text-lg font-inter font-medium tracking-widest text-black">Welcome to Eco Mart</span>
-							</div>
-							<h2 className="text-3xl md:text-4xl font-inter font-medium text-black mb-6">
+			</motion.section>
+			
+			{/* Choose Eco Mart Section */}
+			<motion.section 
+				className="relative w-full bg-white z-0"
+				initial={{ opacity: 0, x: -50 }}
+				whileInView={{ opacity: 1, x: 0 }}
+				viewport={{ once: false, margin: '-100px' }}
+				transition={{ duration: 0.8, delay: 0.2 }}
+			>
+				<div className="container px-6 sm:px-8 lg:px-12 xl:px-16 py-16 md:py-24 -mt-20">
+					<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 2xl:gap-32 items-center">
+						{/* Left Content */}
+						<div className="max-w-xl mx-auto lg:mx-0">
+							<h2 className="text-3xl sm:text-4xl lg:text-5xl font-inter font-medium text-black leading-tight mb-6">
 								Choose Eco Mart with Our Expert Services
 							</h2>
-							<p className="text-[#454545] font-inter font-regular text-md mb-8">
+
+							<p className="text-[#454545] text-lg mb-4 font-inter font-regular">
 								Discover the benefits that set us apart and make your shopping experience smoother, cleaner, and more enjoyable.
 							</p>
 
-							<div className="space-y-6 mb-0">
-								{featureItems.map((item) => {
-									const Icon = item.icon
-									return (
-										<div key={item.title} className="flex items-start gap-4">
+							<div className="space-y-4 mb-8">
+								{featureItems.map((item) => (
+									<div key={item.title} className="mb-6">
+										<div className="flex items-start">
 											<div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#2F4734] flex items-center justify-center mt-1">
 												<svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
 												</svg>
 											</div>
-											<div>
-												<h3 className="font-inter font-medium text-lg text-[#141414] mb-1 flex items-center gap-2">
-													<Icon className="w-4 h-4 text-lime-700" />
-													{item.title}
-												</h3>
-												<p className="font-inter font-regular text-[#454545]">{item.description}</p>
-											</div>
+											<p className="ml-3 text-black font-inter font-medium">{item.title}</p>
 										</div>
-									)
-								})}
-
-								<div className="pt-6">
-									<button className="bg-[#4F9D69] text-white font-roboto font-semibold px-8 py-3.5 rounded-full hover:opacity-90 transition-colors">
-										Start Shopping Sustainably
-									</button>
-								</div>
+										<p className="text-[#454545] text-sm mt-1 ml-9">{item.description}</p>
+									</div>
+								))}
 							</div>
+
+							<Link to="/products" className="inline-block">
+								<button className="bg-[#0D0D0D] text-white px-8 py-4 rounded-full text-sm font-bold tracking-wider hover:bg-gray-800 transition-colors uppercase shadow-lg">
+									Start Shopping Sustainably
+								</button>
+							</Link>
+						</div>
+
+						{/* Right Image */}
+						<div className="relative w-full max-w-2xl mx-auto px-0 mt-10 2xl:mt-0">
+							<img 
+								src={choose}
+								alt="Why choose Eco Mart"
+								className="w-full h-auto rounded-none 2xl:scale-[1.1]"
+							/>
 						</div>
 					</div>
 				</div>
-			</section>
+			</motion.section>
 
 		</div>
 	)
