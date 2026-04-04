@@ -21,9 +21,11 @@ import SellerDashboard from './pages/Tudakshana/SellerDashboard'
 import UserProfile from './pages/Tudakshana/UserProfile'
 import ProtectedRoute from './components/Tudakshana/ProtectedRoute'
 import { Navbar } from './components/Navbar'
+import { Footer } from './components/Footer'
 
 function AppContent() {
   const location = useLocation()
+  const isAdminPage = location.pathname.startsWith('/admin') || location.pathname.startsWith('/seller')
   const showNavbar = location.pathname !== '/admin/products'
 
   return (
@@ -102,6 +104,7 @@ function AppContent() {
           />
         </Routes>
       </main>
+      {!isAdminPage && <Footer />}
     </>
   )
 }
