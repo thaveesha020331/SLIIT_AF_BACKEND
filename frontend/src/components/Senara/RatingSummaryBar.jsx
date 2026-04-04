@@ -3,13 +3,12 @@ import StarRating from './StarRating';
 
 const RatingSummaryBar = ({ reviews = [] }) => {
   const { average, counts, total } = useMemo(() => {
-    if (!reviews.length) {
+    if (!reviews.length)
       return {
         average: 0,
         counts: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
         total: 0,
       };
-    }
 
     const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     let sum = 0;
@@ -28,37 +27,52 @@ const RatingSummaryBar = ({ reviews = [] }) => {
     return { average, counts, total };
   }, [reviews]);
 
+  const BAR_COLORS = {
+    5: 'bg-lime-500',
+    4: 'bg-lime-400',
+    3: 'bg-amber-400',
+    2: 'bg-orange-400',
+    1: 'bg-red-400',
+  };
+
   return (
-    <div className="grid gap-6 rounded-lg bg-white p-5 shadow-sm md:grid-cols-[1.2fr_2fr]">
-      <div className="border-b border-gray-200 pb-4 text-center md:border-b-0 md:border-r md:pb-0 md:pr-6">
-        <div className="text-4xl font-bold text-gray-900">
+    <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start">
+      {/* Score */}
+      <div className="flex flex-col items-center justify-center flex-shrink-0 w-32">
+        <span className="text-5xl font-black text-gray-900">
           {average.toFixed(1)}
-        </div>
-        <div className="my-2 flex justify-center">
+        </span>
+        <div className="mt-2">
           <StarRating value={Math.round(average)} readOnly />
         </div>
-        <div className="text-sm text-gray-500">
-          Based on {total} review{total !== 1 ? 's' : ''}
-        </div>
+        <span className="mt-1.5 text-xs text-gray-400">
+          {total} review{total !== 1 ? 's' : ''}
+        </span>
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      {/* Divider */}
+      <div className="hidden md:block w-px bg-gray-100" />
+
+      {/* Bars */}
+      <div className="flex-1 w-full flex flex-col gap-2.5">
         {[5, 4, 3, 2, 1].map((star) => {
           const count = counts[star] || 0;
-          const percentage = total ? (count / total) * 100 : 0;
+          const pct = total ? (count / total) * 100 : 0;
+
           return (
-            <div
-              key={star}
-              className="flex items-center gap-2 text-sm text-gray-700"
-            >
-              <span className="w-16 text-xs md:text-sm">{star} star</span>
-              <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200">
+            <div key={star} className="flex items-center gap-3">
+              <span className="w-12 text-xs text-gray-500 text-right">
+                {star} star
+              </span>
+
+              <div className="flex-1 h-2.5 rounded-full bg-gray-100 overflow-hidden">
                 <div
-                  className="h-full bg-emerald-500"
-                  style={{ width: `${percentage}%` }}
+                  className={`h-full ${BAR_COLORS[star]}`}
+                  style={{ width: `${pct}%` }}
                 />
               </div>
-              <span className="w-10 text-right text-xs text-gray-500">
+
+              <span className="w-6 text-xs text-gray-400 text-right">
                 {count}
               </span>
             </div>
@@ -70,4 +84,3 @@ const RatingSummaryBar = ({ reviews = [] }) => {
 };
 
 export default RatingSummaryBar;
-

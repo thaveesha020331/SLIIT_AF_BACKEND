@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import StarRating from './StarRating';
 
-const initialState = {
-  rating: 0,
-  title: '',
-  comment: '',
-};
+const initialState = { rating: 0, title: '', comment: '' };
 
 const ReviewForm = ({ onSubmit, submitting = false, initialValues = null, onCancel }) => {
   const [form, setForm] = useState(initialValues || initialState);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (initialValues) setForm({ ...initialState, ...initialValues });
-    else setForm(initialState);
+    setForm(initialValues ? { ...initialState, ...initialValues } : initialState);
   }, [initialValues]);
 
   const handleChange = (e) => {
@@ -21,15 +17,10 @@ const ReviewForm = ({ onSubmit, submitting = false, initialValues = null, onCanc
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleRatingChange = (rating) => {
-    setForm((prev) => ({ ...prev, rating }));
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
-
-    if (!form.rating || !form.comment || !form.comment.trim()) {
+    if (!form.rating || !form.comment?.trim()) {
       setError('Please select a rating and write a short review.');
       return;
     }
@@ -37,82 +28,82 @@ const ReviewForm = ({ onSubmit, submitting = false, initialValues = null, onCanc
       setError('Comment must be at least 10 characters.');
       return;
     }
-
-    if (onSubmit) {
-      onSubmit(form);
-    }
-
-    if (!initialValues) {
-      setForm(initialState);
-    }
+    onSubmit?.(form);
+    if (!initialValues) setForm(initialState);
   };
 
   return (
-    <div className="mt-5 rounded-lg bg-white p-5 shadow-sm">
-      <h3 className="mb-3 text-base font-semibold text-gray-900">
-        {initialValues ? 'Edit your review' : 'Write a review'}
-      </h3>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
+      {/* Error */}
       {error && (
-        <div className="mb-4 rounded-md border-l-4 border-red-500 bg-red-50 px-4 py-2 text-sm text-red-800">
+        <div className="flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <AlertCircle size={14} className="flex-shrink-0" />
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col space-y-1">
-          <label className="text-sm font-medium text-gray-700">
-            Rating *
-          </label>
-          <StarRating value={form.rating} onChange={handleRatingChange} />
-        </div>
+      {/* Rating */}
+      <div className="flex flex-col gap-2">
+        <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
+          Your Rating <span className="text-red-400">*</span>
+        </label>
+        <StarRating value={form.rating} onChange={(r) => setForm((p) => ({ ...p, rating: r }))} />
+      </div>
 
-        <div className="flex flex-col space-y-1">
-          <label className="text-sm font-medium text-gray-700">Headline</label>
-          <input
-            type="text"
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            placeholder="Summarize your review in a few words"
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          />
-        </div>
+      {/* Headline */}
+      <div className="flex flex-col gap-2">
+        <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
+          Headline
+        </label>
+        <input
+          type="text"
+          name="title"
+          value={form.title}
+          onChange={handleChange}
+          placeholder="Summarize your experience in a few words"
+          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-lime-400 focus:bg-white focus:ring-2 focus:ring-lime-100"
+        />
+      </div>
 
-        <div className="flex flex-col space-y-1">
-          <label className="text-sm font-medium text-gray-700">
-            Your review *
-          </label>
-          <textarea
-            name="comment"
-            value={form.comment}
-            onChange={handleChange}
-            rows="4"
-            placeholder="What did you like or dislike? How is the eco-friendliness and quality?"
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          />
-        </div>
+      {/* Comment */}
+      <div className="flex flex-col gap-2">
+        <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
+          Your Review <span className="text-red-400">*</span>
+        </label>
+        <textarea
+          name="comment"
+          value={form.comment}
+          onChange={handleChange}
+          rows={4}
+          placeholder="What did you like or dislike? How is the eco-friendliness and quality?"
+          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-lime-400 focus:bg-white focus:ring-2 focus:ring-lime-100 resize-none"
+        />
+        <span className="text-[10px] text-gray-400 text-right">{form.comment.length} chars · min 10</span>
+      </div>
 
-        <div className="flex items-center justify-start gap-2 pt-2">
+      {/* Actions */}
+      <div className="flex items-center gap-3 pt-1">
+        <button
+          type="submit"
+          disabled={submitting}
+          className="inline-flex items-center gap-2 rounded-full bg-[#0D0D0D] px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {submitting
+            ? <><Loader2 size={12} className="animate-spin" /> Saving…</>
+            : initialValues ? 'Update Review' : 'Submit Review'}
+        </button>
+        {initialValues && onCancel && (
           <button
-            type="submit"
-            className="inline-flex items-center rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={submitting}
+            type="button"
+            onClick={onCancel}
+            className="inline-flex items-center gap-2 rounded-full border-2 border-gray-200 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-gray-600 hover:bg-gray-50 transition-colors"
           >
-            {submitting ? 'Saving...' : initialValues ? 'Update review' : 'Submit review'}
+            Cancel
           </button>
-          {initialValues && onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </form>
-    </div>
+        )}
+      </div>
+    </form>
   );
 };
 
