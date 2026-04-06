@@ -11,6 +11,7 @@ import ProductReviewPage from './pages/Senara/ProductReviewPage'
 import AllUserProductReviews from './pages/Senara/AllUserProductReviews'
 import AdminReviewsPage from './pages/Senara/AdminReviewsPage'
 import AboutUsPage from './pages/AboutUs'
+import ContactUsPage from './pages/ContactUs'
 import UserLogin from './pages/Tudakshana/UserLogin'
 import AdminLogin from './pages/Tudakshana/AdminLogin'
 import SellerLogin from './pages/Tudakshana/SellerLogin'
@@ -36,6 +37,7 @@ function AppContent() {
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/about-us" element={<AboutUsPage />} />
+          <Route path="/contact" element={<ContactUsPage />} />
           <Route path="/products" element={<UserProducts />} />
           <Route path="/login" element={<UserLogin />} />
           <Route path="/admin/login" element={<AdminLogin />} />
