@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { name: 'Products',   href: '/products' },
   { name: 'My Orders',  href: '/my-orders' },
   { name: 'My Reviews', href: '/my-reviews' },
+  { name: 'Contact',    href: '/contact' },
 ]
 
 const CATEGORIES = [

@@ -52,10 +52,10 @@ const featureItems = [
 const AboutUsPage = () => {
 	return (
 		<div className="min-h-screen flex flex-col overflow-x-hidden bg-white font-sans selection:bg-lime-500 selection:text-white">
-			<section className="pt-4 pb-12 bg-white">
-				<div className="px-6 sm:px-8 lg:px-12 xl:px-16">
+			<section className="px-4 md:px-6 lg:px-8 pt-4 pb-12 bg-white">
+				<div className="max-w-8xl mx-auto">
 					<div
-						className="container rounded-[3rem] relative overflow-hidden h-[800px] md:h-[560px] 2xl:h-[500px] flex items-center justify-center text-center"
+						className="rounded-[3rem] relative overflow-hidden h-[800px] md:h-[560px] 2xl:h-[500px] flex items-center justify-center text-center"
 						style={{
 							backgroundImage: `url(${hero})`,
 							backgroundSize: 'cover',
@@ -76,8 +76,8 @@ const AboutUsPage = () => {
 				</div>
 			</section>
 
-			<section className="relative w-full bg-white py-16 md:py-16">
-				<div className="container px-6 sm:px-8 lg:px-12 xl:px-16">
+			<section className="relative bg-white py-16 md:py-16 px-4 md:px-6 lg:px-8">
+				<div className="container mx-auto">
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 						<div className="relative w-full max-w-xl mx-auto lg:mx-0 order-2 lg:order-1">
 							<img src={know} alt="Eco Mart sustainable products" className="w-full h-full rounded-none mt-10 2xl:mt-0" />
@@ -112,13 +112,13 @@ const AboutUsPage = () => {
 
 			{/* Vision Section */}
 			<motion.section 
-				className="relative w-full bg-white py-16 md:py-16"
+				className="relative bg-white py-16 md:py-16 px-4 md:px-6 lg:px-8"
 				initial={{ opacity: 0, y: 40 }}
 				whileInView={{ opacity: 1, y: 0 }}
 				viewport={{ once: false, margin: "-10% 0px" }}
 				transition={{ duration: 0.8, ease: "easeOut" }}
 			>
-				<div className="container px-6 sm:px-8 lg:px-12 xl:px-16">
+				<div className="container mx-auto">
 					<div className="flex flex-col lg:flex-row-reverse gap-12 items-center">
 						{/* Right Side - Image with overlap */}
 						<motion.div 
@@ -191,13 +191,13 @@ const AboutUsPage = () => {
 
 			{/* Mission Section */}
 			<motion.section 
-				className="relative w-full bg-white pt-0 pb-8 md:pt-0 md:pb-24 mt-0 2xl:-mt-28"
+				className="relative bg-white pt-0 pb-8 md:pt-0 md:pb-24 mt-0 2xl:-mt-28 px-4 md:px-6 lg:px-8"
 				initial={{ opacity: 0, y: 40 }}
 				whileInView={{ opacity: 1, y: 0 }}
 				viewport={{ once: false, margin: "-10% 0px" }}
 				transition={{ duration: 0.8, ease: "easeOut" }}
 			>
-				<div className="container px-6 sm:px-8 lg:px-12 xl:px-16">
+				<div className="container mx-auto">
 					<div className="flex flex-col lg:flex-row gap-12 items-center">
 						{/* Left Side - Image */}
 						<motion.div 
@@ -272,13 +272,13 @@ const AboutUsPage = () => {
 			
 			{/* Choose Eco Mart Section */}
 			<motion.section 
-				className="relative w-full bg-white z-0"
+				className="relative bg-white z-0 px-4 md:px-6 lg:px-8"
 				initial={{ opacity: 0, x: -50 }}
 				whileInView={{ opacity: 1, x: 0 }}
 				viewport={{ once: false, margin: '-100px' }}
 				transition={{ duration: 0.8, delay: 0.2 }}
 			>
-				<div className="container px-6 sm:px-8 lg:px-12 xl:px-16 py-16 md:py-24 -mt-20">
+				<div className="container mx-auto py-16 md:py-24 -mt-20">
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 2xl:gap-32 items-center">
 						{/* Left Content */}
 						<div className="max-w-xl mx-auto lg:mx-0">

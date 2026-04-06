@@ -73,7 +73,7 @@ export function Navbar() {
     { name: 'Products', href: '/products' },
     { name: 'Orders', href: '/my-orders' },
     { name: 'Reviews', href: '/my-reviews' },
-    { name: 'Contact', href: '/' },
+    { name: 'Contact', href: '/contact' },
   ]
 
   return (
