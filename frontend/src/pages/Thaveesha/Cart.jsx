@@ -139,11 +139,15 @@ export default function Cart() {
         ...(shippingLat != null && shippingLng != null && { shippingLat, shippingLng }),
       });
 
-      const orderId = response.order?._id || response._id;
+      const orderId =
+        response?.order?._id ||
+        response?._id ||
+        response?.data?.order?._id ||
+        response?.data?._id;
       if (orderId) {
         setOrderSuccess(true);
         setCart([]);
-        setTimeout(() => navigate(`/checkout/${orderId}`), 1000);
+        navigate(`/checkout/${orderId}`);
       } else {
         setError('Order created but ID not found. Please try again.');
         setOrderSuccess(false);

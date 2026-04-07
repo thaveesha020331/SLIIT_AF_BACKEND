@@ -6,9 +6,7 @@ const generateTransactionId = () => {
   return `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 };
 
-// @desc    Process card payment
-// @route   POST /api/payments/process-card
-// @access  Protected
+
 export const processCardPayment = async (req, res) => {
   try {
     const { orderId, cardNumber, expiryMonth, expiryYear, cvv, cardholderName } = req.body;

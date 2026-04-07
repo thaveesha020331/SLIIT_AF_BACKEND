@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './PaymentForm.css';
 import paymentAPI from '../../services/Thaveesha/paymentService';
+import { authAPI } from '../../services/Tudakshana/authService';
 
 export default function PaymentForm({ orderId, orderTotal, onPaymentSuccess, onPaymentError }) {
   const [paymentMethod, setPaymentMethod] = useState('cash_on_delivery');
@@ -13,6 +14,32 @@ export default function PaymentForm({ orderId, orderTotal, onPaymentSuccess, onP
     cvv: '',
   });
   const [errors, setErrors] = useState({});
+  const [savedCard, setSavedCard] = useState(null);
+
+  useEffect(() => {
+    const loadSavedCard = async () => {
+      try {
+        const response = await authAPI.getProfile();
+        const paymentCard = response?.data?.user?.paymentCard;
+        if (paymentCard?.cardNumberLast4) {
+          setSavedCard(paymentCard);
+          setCardDetails((prev) => ({
+            ...prev,
+            cardNumber: paymentCard.cardNumber
+              ? paymentCard.cardNumber.replace(/(\d{4})(?=\d)/g, '$1 ')
+              : prev.cardNumber,
+            cardholderName: paymentCard.cardHolderName || prev.cardholderName,
+            expiryMonth: paymentCard.expiryMonth ? String(paymentCard.expiryMonth).padStart(2, '0') : prev.expiryMonth,
+            expiryYear: paymentCard.expiryYear ? String(paymentCard.expiryYear) : prev.expiryYear,
+          }));
+        }
+      } catch (error) {
+        // Profile/card preload should not block payment flow.
+      }
+    };
+
+    loadSavedCard();
+  }, []);
 
   const validateCardDetails = () => {
     const newErrors = {};
@@ -212,6 +239,18 @@ export default function PaymentForm({ orderId, orderTotal, onPaymentSuccess, onP
         <form className="card-details-form" onSubmit={handleCardPayment}>
           <div className="form-section">
             <h3>Enter Card Details</h3>
+
+            {savedCard?.cardNumberLast4 && (
+              <div className="saved-card-banner">
+                <p>
+                  Saved card on profile: **** **** **** {savedCard.cardNumberLast4}
+                  {savedCard.expiryMonth && savedCard.expiryYear
+                    ? ` (Exp: ${String(savedCard.expiryMonth).padStart(2, '0')}/${String(savedCard.expiryYear).slice(-2)})`
+                    : ''}
+                </p>
+                <p className="saved-card-note">Card holder and expiry are pre-filled. Enter full card number and CVV to continue.</p>
+              </div>
+            )}
 
             <div className="form-group">
               <label>Cardholder Name *</label>

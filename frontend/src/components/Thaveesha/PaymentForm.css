@@ -108,6 +108,26 @@
   font-weight: 600;
 }
 
+.saved-card-banner {
+  background: #ecfdf5;
+  border: 1px solid #86efac;
+  border-left: 4px solid #22c55e;
+  color: #14532d;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.saved-card-banner p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.saved-card-note {
+  margin-top: 6px !important;
+  color: #166534;
+}
+
 .form-group {
   margin-bottom: 18px;
 }

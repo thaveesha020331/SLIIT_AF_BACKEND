@@ -37,17 +37,15 @@ export default function Checkout() {
     setPaymentDetails(details);
     setPaymentSuccess(true);
     setError(null);
+  };
 
-    // Redirect to order confirmation after 2 seconds
-    setTimeout(() => {
-      console.log('🔄 Redirecting to order details...');
-      navigate(`/my-orders/${orderId}`, { 
-        state: { 
-          paymentSuccess: true,
-          paymentDetails: details 
-        } 
-      });
-    }, 2000);
+  const handleContinueToOrderDetails = () => {
+    navigate(`/my-orders/${orderId}`, {
+      state: {
+        paymentSuccess: true,
+        paymentDetails,
+      },
+    });
   };
 
   const handlePaymentError = (errorMessage) => {
@@ -195,7 +193,15 @@ export default function Checkout() {
                   </button>
                 </div>
                 
-                <p className="redirect-message">Redirecting to order details...</p>
+                <div className="receipt-actions" style={{ marginTop: '12px' }}>
+                  <button
+                    className="btn-download-receipt"
+                    onClick={handleContinueToOrderDetails}
+                    title="Go to order details"
+                  >
+                    Continue to Order Details
+                  </button>
+                </div>
               </div>
             ) : (
               <>
