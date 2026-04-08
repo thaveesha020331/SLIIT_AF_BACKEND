@@ -62,6 +62,14 @@ function AppContent() {
               </ProtectedRoute>
             } 
           />
+          <Route 
+            path="/payment/:orderId" 
+            element={
+              <ProtectedRoute>
+                <Checkout />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/my-orders" element={<MyOrders />} />
           <Route path="/my-orders/:orderId" element={<OrderDetail />} />
           <Route path="/my-reviews" element={<MyReviewPage />} />

@@ -13,7 +13,10 @@ const UserProfile = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: ''
+    phone: '',
+    cardHolderName: '',
+    cardNumber: '',
+    expiryDate: '',
   });
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -31,10 +34,17 @@ const UserProfile = () => {
       setLoading(true);
       const response = await authAPI.getProfile();
       setUser(response.data.user);
+      const paymentCard = response.data.user.paymentCard || {};
+      const expiryDate = paymentCard.expiryMonth && paymentCard.expiryYear
+        ? `${String(paymentCard.expiryMonth).padStart(2, '0')}/${String(paymentCard.expiryYear).slice(-2)}`
+        : '';
       setFormData({
         name: response.data.user.name,
         email: response.data.user.email,
-        phone: response.data.user.phone || ''
+        phone: response.data.user.phone || '',
+        cardHolderName: paymentCard.cardHolderName || '',
+        cardNumber: '',
+        expiryDate,
       });
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load profile');
@@ -63,10 +73,45 @@ const UserProfile = () => {
     setSuccess('');
 
     try {
-      const response = await authAPI.updateProfile(formData);
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+      };
+
+      const hasCardInput = Boolean(
+        formData.cardHolderName.trim() ||
+        formData.cardNumber.trim() ||
+        formData.expiryDate.trim()
+      );
+
+      if (hasCardInput) {
+        const digitsOnly = formData.cardNumber.replace(/\D/g, '');
+        if (!formData.cardHolderName.trim()) {
+          setError('Card holder name is required when updating card details');
+          return;
+        }
+        if (digitsOnly.length < 12 || digitsOnly.length > 19) {
+          setError('Please enter a valid card number');
+          return;
+        }
+        if (!/^(0[1-9]|1[0-2])\s*\/\s*(\d{2}|\d{4})$/.test(formData.expiryDate.trim())) {
+          setError('Expiry date must be in MM/YY format');
+          return;
+        }
+
+        payload.paymentCard = {
+          cardHolderName: formData.cardHolderName.trim(),
+          cardNumber: digitsOnly,
+          expiryDate: formData.expiryDate.trim(),
+        };
+      }
+
+      const response = await authAPI.updateProfile(payload);
       setUser(response.data.user);
       setSuccess('Profile updated successfully!');
       setIsEditing(false);
+      setFormData((prev) => ({ ...prev, cardNumber: '' }));
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update profile');
@@ -103,6 +148,28 @@ const UserProfile = () => {
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to change password');
+    }
+  };
+
+  const handleRemoveSavedCard = async () => {
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await authAPI.updateProfile({
+        paymentCard: { clear: true },
+      });
+      setUser(response.data.user);
+      setFormData((prev) => ({
+        ...prev,
+        cardHolderName: '',
+        cardNumber: '',
+        expiryDate: '',
+      }));
+      setSuccess('Saved card details removed successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to remove saved card');
     }
   };
 
@@ -178,6 +245,14 @@ const UserProfile = () => {
                 <label>Phone:</label>
                 <span>{user?.phone || 'Not provided'}</span>
               </div>
+              <div className="detail-row">
+                <label>Card Details:</label>
+                <span>
+                  {user?.paymentCard?.cardNumberLast4
+                    ? `**** **** **** ${user.paymentCard.cardNumberLast4} (${String(user.paymentCard.expiryMonth || '').padStart(2, '0')}/${String(user.paymentCard.expiryYear || '').slice(-2)})`
+                    : 'Not provided'}
+                </span>
+              </div>
               <div className="profile-actions">
                 <button 
                   onClick={() => setIsEditing(true)} 
@@ -185,6 +260,15 @@ const UserProfile = () => {
                 >
                   Edit Profile
                 </button>
+                {user?.paymentCard?.cardNumberLast4 && (
+                  <button
+                    onClick={handleRemoveSavedCard}
+                    className="btn-danger"
+                    type="button"
+                  >
+                    Remove Saved Card
+                  </button>
+                )}
                 <button 
                   onClick={() => setShowPasswordForm(!showPasswordForm)} 
                   className="btn-secondary"
@@ -224,6 +308,45 @@ const UserProfile = () => {
                   onChange={handleInputChange}
                 />
               </div>
+              <div className="card-details-section">
+                <h3>Card Details</h3>
+                {user?.paymentCard?.cardNumberLast4 && (
+                  <p className="card-note">
+                    Current card: **** **** **** {user.paymentCard.cardNumberLast4}
+                  </p>
+                )}
+                <div className="form-group">
+                  <label>Card Holder Name:</label>
+                  <input
+                    type="text"
+                    name="cardHolderName"
+                    value={formData.cardHolderName}
+                    onChange={handleInputChange}
+                    placeholder="Name on card"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Card Number:</label>
+                  <input
+                    type="text"
+                    name="cardNumber"
+                    value={formData.cardNumber}
+                    onChange={handleInputChange}
+                    placeholder="xxxx xxxx xxxx xxxx"
+                    inputMode="numeric"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Expiry Date (MM/YY):</label>
+                  <input
+                    type="text"
+                    name="expiryDate"
+                    value={formData.expiryDate}
+                    onChange={handleInputChange}
+                    placeholder="MM/YY"
+                  />
+                </div>
+              </div>
               <div className="form-actions">
                 <button type="submit" className="btn-primary">
                   Save Changes
@@ -235,7 +358,12 @@ const UserProfile = () => {
                     setFormData({
                       name: user.name,
                       email: user.email,
-                      phone: user.phone || ''
+                      phone: user.phone || '',
+                      cardHolderName: user.paymentCard?.cardHolderName || '',
+                      cardNumber: '',
+                      expiryDate: user.paymentCard?.expiryMonth && user.paymentCard?.expiryYear
+                        ? `${String(user.paymentCard.expiryMonth).padStart(2, '0')}/${String(user.paymentCard.expiryYear).slice(-2)}`
+                        : '',
                     });
                   }} 
                   className="btn-secondary"
