@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { Leaf, ShieldCheck, Truck, Recycle, Handshake, Sparkles, Star, ArrowUp, ArrowDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
 import Hero1 from "@/assets/Hero1.png";
@@ -78,6 +79,29 @@ const PRODUCT_CATEGORIES = [
   },
 ]
 
+const FAQ_ITEMS = [
+  {
+    question: 'How do I know if a product is truly eco-friendly?',
+    answer: 'Every product on EcoMart is verified for eco-certification, sustainable sourcing practices, and production transparency. We work directly with vendors to ensure their items meet our strict environmental standards.',
+  },
+  {
+    question: 'What are your delivery times and shipping options?',
+    answer: 'We prioritize local deliveries to reduce carbon emissions. Most deliveries within Colombo take 2-3 business days. We also offer nationwide shipping with delivery within 5-7 business days.',
+  },
+  {
+    question: 'Can I return or exchange products?',
+    answer: 'Yes, we offer a 14-day return and exchange policy for most items. Products must be unused and in original packaging. Simply contact our support team to initiate the process.',
+  },
+  {
+    question: 'Do you offer bulk orders for businesses?',
+    answer: 'Absolutely! We welcome B2B partnerships and bulk orders. Contact our business team at partnerships@ecomart.lk for wholesale pricing and custom solutions.',
+  },
+  {
+    question: 'Is my payment information secure?',
+    answer: 'We use industry-standard SSL encryption and secure payment gateways. Your payment data is never stored on our servers and is processed through trusted payment providers.',
+  },
+]
+
 const CUSTOMER_TESTIMONIALS = [
   {
     id: 1,
@@ -117,6 +141,7 @@ export function HomePage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0)
   const [isTestimonialTransitioning, setIsTestimonialTransitioning] = useState(false)
+  const [openFaq, setOpenFaq] = useState(null)
   const navigate = useNavigate()
   const currentTestimonial = CUSTOMER_TESTIMONIALS[currentTestimonialIndex]
 
@@ -482,8 +507,101 @@ export function HomePage() {
           </div>
         </section>
 
+        {/* FAQ */}
+        <section className="py-16 lg:py-20 -mt-6 bg-white">
+          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-8xl">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.7, ease: 'easeOut' }}
+              className="relative overflow-hidden rounded-[2rem] border border-lime-300/30 px-6 py-8 md:px-10 md:py-12 bg-gradient-to-br from-white to-lime-50"
+            >
+              <div className="pointer-events-none absolute inset-0">
+                <div
+                  className="absolute inset-0 bg-cover bg-center opacity-100"
+                  style={{
+                    backgroundImage:
+                      "url('https://plus.unsplash.com/premium_photo-1736505437503-67d15f26663d?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-white/60 via-white/10 to-transparent" />
+              </div>
+              <div className="pointer-events-none absolute -left-20 -top-24 h-64 w-64 rounded-full bg-lime-400/10 blur-3xl" />
+              <div className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-lime-300/8 blur-3xl" />
+
+              <div className="relative grid lg:grid-cols-2 gap-10 items-start">
+                <motion.div
+                  initial={{ opacity: 0, x: -40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.7, ease: 'easeOut' }}
+                  className="lg:max-w-lg"
+                >
+                  <span className="text-sm font-semibold uppercase tracking-widest text-lime-700">FAQ</span>
+                  <h2 className="mt-6 font-bold text-3xl md:text-5xl leading-tight text-gray-900">
+                    Frequently Asked Questions
+                  </h2>
+                  <p className="mt-6 max-w-md text-sm md:text-base text-gray-700 leading-relaxed">
+                    Everything you need to know about EcoMart—clear answers about our products, delivery, returns, and commitment to sustainability.
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.7, ease: 'easeOut' }}
+                  className="space-y-4"
+                >
+                  {FAQ_ITEMS.map((q, i) => {
+                    const isOpen = openFaq === i
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => setOpenFaq(isOpen ? null : i)}
+                        aria-expanded={isOpen}
+                        className={`w-full text-left rounded-2xl border p-5 transition-all duration-300 ${
+                          isOpen
+                            ? 'bg-white border-lime-300/50 shadow-md'
+                            : 'bg-white/75 border-gray-200 hover:bg-white hover:shadow-sm'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <span className="text-base md:text-lg font-semibold text-gray-900 leading-snug">{q.question}</span>
+                          <motion.div
+                            animate={{ rotate: isOpen ? 180 : 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="flex-shrink-0 mt-1"
+                          >
+                            <ArrowDown size={20} className="text-lime-700" />
+                          </motion.div>
+                        </div>
+
+                        <motion.div
+                          initial={false}
+                          animate={{
+                            height: isOpen ? 'auto' : 0,
+                            opacity: isOpen ? 1 : 0,
+                          }}
+                          transition={{ duration: 0.3, ease: 'easeInOut' }}
+                          className="overflow-hidden"
+                        >
+                          <p className="pt-4 text-sm md:text-base text-gray-700 leading-relaxed">
+                            {q.answer}
+                          </p>
+                        </motion.div>
+                      </button>
+                    )
+                  })}
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
         {/* What Our Customers Say */}
-        <section className="w-full pb-16 md:pb-20">
+        <section className="w-full pb-4 md:pb-4">
           <div className="relative w-full overflow-hidden bg-gradient-to-br from-white via-lime-50 to-lime-100">
             <div className="relative z-10 max-w-8xl mx-auto px-4 md:px-6 lg:px-8 py-10 md:py-12 flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
               <div className="relative w-full flex flex-row-reverse lg:block order-1 lg:order-2">

@@ -82,7 +82,7 @@ export default function ContactPage() {
 							className="absolute inset-0 bg-cover bg-center"
 							style={{
 								backgroundImage:
-									"url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1400&auto=format&fit=crop')",
+									"url('https://images.unsplash.com/photo-1758272133604-f19405bdf108?q=80&w=1331&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
 							}}
 						/>
 						<div className="absolute inset-0 bg-gradient-to-br from-[#0B120E]/80 via-[#0B120E]/55 to-[#0B120E]/75" />
@@ -96,10 +96,7 @@ export default function ContactPage() {
 									transition={{ duration: 0.8, ease: 'easeOut' }}
 									className="max-w-3xl"
 								>
-									<div className="inline-flex items-center gap-2 rounded-full border border-lime-400/30 bg-lime-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-lime-100">
-										<Leaf size={14} /> Eco Mart support
-									</div>
-									<h1 className="mt-6 text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-white leading-none" style={{ fontFamily: 'serif' }}>
+									<h1 className="mt-6 text-3xl md:text-5xl lg:text-7xl font-inter font-bold tracking-tight text-white leading-none">
 										Get in touch
 										<span className="block mt-2 text-lime-300">with Eco Mart</span>
 									</h1>
@@ -107,10 +104,10 @@ export default function ContactPage() {
 										Reach our team for product help, delivery questions, vendor partnerships, or anything related to your sustainable shopping experience.
 									</p>
 									<div className="mt-8 flex flex-wrap gap-3">
-										<a href="mailto:hello@ecomart.lk" className="inline-flex items-center gap-2 rounded-full bg-lime-400 px-6 py-3 text-sm font-bold uppercase tracking-wider text-black transition-colors hover:bg-lime-300">
+										<a href="mailto:hello@ecomart.lk" className="inline-flex items-center gap-2 rounded-full bg-[#0D0D0D] text-white px-6 py-3 text-sm font-inter font-bold uppercase tracking-wider transition-colors hover:bg-gray-800">
 											<Mail size={16} /> Email support
 										</a>
-										<a href="tel:+94112345678" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-bold uppercase tracking-wider text-white backdrop-blur-sm transition-colors hover:bg-white/10">
+										<a href="tel:+94112345678" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-inter font-bold uppercase tracking-wider text-white backdrop-blur-sm transition-colors hover:bg-white/10">
 											<Phone size={16} /> Call now
 										</a>
 									</div>
