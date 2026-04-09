@@ -8,6 +8,12 @@ export const adminAPI = {
     return response.data;
   },
 
+  // Get dashboard analytics
+  getDashboardAnalytics: async (period = 'weekly') => {
+    const response = await api.get(`/admin/analytics?period=${period}`);
+    return response.data;
+  },
+
   // Get all users
   getAllUsers: async (filters = {}) => {
     const params = new URLSearchParams(filters);
@@ -36,6 +42,25 @@ export const adminAPI = {
   // Toggle user status
   toggleUserStatus: async (id) => {
     const response = await api.patch(`/admin/users/${id}/toggle-status`);
+    return response.data;
+  },
+
+  // Get customers with analytics fields
+  getCustomers: async (filters = {}) => {
+    const params = new URLSearchParams(filters);
+    const response = await api.get(`/admin/customers?${params}`);
+    return response.data;
+  },
+
+  // Get customer summary statistics
+  getCustomerStats: async () => {
+    const response = await api.get('/admin/customers/stats');
+    return response.data;
+  },
+
+  // Get customer detail summary
+  getCustomerSummary: async (id) => {
+    const response = await api.get(`/admin/customers/${id}/summary`);
     return response.data;
   },
 };
