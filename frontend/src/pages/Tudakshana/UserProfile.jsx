@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI, authHelpers } from '../../services/Tudakshana/authService';
+import MapAddressPicker from '../../components/Thaveesha/MapAddressPicker';
 import './UserProfile.css';
 
 const UserProfile = () => {
@@ -14,16 +15,39 @@ const UserProfile = () => {
     name: '',
     email: '',
     phone: '',
+    address: '',
+    themePreference: 'light',
     cardHolderName: '',
     cardNumber: '',
     expiryDate: '',
   });
+  const [showMapPicker, setShowMapPicker] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+
+  const formatAddress = (addressObj) => {
+    if (!addressObj || typeof addressObj !== 'object') return '';
+    return [addressObj.street, addressObj.city, addressObj.state, addressObj.zipCode, addressObj.country]
+      .filter(Boolean)
+      .join(', ');
+  };
+
+  const buildAddressObject = (rawAddress) => {
+    const text = String(rawAddress || '').trim();
+    if (!text) return undefined;
+    const parts = text.split(',').map((part) => part.trim()).filter(Boolean);
+    return {
+      street: parts[0] || text,
+      city: parts[1] || '',
+      state: parts[2] || '',
+      zipCode: parts[3] || '',
+      country: parts[4] || '',
+    };
+  };
 
   useEffect(() => {
     fetchUserProfile();
@@ -42,10 +66,13 @@ const UserProfile = () => {
         name: response.data.user.name,
         email: response.data.user.email,
         phone: response.data.user.phone || '',
+        address: formatAddress(response.data.user.address),
+        themePreference: response.data.user.themePreference || 'light',
         cardHolderName: paymentCard.cardHolderName || '',
         cardNumber: '',
         expiryDate,
       });
+      localStorage.setItem('userTheme', response.data.user.themePreference || 'light');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load profile');
     } finally {
@@ -77,7 +104,10 @@ const UserProfile = () => {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
+        themePreference: formData.themePreference,
       };
+      const addressObj = buildAddressObject(formData.address);
+      if (addressObj) payload.address = addressObj;
 
       const hasCardInput = Boolean(
         formData.cardHolderName.trim() ||
@@ -109,9 +139,12 @@ const UserProfile = () => {
 
       const response = await authAPI.updateProfile(payload);
       setUser(response.data.user);
+      const cachedUser = authHelpers.getUser() || {};
+      localStorage.setItem('user', JSON.stringify({ ...cachedUser, ...response.data.user }));
       setSuccess('Profile updated successfully!');
       setIsEditing(false);
       setFormData((prev) => ({ ...prev, cardNumber: '' }));
+      localStorage.setItem('userTheme', response.data.user.themePreference || 'light');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update profile');
@@ -246,6 +279,14 @@ const UserProfile = () => {
                 <span>{user?.phone || 'Not provided'}</span>
               </div>
               <div className="detail-row">
+                <label>Address:</label>
+                <span>{formatAddress(user?.address) || 'Not provided'}</span>
+              </div>
+              <div className="detail-row">
+                <label>Theme:</label>
+                <span>{(user?.themePreference || 'light').toUpperCase()}</span>
+              </div>
+              <div className="detail-row">
                 <label>Card Details:</label>
                 <span>
                   {user?.paymentCard?.cardNumberLast4
@@ -308,6 +349,36 @@ const UserProfile = () => {
                   onChange={handleInputChange}
                 />
               </div>
+              <div className="form-group">
+                <label>Address:</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  placeholder="Street, city, state, zip, country"
+                />
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  style={{ marginTop: '8px' }}
+                  onClick={() => setShowMapPicker(true)}
+                >
+                  Pick from map
+                </button>
+              </div>
+              <div className="form-group">
+                <label>Home UI Theme:</label>
+                <select
+                  name="themePreference"
+                  value={formData.themePreference}
+                  onChange={handleInputChange}
+                >
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                  <option value="green">Green</option>
+                </select>
+              </div>
               <div className="card-details-section">
                 <h3>Card Details</h3>
                 {user?.paymentCard?.cardNumberLast4 && (
@@ -359,6 +430,8 @@ const UserProfile = () => {
                       name: user.name,
                       email: user.email,
                       phone: user.phone || '',
+                      address: formatAddress(user.address),
+                      themePreference: user.themePreference || 'light',
                       cardHolderName: user.paymentCard?.cardHolderName || '',
                       cardNumber: '',
                       expiryDate: user.paymentCard?.expiryMonth && user.paymentCard?.expiryYear
@@ -372,6 +445,15 @@ const UserProfile = () => {
                 </button>
               </div>
             </form>
+          )}
+          {showMapPicker && (
+            <MapAddressPicker
+              onSelect={({ address }) => {
+                setFormData((prev) => ({ ...prev, address }));
+                setShowMapPicker(false);
+              }}
+              onClose={() => setShowMapPicker(false)}
+            />
           )}
 
           {showPasswordForm && (

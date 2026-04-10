@@ -66,6 +66,7 @@ export const register = async (req, res) => {
           role: user.role,
           phone: user.phone,
           address: user.address,
+          themePreference: user.themePreference,
           profileImage: user.profileImage,
           paymentCard: user.paymentCard,
         },
@@ -146,6 +147,7 @@ export const login = async (req, res) => {
           role: user.role,
           phone: user.phone,
           address: user.address,
+          themePreference: user.themePreference,
           profileImage: user.profileImage,
           paymentCard: user.paymentCard,
         },
@@ -186,6 +188,7 @@ export const getProfile = async (req, res) => {
           role: user.role,
           phone: user.phone,
           address: user.address,
+          themePreference: user.themePreference,
           profileImage: user.profileImage,
           isActive: user.isActive,
           createdAt: user.createdAt,
@@ -208,7 +211,7 @@ export const getProfile = async (req, res) => {
 // @access  Private
 export const updateProfile = async (req, res) => {
   try {
-    const { name, phone, address, profileImage, paymentCard } = req.body;
+    const { name, phone, address, profileImage, paymentCard, themePreference } = req.body;
 
     const user = await User.findById(req.user.id);
 
@@ -224,6 +227,9 @@ export const updateProfile = async (req, res) => {
     if (phone) user.phone = phone;
     if (address) user.address = address;
     if (profileImage) user.profileImage = profileImage;
+    if (themePreference && ['light', 'dark', 'green'].includes(themePreference)) {
+      user.themePreference = themePreference;
+    }
     if (paymentCard && typeof paymentCard === 'object') {
       if (paymentCard.clear === true) {
         user.paymentCard = {
@@ -290,6 +296,7 @@ export const updateProfile = async (req, res) => {
           role: user.role,
           phone: user.phone,
           address: user.address,
+          themePreference: user.themePreference,
           profileImage: user.profileImage,
           paymentCard: user.paymentCard,
         },
