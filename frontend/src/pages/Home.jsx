@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Leaf, ShieldCheck, Truck, Recycle, Handshake, Sparkles, Star, ArrowUp, ArrowDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
+import { authAPI, authHelpers } from '../services/Tudakshana/authService';
 import Hero1 from "@/assets/Hero1.png";
 import Hero2 from "@/assets/Hero2.png";
 import Hero3 from "@/assets/Hero3.png";
@@ -142,6 +143,7 @@ export function HomePage() {
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0)
   const [isTestimonialTransitioning, setIsTestimonialTransitioning] = useState(false)
   const [openFaq, setOpenFaq] = useState(null)
+  const [themePreference, setThemePreference] = useState(localStorage.getItem('userTheme') || 'light')
   const navigate = useNavigate()
   const currentTestimonial = CUSTOMER_TESTIMONIALS[currentTestimonialIndex]
 
@@ -151,6 +153,23 @@ export function HomePage() {
     }, 5000)
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    if (!authHelpers.isAuthenticated()) return;
+    authAPI.getProfile()
+      .then((res) => {
+        const theme = res?.data?.user?.themePreference || 'light';
+        setThemePreference(theme);
+        localStorage.setItem('userTheme', theme);
+      })
+      .catch(() => {});
+  }, []);
+
+  const rootThemeClass = themePreference === 'dark'
+    ? 'bg-slate-950 text-slate-100'
+    : themePreference === 'green'
+      ? 'bg-lime-50 text-lime-950'
+      : 'bg-white text-gray-900';
 
   const handlePrevTestimonial = () => {
     if (isTestimonialTransitioning) return
@@ -167,7 +186,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className={`min-h-screen ${rootThemeClass}`}>
       <main className="mb-0">
         {/* Hero */}
         <section className="px-4 md:px-6 lg:px-8 pt-4 pb-12 max-w-8xl mx-auto">

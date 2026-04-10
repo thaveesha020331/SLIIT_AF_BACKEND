@@ -38,6 +38,11 @@ const userSchema = new mongoose.Schema({
     zipCode: String,
     country: String,
   },
+  themePreference: {
+    type: String,
+    enum: ['light', 'dark', 'green'],
+    default: 'light',
+  },
   isActive: {
     type: Boolean,
     default: true,
