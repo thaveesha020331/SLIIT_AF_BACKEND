@@ -190,7 +190,13 @@ export function HomePage() {
       <main className="mb-0">
         {/* Hero */}
         <section className="px-4 md:px-6 lg:px-8 pt-4 pb-12 max-w-8xl mx-auto">
-          <div className="relative h-[95vh] min-h-[500px] overflow-hidden rounded-xl md:rounded-2xl">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            className="relative h-[95vh] min-h-[500px] overflow-hidden rounded-xl md:rounded-2xl"
+          >
             <div className="absolute inset-0 bg-gradient-to-br from-lime-100 via-lime-200 to-lime-400" />
             <div className="relative h-full flex items-center justify-center px-4 text-center">
               {/* Decorative Background Elements */}
@@ -198,7 +204,13 @@ export function HomePage() {
               <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-lime-300/20 blur-3xl rounded-full pointer-events-none" />
               <div className="flex flex-col lg:flex-row items-center">
                 {/* Left Content */}
-                <div className="w-full lg:w-[45%] text-center lg:text-left mb-16 lg:mb-0 relative z-10 lg:mr-12">
+                <motion.div
+                  initial={{ opacity: 0, x: -40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.7, ease: 'easeOut' }}
+                  className="w-full lg:w-[45%] text-center lg:text-left mb-16 lg:mb-0 relative z-10 lg:mr-12"
+                >
                   <span className="inline-block text-lime-800 font-bold tracking-widest text-xs md:text-sm mb-4 uppercase">
                     ECO FRIENDLY LOCAL PRODUCTS
                   </span>
@@ -220,10 +232,16 @@ export function HomePage() {
                   >
                     Explore More
                   </button>
-                </div>
+                </motion.div>
 
                 {/* Right Image Content */}
-                <div className="w-full lg:w-[55%] relative flex justify-center lg:justify-end">
+                <motion.div
+                  initial={{ opacity: 0, x: 40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.7, ease: 'easeOut' }}
+                  className="w-full lg:w-[55%] relative flex justify-center lg:justify-end"
+                >
                   <div className="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] lg:w-[460px] lg:h-[460px]">
                     {/* Main Bowl Image Container with Float Animation */}
                     <div className="w-full h-full relative z-10 animate-float -mt-12">
@@ -311,7 +329,7 @@ export function HomePage() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               </div>
             </div>
 
@@ -334,16 +352,28 @@ export function HomePage() {
                 ></path>
               </svg>
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* About Us */}
         <section className="px-4 md:px-6 lg:px-8 pb-16 md:pb-20 max-w-8xl mx-auto">
-          <div className="relative overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.75, ease: 'easeOut' }}
+            className="relative overflow-hidden"
+          >
 
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Left: Image */}
-              <div className="order-2 lg:order-1 flex justify-center lg:justify-start">
+              <motion.div
+                initial={{ opacity: 0, x: -50, scale: 0.95 }}
+                whileInView={{ opacity: 1, x: 0, scale: 1 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                className="order-2 lg:order-1 flex justify-center lg:justify-start"
+              >
                 <div className="relative w-full max-w-sm">
                   <div className="absolute inset-0" />
                   <div className="relative">
@@ -355,10 +385,16 @@ export function HomePage() {
                     <div className="absolute inset-0" />
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Right: Content & Stats */}
-              <div className="order-1 lg:order-2 flex flex-col justify-center">
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.8, ease: 'easeOut', delay: 0.08 }}
+                className="order-1 lg:order-2 flex flex-col justify-center"
+              >
                 <span className="inline-flex w-fit items-center gap-2 rounded-full border border-lime-300 bg-white/80 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-lime-800 backdrop-blur-sm">
                   <Leaf size={14} className="text-lime-700" />
                   About EcoMart
@@ -379,43 +415,73 @@ export function HomePage() {
 
                 {/* Stats Grid */}
                 <div className="mt-10 grid grid-cols-3 gap-4">
-                  <div className="relative overflow-hidden rounded-2xl border border-lime-300/50 bg-white/70 backdrop-blur-sm p-5 text-center shadow-[0_8px_20px_rgba(132,204,22,0.08)] transition-all duration-300 hover:shadow-[0_12px_30px_rgba(132,204,22,0.15)] hover:scale-105">
+                  <motion.div
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.4 }}
+                    transition={{ duration: 0.55, ease: 'easeOut', delay: 0.05 }}
+                    className="relative overflow-hidden rounded-2xl border border-lime-300/50 bg-white/70 backdrop-blur-sm p-5 text-center shadow-[0_8px_20px_rgba(132,204,22,0.08)] transition-all duration-300 hover:shadow-[0_12px_30px_rgba(132,204,22,0.15)] hover:scale-105"
+                  >
                     <div className="pointer-events-none absolute -top-8 right-0 h-20 w-20 rounded-full bg-lime-300/30 blur-2xl" />
                     <p className="relative z-10 text-2xl md:text-3xl font-bold text-lime-700">10K+</p>
                     <p className="relative z-10 mt-2 text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider">
                       Happy Customers
                     </p>
-                  </div>
+                  </motion.div>
 
-                  <div className="relative overflow-hidden rounded-2xl border border-lime-300/50 bg-white/70 backdrop-blur-sm p-5 text-center shadow-[0_8px_20px_rgba(132,204,22,0.08)] transition-all duration-300 hover:shadow-[0_12px_30px_rgba(132,204,22,0.15)] hover:scale-105">
+                  <motion.div
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.4 }}
+                    transition={{ duration: 0.55, ease: 'easeOut', delay: 0.14 }}
+                    className="relative overflow-hidden rounded-2xl border border-lime-300/50 bg-white/70 backdrop-blur-sm p-5 text-center shadow-[0_8px_20px_rgba(132,204,22,0.08)] transition-all duration-300 hover:shadow-[0_12px_30px_rgba(132,204,22,0.15)] hover:scale-105"
+                  >
                     <div className="pointer-events-none absolute -top-8 right-0 h-20 w-20 rounded-full bg-lime-300/30 blur-2xl" />
                     <p className="relative z-10 text-2xl md:text-3xl font-bold text-lime-700">500+</p>
                     <p className="relative z-10 mt-2 text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider">
                       Eco Products
                     </p>
-                  </div>
+                  </motion.div>
 
-                  <div className="relative overflow-hidden rounded-2xl border border-lime-300/50 bg-white/70 backdrop-blur-sm p-5 text-center shadow-[0_8px_20px_rgba(132,204,22,0.08)] transition-all duration-300 hover:shadow-[0_12px_30px_rgba(132,204,22,0.15)] hover:scale-105">
+                  <motion.div
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.4 }}
+                    transition={{ duration: 0.55, ease: 'easeOut', delay: 0.23 }}
+                    className="relative overflow-hidden rounded-2xl border border-lime-300/50 bg-white/70 backdrop-blur-sm p-5 text-center shadow-[0_8px_20px_rgba(132,204,22,0.08)] transition-all duration-300 hover:shadow-[0_12px_30px_rgba(132,204,22,0.15)] hover:scale-105"
+                  >
                     <div className="pointer-events-none absolute -top-8 right-0 h-20 w-20 rounded-full bg-lime-300/30 blur-2xl" />
                     <p className="relative z-10 text-2xl md:text-3xl font-bold text-lime-700">50+</p>
                     <p className="relative z-10 mt-2 text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider">
                       Local Vendors
                     </p>
-                  </div>
+                  </motion.div>
                 </div>
-              </div>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* Why Choose */}
         <section className="px-4 md:px-6 lg:px-8 pb-16 md:pb-20 max-w-8xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl border border-lime-200/70 bg-gradient-to-br from-white via-lime-50 to-lime-100 p-6 md:p-8 lg:p-12 shadow-[0_25px_80px_rgba(132,204,22,0.14)]">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.75, ease: 'easeOut' }}
+            className="relative overflow-hidden rounded-3xl border border-lime-200/70 bg-gradient-to-br from-white via-lime-50 to-lime-100 p-6 md:p-8 lg:p-12 shadow-[0_25px_80px_rgba(132,204,22,0.14)]"
+          >
             <div className="pointer-events-none absolute -top-20 -right-16 h-64 w-64 rounded-full bg-lime-300/35 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-lime-400/25 blur-3xl" />
 
             <div className="relative z-10 flex flex-col gap-10">
-              <div className="mx-auto max-w-3xl text-center">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.35 }}
+                transition={{ duration: 0.65, ease: 'easeOut' }}
+                className="mx-auto max-w-3xl text-center"
+              >
                 <span className="inline-flex items-center gap-2 rounded-full border border-lime-300 bg-white/70 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-lime-800 backdrop-blur-sm">
                   <Sparkles size={14} className="text-lime-700" />
                   Why Choose EcoMart?
@@ -427,14 +493,18 @@ export function HomePage() {
                 <p className="mt-4 text-base md:text-lg leading-relaxed text-gray-600">
                   EcoMart blends sustainability, quality, and convenience in one beautifully curated marketplace designed for conscious living.
                 </p>
-              </div>
+              </motion.div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5">
-                {WHY_CHOOSE_ITEMS.map((item) => {
+                {WHY_CHOOSE_ITEMS.map((item, index) => {
                   const Icon = item.icon
                   return (
-                    <article
+                    <motion.article
                       key={item.title}
+                      initial={{ opacity: 0, y: 24, scale: 0.97 }}
+                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                      viewport={{ once: true, amount: 0.35 }}
+                      transition={{ duration: 0.55, ease: 'easeOut', delay: index * 0.08 }}
                       className="group relative overflow-hidden rounded-2xl border border-lime-200/80 bg-white/85 p-5 md:p-6 shadow-[0_10px_35px_rgba(15,23,42,0.08)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-lime-400 hover:shadow-[0_18px_40px_rgba(132,204,22,0.18)]"
                     >
                       <div className="absolute -top-10 -right-8 h-24 w-24 rounded-full bg-lime-300/20 blur-2xl transition-opacity duration-300 group-hover:opacity-100 opacity-70" />
@@ -445,12 +515,18 @@ export function HomePage() {
                         <h3 className="text-lg font-bold text-gray-900">{item.title}</h3>
                         <p className="mt-2 text-sm leading-relaxed text-gray-600">{item.description}</p>
                       </div>
-                    </article>
+                    </motion.article>
                   )
                 })}
               </div>
 
-              <div className="relative rounded-2xl border border-lime-300/70 bg-[#0D0D0D] p-6 md:p-8 text-white shadow-2xl">
+              <motion.div
+                initial={{ opacity: 0, y: 26 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.35 }}
+                transition={{ duration: 0.65, ease: 'easeOut', delay: 0.18 }}
+                className="relative rounded-2xl border border-lime-300/70 bg-[#0D0D0D] p-6 md:p-8 text-white shadow-2xl"
+              >
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-lime-500/20 via-transparent to-lime-300/10" />
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
                   <div>
@@ -464,16 +540,28 @@ export function HomePage() {
                     Start Shopping
                   </button>
                 </div>
-              </div>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* Filter By Category */}
         <section className="px-4 md:px-6 lg:px-8 pb-16 md:pb-20 max-w-8xl mx-auto">
-          <div className="relative overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            className="relative overflow-hidden"
+          >
 
-            <div className="relative z-10 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.35 }}
+              transition={{ duration: 0.65, ease: 'easeOut' }}
+              className="relative z-10 text-center"
+            >
               <span className="inline-flex items-center gap-2 rounded-full border border-lime-300 bg-white/75 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-lime-800">
                 <Sparkles size={14} className="text-lime-700" />
                 Filter By Category
@@ -484,17 +572,21 @@ export function HomePage() {
               <p className="mt-3 text-base md:text-lg text-gray-600 leading-relaxed">
                 Open products with your selected category already checked in the sidebar.
               </p>
-            </div>
+            </motion.div>
 
             <div className="relative z-10 mt-8 overflow-x-auto pb-2">
               <div className="flex flex-nowrap gap-12 md:gap-20 min-w-max md:justify-center md:flex-wrap md:min-w-0 ml-4 md:ml-0">
-              {PRODUCT_CATEGORIES.map((category) => {
+              {PRODUCT_CATEGORIES.map((category, index) => {
                 const Icon = category.icon
                 return (
-                  <article
+                  <motion.article
                     key={category.title}
                     role="button"
                     tabIndex={0}
+                    initial={{ opacity: 0, y: 24, scale: 0.96 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true, amount: 0.35 }}
+                    transition={{ duration: 0.55, ease: 'easeOut', delay: index * 0.08 }}
                     onClick={() => navigate(`/products?productCategory=${encodeURIComponent(category.title)}`)}
                     onKeyDown={(event) => {
                       if (event.key === 'Enter' || event.key === ' ') {
@@ -518,12 +610,12 @@ export function HomePage() {
 
                     <h3 className="mt-4 text-base font-bold leading-snug text-gray-900">{category.title}</h3>
                     <p className="mt-1 text-xs leading-relaxed text-gray-600">{category.subtitle}</p>
-                  </article>
+                  </motion.article>
                 )
               })}
               </div>
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* FAQ */}
@@ -621,9 +713,21 @@ export function HomePage() {
 
         {/* What Our Customers Say */}
         <section className="w-full pb-4 md:pb-4">
-          <div className="relative w-full overflow-hidden bg-gradient-to-br from-white via-lime-50 to-lime-100">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.75, ease: 'easeOut' }}
+            className="relative w-full overflow-hidden bg-gradient-to-br from-white via-lime-50 to-lime-100"
+          >
             <div className="relative z-10 max-w-8xl mx-auto px-4 md:px-6 lg:px-8 py-10 md:py-12 flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-              <div className="relative w-full flex flex-row-reverse lg:block order-1 lg:order-2">
+              <motion.div
+                initial={{ opacity: 0, x: -40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.7, ease: 'easeOut' }}
+                className="relative w-full flex flex-row-reverse lg:block order-1 lg:order-2"
+              >
                 <div className="lg:absolute right-10 w-full h-[250px] lg:h-[24vw] xl:h-[21vw] overflow-hidden lg:translate-x-[2vw] lg:-translate-y-[2vw] ml-4 lg:ml-0">
                   <div className="relative w-full h-full">
                     {[Ellipse1, Ellipse2, Ellipse3, Ellipse4].map((img, index) => {
@@ -667,9 +771,15 @@ export function HomePage() {
                     See what EcoMart shoppers say about their experience with our sustainable marketplace.
                   </p>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="relative max-w-2xl mx-auto lg:mx-0 flex items-start gap-5 order-2 lg:order-1 mt-4 lg:mt-0">
+              <motion.div
+                initial={{ opacity: 0, x: 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.7, ease: 'easeOut', delay: 0.08 }}
+                className="relative max-w-2xl mx-auto lg:mx-0 flex items-start gap-5 order-2 lg:order-1 mt-4 lg:mt-0"
+              >
                 <div className="flex flex-col gap-4 mt-8">
                   <button
                     onClick={handlePrevTestimonial}
@@ -716,7 +826,7 @@ export function HomePage() {
                     &quot;{currentTestimonial.text}&quot;
                   </p>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             <style>{`
@@ -747,7 +857,7 @@ export function HomePage() {
                 }
               }
             `}</style>
-          </div>
+          </motion.div>
         </section>
       </main>
     </div>

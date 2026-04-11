@@ -52,10 +52,21 @@ const featureItems = [
 const AboutUsPage = () => {
 	return (
 		<div className="min-h-screen flex flex-col overflow-x-hidden bg-white font-sans selection:bg-lime-500 selection:text-white">
-			<section className="px-4 md:px-6 lg:px-8 pt-4 pb-12 bg-white">
+			{/* Hero Section */}
+			<motion.section
+				className="px-4 md:px-6 lg:px-8 pt-4 pb-12 bg-white"
+				initial={{ opacity: 0, y: 30 }}
+				whileInView={{ opacity: 1, y: 0 }}
+				viewport={{ once: true, amount: 0.25 }}
+				transition={{ duration: 0.75, ease: 'easeOut' }}
+			>
 				<div className="max-w-8xl mx-auto">
-					<div
+					<motion.div
 						className="rounded-[3rem] relative overflow-hidden h-[800px] md:h-[560px] 2xl:h-[500px] flex items-center justify-center text-center"
+						initial={{ opacity: 0, scale: 0.97 }}
+						whileInView={{ opacity: 1, scale: 1 }}
+						viewport={{ once: true, amount: 0.3 }}
+						transition={{ duration: 0.8, ease: 'easeOut' }}
 						style={{
 							backgroundImage: `url(${hero})`,
 							backgroundSize: 'cover',
@@ -65,50 +76,112 @@ const AboutUsPage = () => {
 					>
 						<div className="absolute inset-0 bg-[#0F1D14]/55"></div>
 						<div className="relative z-10 max-w-4xl mx-auto text-white">
-							<h1 className="text-3xl md:text-5xl lg:text-6xl font-inter font-bold mb-6">
+							<motion.h1
+								className="text-3xl md:text-5xl lg:text-6xl font-inter font-bold mb-6"
+								initial={{ opacity: 0, y: 24 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: true, amount: 0.4 }}
+								transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
+							>
 								Where Smart Shopping Meets Sustainable Living
-							</h1>
-							<p className="text-md md:text-lg font-inter font-normal leading-relaxed text-white/80">
+							</motion.h1>
+							<motion.p
+								className="text-md md:text-lg font-inter font-normal leading-relaxed text-white/80"
+								initial={{ opacity: 0, y: 24 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: true, amount: 0.4 }}
+								transition={{ duration: 0.7, ease: 'easeOut', delay: 0.2 }}
+							>
 								Eco Mart is more than a marketplace. It is a practical way to discover products that are better for your home, your routine, and the planet. We bring together trusted local vendors, eco-conscious essentials, and reliable delivery in one simple experience so shopping feels easier and more intentional.
-							</p>
+							</motion.p>
 						</div>
-					</div>
+					</motion.div>
 				</div>
-			</section>
+			</motion.section>
 
-			<section className="relative bg-white py-16 md:py-16 px-4 md:px-6 lg:px-8">
+			{/* Know About Us Section */}
+			<motion.section
+				className="relative bg-white py-16 md:py-16 px-4 md:px-6 lg:px-8"
+				initial={{ opacity: 0, y: 34 }}
+				whileInView={{ opacity: 1, y: 0 }}
+				viewport={{ once: true, amount: 0.25 }}
+				transition={{ duration: 0.75, ease: 'easeOut' }}
+			>
 				<div className="container mx-auto">
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-						<div className="relative w-full max-w-xl mx-auto lg:mx-0 order-2 lg:order-1">
+						<motion.div
+							className="relative w-full max-w-xl mx-auto lg:mx-0 order-2 lg:order-1"
+							initial={{ opacity: 0, x: -45, scale: 0.98 }}
+							whileInView={{ opacity: 1, x: 0, scale: 1 }}
+							viewport={{ once: true, amount: 0.3 }}
+							transition={{ duration: 0.8, ease: 'easeOut', delay: 0.06 }}
+						>
 							<img src={know} alt="Eco Mart sustainable products" className="w-full h-full rounded-none mt-10 2xl:mt-0" />
-						</div>
+						</motion.div>
 
-						<div className="max-w-2xl mx-auto lg:mx-0 order-1 lg:order-2 lg:pl-12 -mt-12 2xl:mt-0">
-							<div className="mb-6">
+						<motion.div
+							className="max-w-2xl mx-auto lg:mx-0 order-1 lg:order-2 lg:pl-12 -mt-12 2xl:mt-0"
+							initial={{ opacity: 0, x: 45 }}
+							whileInView={{ opacity: 1, x: 0 }}
+							viewport={{ once: true, amount: 0.3 }}
+							transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
+						>
+							<motion.div
+								className="mb-6"
+								initial={{ opacity: 0, y: 18 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: true, amount: 0.4 }}
+								transition={{ duration: 0.55, ease: 'easeOut', delay: 0.18 }}
+							>
 								<div className="flex items-center gap-2">
 									<div className="w-14 h-[2px] bg-lime-600"></div>
 									<span className="text-black text-sm font-inter font-bold tracking-widest">KNOW ABOUT US</span>
 								</div>
-							</div>
-							<h1 className="text-4xl md:text-5xl font-inter font-bold text-black mb-8 leading-tight">
+							</motion.div>
+							<motion.h1
+								className="text-4xl md:text-5xl font-inter font-bold text-black mb-8 leading-tight"
+								initial={{ opacity: 0, y: 18 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: true, amount: 0.4 }}
+								transition={{ duration: 0.6, ease: 'easeOut', delay: 0.24 }}
+							>
 								A Better Way to Shop for Daily Life
-							</h1>
-							<p className="text-black text-lg font-inter font-bold mb-6">
+							</motion.h1>
+							<motion.p
+								className="text-black text-lg font-inter font-bold mb-6"
+								initial={{ opacity: 0, y: 18 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: true, amount: 0.4 }}
+								transition={{ duration: 0.6, ease: 'easeOut', delay: 0.3 }}
+							>
 								Eco Mart helps customers find better products without sacrificing convenience. We bring together eco-friendly essentials, trusted local brands, and thoughtfully sourced items in one simple marketplace.
-							</p>
-							<p className="text-black/60 font-inter font-regular text-lg">
+							</motion.p>
+							<motion.p
+								className="text-black/60 font-inter font-regular text-lg"
+								initial={{ opacity: 0, y: 18 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: true, amount: 0.4 }}
+								transition={{ duration: 0.6, ease: 'easeOut', delay: 0.36 }}
+							>
 								Our platform is built to make conscious shopping clear and accessible. Whether you are choosing reusable home goods, cleaner personal care items, or everyday products from responsible sellers, we keep the experience straightforward and dependable from start to finish.
-							</p>
+							</motion.p>
 
-							<Link to="/products" className="inline-block mt-6">
+							<motion.div
+								initial={{ opacity: 0, y: 16 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: true, amount: 0.4 }}
+								transition={{ duration: 0.55, ease: 'easeOut', delay: 0.42 }}
+							>
+								<Link to="/products" className="inline-block mt-6">
 								<button className="bg-[#0D0D0D] text-white px-8 py-4 rounded-full text-sm font-bold tracking-wider hover:bg-gray-800 transition-colors uppercase shadow-lg">
 									Explore More
 								</button>
-							</Link>
-						</div>
+								</Link>
+							</motion.div>
+						</motion.div>
 					</div>
 				</div>
-			</section>
+			</motion.section>
 
 			{/* Vision Section */}
 			<motion.section 
