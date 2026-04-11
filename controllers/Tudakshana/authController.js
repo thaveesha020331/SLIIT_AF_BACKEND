@@ -66,7 +66,9 @@ export const register = async (req, res) => {
           role: user.role,
           phone: user.phone,
           address: user.address,
+          themePreference: user.themePreference,
           profileImage: user.profileImage,
+          paymentCard: user.paymentCard,
         },
         token,
       },
@@ -145,7 +147,9 @@ export const login = async (req, res) => {
           role: user.role,
           phone: user.phone,
           address: user.address,
+          themePreference: user.themePreference,
           profileImage: user.profileImage,
+          paymentCard: user.paymentCard,
         },
         token,
       },
@@ -184,9 +188,11 @@ export const getProfile = async (req, res) => {
           role: user.role,
           phone: user.phone,
           address: user.address,
+          themePreference: user.themePreference,
           profileImage: user.profileImage,
           isActive: user.isActive,
           createdAt: user.createdAt,
+          paymentCard: user.paymentCard,
         },
       },
     });
@@ -205,7 +211,7 @@ export const getProfile = async (req, res) => {
 // @access  Private
 export const updateProfile = async (req, res) => {
   try {
-    const { name, phone, address, profileImage } = req.body;
+    const { name, phone, address, profileImage, paymentCard, themePreference } = req.body;
 
     const user = await User.findById(req.user.id);
 
@@ -221,6 +227,61 @@ export const updateProfile = async (req, res) => {
     if (phone) user.phone = phone;
     if (address) user.address = address;
     if (profileImage) user.profileImage = profileImage;
+    if (themePreference && ['light', 'dark', 'green'].includes(themePreference)) {
+      user.themePreference = themePreference;
+    }
+    if (paymentCard && typeof paymentCard === 'object') {
+      if (paymentCard.clear === true) {
+        user.paymentCard = {
+          cardHolderName: '',
+          cardNumber: '',
+          cardNumberLast4: '',
+          expiryMonth: null,
+          expiryYear: null,
+        };
+      } else {
+      const cardHolderName = String(paymentCard.cardHolderName || '').trim();
+      const cardNumber = String(paymentCard.cardNumber || '').replace(/\D/g, '');
+      const expiryDate = String(paymentCard.expiryDate || '').trim();
+      const hasAnyCardInput = Boolean(cardHolderName || cardNumber || expiryDate);
+
+      if (hasAnyCardInput) {
+        if (!cardHolderName || !cardNumber || !expiryDate) {
+          return res.status(400).json({
+            success: false,
+            message: 'Please provide card holder name, card number, and expiry date',
+          });
+        }
+
+        if (cardNumber.length < 12 || cardNumber.length > 19) {
+          return res.status(400).json({
+            success: false,
+            message: 'Please enter a valid card number',
+          });
+        }
+
+        const expiryMatch = expiryDate.match(/^(0[1-9]|1[0-2])\s*\/\s*(\d{2}|\d{4})$/);
+        if (!expiryMatch) {
+          return res.status(400).json({
+            success: false,
+            message: 'Expiry date must be in MM/YY format',
+          });
+        }
+
+        const expiryMonth = Number(expiryMatch[1]);
+        let expiryYear = Number(expiryMatch[2]);
+        if (expiryYear < 100) expiryYear += 2000;
+
+        user.paymentCard = {
+          cardHolderName,
+          cardNumber,
+          cardNumberLast4: cardNumber.slice(-4),
+          expiryMonth,
+          expiryYear,
+        };
+      }
+      }
+    }
 
     await user.save();
 
@@ -235,7 +296,9 @@ export const updateProfile = async (req, res) => {
           role: user.role,
           phone: user.phone,
           address: user.address,
+          themePreference: user.themePreference,
           profileImage: user.profileImage,
+          paymentCard: user.paymentCard,
         },
       },
     });

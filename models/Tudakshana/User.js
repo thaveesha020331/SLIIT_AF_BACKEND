@@ -38,6 +38,11 @@ const userSchema = new mongoose.Schema({
     zipCode: String,
     country: String,
   },
+  themePreference: {
+    type: String,
+    enum: ['light', 'dark', 'green'],
+    default: 'light',
+  },
   isActive: {
     type: Boolean,
     default: true,
@@ -45,6 +50,35 @@ const userSchema = new mongoose.Schema({
   profileImage: {
     type: String,
     default: '',
+  },
+  paymentCard: {
+    cardHolderName: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    cardNumber: {
+      type: String,
+      match: [/^\d{12,19}$/, 'Card number must be 12 to 19 digits'],
+      default: '',
+    },
+    cardNumberLast4: {
+      type: String,
+      match: [/^\d{4}$/, 'Card number must contain exactly 4 digits'],
+      default: '',
+    },
+    expiryMonth: {
+      type: Number,
+      min: 1,
+      max: 12,
+      default: null,
+    },
+    expiryYear: {
+      type: Number,
+      min: 2000,
+      max: 2100,
+      default: null,
+    },
   },
 }, {
   timestamps: true,

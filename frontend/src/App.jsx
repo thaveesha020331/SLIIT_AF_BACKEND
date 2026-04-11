@@ -10,6 +10,8 @@ import MyReviewPage from './pages/Senara/MyReviewPage'
 import ProductReviewPage from './pages/Senara/ProductReviewPage'
 import AllUserProductReviews from './pages/Senara/AllUserProductReviews'
 import AdminReviewsPage from './pages/Senara/AdminReviewsPage'
+import AboutUsPage from './pages/AboutUs'
+import ContactUsPage from './pages/ContactUs'
 import UserLogin from './pages/Tudakshana/UserLogin'
 import AdminLogin from './pages/Tudakshana/AdminLogin'
 import SellerLogin from './pages/Tudakshana/SellerLogin'
@@ -20,9 +22,11 @@ import SellerDashboard from './pages/Tudakshana/SellerDashboard'
 import UserProfile from './pages/Tudakshana/UserProfile'
 import ProtectedRoute from './components/Tudakshana/ProtectedRoute'
 import { Navbar } from './components/Navbar'
+import { Footer } from './components/Footer'
 
 function AppContent() {
   const location = useLocation()
+  const isAdminPage = location.pathname.startsWith('/admin') || location.pathname.startsWith('/seller')
   const showNavbar = location.pathname !== '/admin/products'
 
   return (
@@ -32,6 +36,8 @@ function AppContent() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
+          <Route path="/about-us" element={<AboutUsPage />} />
+          <Route path="/contact" element={<ContactUsPage />} />
           <Route path="/products" element={<UserProducts />} />
           <Route path="/login" element={<UserLogin />} />
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -50,6 +56,14 @@ function AppContent() {
           />
           <Route 
             path="/checkout/:orderId" 
+            element={
+              <ProtectedRoute>
+                <Checkout />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/payment/:orderId" 
             element={
               <ProtectedRoute>
                 <Checkout />
@@ -100,6 +114,7 @@ function AppContent() {
           />
         </Routes>
       </main>
+      {!isAdminPage && <Footer />}
     </>
   )
 }

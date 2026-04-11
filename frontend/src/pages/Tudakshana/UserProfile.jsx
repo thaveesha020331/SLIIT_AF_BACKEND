@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI, authHelpers } from '../../services/Tudakshana/authService';
+import MapAddressPicker from '../../components/Thaveesha/MapAddressPicker';
 import './UserProfile.css';
 
 const UserProfile = () => {
@@ -13,14 +14,40 @@ const UserProfile = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: ''
+    phone: '',
+    address: '',
+    themePreference: 'light',
+    cardHolderName: '',
+    cardNumber: '',
+    expiryDate: '',
   });
+  const [showMapPicker, setShowMapPicker] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+
+  const formatAddress = (addressObj) => {
+    if (!addressObj || typeof addressObj !== 'object') return '';
+    return [addressObj.street, addressObj.city, addressObj.state, addressObj.zipCode, addressObj.country]
+      .filter(Boolean)
+      .join(', ');
+  };
+
+  const buildAddressObject = (rawAddress) => {
+    const text = String(rawAddress || '').trim();
+    if (!text) return undefined;
+    const parts = text.split(',').map((part) => part.trim()).filter(Boolean);
+    return {
+      street: parts[0] || text,
+      city: parts[1] || '',
+      state: parts[2] || '',
+      zipCode: parts[3] || '',
+      country: parts[4] || '',
+    };
+  };
 
   useEffect(() => {
     fetchUserProfile();
@@ -31,11 +58,21 @@ const UserProfile = () => {
       setLoading(true);
       const response = await authAPI.getProfile();
       setUser(response.data.user);
+      const paymentCard = response.data.user.paymentCard || {};
+      const expiryDate = paymentCard.expiryMonth && paymentCard.expiryYear
+        ? `${String(paymentCard.expiryMonth).padStart(2, '0')}/${String(paymentCard.expiryYear).slice(-2)}`
+        : '';
       setFormData({
         name: response.data.user.name,
         email: response.data.user.email,
-        phone: response.data.user.phone || ''
+        phone: response.data.user.phone || '',
+        address: formatAddress(response.data.user.address),
+        themePreference: response.data.user.themePreference || 'light',
+        cardHolderName: paymentCard.cardHolderName || '',
+        cardNumber: '',
+        expiryDate,
       });
+      localStorage.setItem('userTheme', response.data.user.themePreference || 'light');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load profile');
     } finally {
@@ -63,10 +100,51 @@ const UserProfile = () => {
     setSuccess('');
 
     try {
-      const response = await authAPI.updateProfile(formData);
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        themePreference: formData.themePreference,
+      };
+      const addressObj = buildAddressObject(formData.address);
+      if (addressObj) payload.address = addressObj;
+
+      const hasCardInput = Boolean(
+        formData.cardHolderName.trim() ||
+        formData.cardNumber.trim() ||
+        formData.expiryDate.trim()
+      );
+
+      if (hasCardInput) {
+        const digitsOnly = formData.cardNumber.replace(/\D/g, '');
+        if (!formData.cardHolderName.trim()) {
+          setError('Card holder name is required when updating card details');
+          return;
+        }
+        if (digitsOnly.length < 12 || digitsOnly.length > 19) {
+          setError('Please enter a valid card number');
+          return;
+        }
+        if (!/^(0[1-9]|1[0-2])\s*\/\s*(\d{2}|\d{4})$/.test(formData.expiryDate.trim())) {
+          setError('Expiry date must be in MM/YY format');
+          return;
+        }
+
+        payload.paymentCard = {
+          cardHolderName: formData.cardHolderName.trim(),
+          cardNumber: digitsOnly,
+          expiryDate: formData.expiryDate.trim(),
+        };
+      }
+
+      const response = await authAPI.updateProfile(payload);
       setUser(response.data.user);
+      const cachedUser = authHelpers.getUser() || {};
+      localStorage.setItem('user', JSON.stringify({ ...cachedUser, ...response.data.user }));
       setSuccess('Profile updated successfully!');
       setIsEditing(false);
+      setFormData((prev) => ({ ...prev, cardNumber: '' }));
+      localStorage.setItem('userTheme', response.data.user.themePreference || 'light');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update profile');
@@ -103,6 +181,28 @@ const UserProfile = () => {
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to change password');
+    }
+  };
+
+  const handleRemoveSavedCard = async () => {
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await authAPI.updateProfile({
+        paymentCard: { clear: true },
+      });
+      setUser(response.data.user);
+      setFormData((prev) => ({
+        ...prev,
+        cardHolderName: '',
+        cardNumber: '',
+        expiryDate: '',
+      }));
+      setSuccess('Saved card details removed successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to remove saved card');
     }
   };
 
@@ -178,6 +278,22 @@ const UserProfile = () => {
                 <label>Phone:</label>
                 <span>{user?.phone || 'Not provided'}</span>
               </div>
+              <div className="detail-row">
+                <label>Address:</label>
+                <span>{formatAddress(user?.address) || 'Not provided'}</span>
+              </div>
+              <div className="detail-row">
+                <label>Theme:</label>
+                <span>{(user?.themePreference || 'light').toUpperCase()}</span>
+              </div>
+              <div className="detail-row">
+                <label>Card Details:</label>
+                <span>
+                  {user?.paymentCard?.cardNumberLast4
+                    ? `**** **** **** ${user.paymentCard.cardNumberLast4} (${String(user.paymentCard.expiryMonth || '').padStart(2, '0')}/${String(user.paymentCard.expiryYear || '').slice(-2)})`
+                    : 'Not provided'}
+                </span>
+              </div>
               <div className="profile-actions">
                 <button 
                   onClick={() => setIsEditing(true)} 
@@ -185,6 +301,15 @@ const UserProfile = () => {
                 >
                   Edit Profile
                 </button>
+                {user?.paymentCard?.cardNumberLast4 && (
+                  <button
+                    onClick={handleRemoveSavedCard}
+                    className="btn-danger"
+                    type="button"
+                  >
+                    Remove Saved Card
+                  </button>
+                )}
                 <button 
                   onClick={() => setShowPasswordForm(!showPasswordForm)} 
                   className="btn-secondary"
@@ -224,6 +349,75 @@ const UserProfile = () => {
                   onChange={handleInputChange}
                 />
               </div>
+              <div className="form-group">
+                <label>Address:</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  placeholder="Street, city, state, zip, country"
+                />
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  style={{ marginTop: '8px' }}
+                  onClick={() => setShowMapPicker(true)}
+                >
+                  Pick from map
+                </button>
+              </div>
+              <div className="form-group">
+                <label>Home UI Theme:</label>
+                <select
+                  name="themePreference"
+                  value={formData.themePreference}
+                  onChange={handleInputChange}
+                >
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                  <option value="green">Green</option>
+                </select>
+              </div>
+              <div className="card-details-section">
+                <h3>Card Details</h3>
+                {user?.paymentCard?.cardNumberLast4 && (
+                  <p className="card-note">
+                    Current card: **** **** **** {user.paymentCard.cardNumberLast4}
+                  </p>
+                )}
+                <div className="form-group">
+                  <label>Card Holder Name:</label>
+                  <input
+                    type="text"
+                    name="cardHolderName"
+                    value={formData.cardHolderName}
+                    onChange={handleInputChange}
+                    placeholder="Name on card"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Card Number:</label>
+                  <input
+                    type="text"
+                    name="cardNumber"
+                    value={formData.cardNumber}
+                    onChange={handleInputChange}
+                    placeholder="xxxx xxxx xxxx xxxx"
+                    inputMode="numeric"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Expiry Date (MM/YY):</label>
+                  <input
+                    type="text"
+                    name="expiryDate"
+                    value={formData.expiryDate}
+                    onChange={handleInputChange}
+                    placeholder="MM/YY"
+                  />
+                </div>
+              </div>
               <div className="form-actions">
                 <button type="submit" className="btn-primary">
                   Save Changes
@@ -235,7 +429,14 @@ const UserProfile = () => {
                     setFormData({
                       name: user.name,
                       email: user.email,
-                      phone: user.phone || ''
+                      phone: user.phone || '',
+                      address: formatAddress(user.address),
+                      themePreference: user.themePreference || 'light',
+                      cardHolderName: user.paymentCard?.cardHolderName || '',
+                      cardNumber: '',
+                      expiryDate: user.paymentCard?.expiryMonth && user.paymentCard?.expiryYear
+                        ? `${String(user.paymentCard.expiryMonth).padStart(2, '0')}/${String(user.paymentCard.expiryYear).slice(-2)}`
+                        : '',
                     });
                   }} 
                   className="btn-secondary"
@@ -244,6 +445,15 @@ const UserProfile = () => {
                 </button>
               </div>
             </form>
+          )}
+          {showMapPicker && (
+            <MapAddressPicker
+              onSelect={({ address }) => {
+                setFormData((prev) => ({ ...prev, address }));
+                setShowMapPicker(false);
+              }}
+              onClose={() => setShowMapPicker(false)}
+            />
           )}
 
           {showPasswordForm && (
