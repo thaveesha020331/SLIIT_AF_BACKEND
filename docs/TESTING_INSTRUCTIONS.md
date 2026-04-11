@@ -10,6 +10,21 @@
 
 Automated tests live under the repository `tests/` directory. The test runner is **Jest** with **Node** as the environment. API integration tests use **Supertest** against the exported Express `app` (server is not started when `NODE_ENV=test`).
 
+### 1.1 Team member ownership — testing by function (4 members)
+
+Each developer owns **features** under their module folder and should **run, fix, and extend** the tests that cover that area (plus manual checks where no Jest suite exists yet).
+
+| Member / module | Primary function | Main code paths | What to test (automated + manual) |
+|-----------------|------------------|-----------------|-----------------------------------|
+| **Tudakshana** | **Auth** (register, login, JWT), **profile & password**; **Admin** dashboard; **Payments** (card, COD, refund) at `/api/payments` | `routes/Tudakshana`, `controllers/Tudakshana`, `models/Tudakshana` (incl. `User.js`, `Payment.js`), `utils/Tudakshana/authMiddleware.js` | **Automated:** `tests/Tudakshana/payment.test.js` — COD, card (with mocked gateway randomness), get-by-order/id, refund. **Command:** `npm run test:tudakshana`. **Manual / Swagger:** auth & admin as before; payments also in **`PAYMENT_API_TESTING_GUIDE.md`**. *(Future: `auth.test.js` / `admin.test.js`.)* |
+| **Lakna** | **Products** (CRUD, list/filter, category, certification), **image upload**, eco-impact helpers | `routes/Lakna`, `controllers/Lakna`, `models/Lakna` | **Automated:** `tests/Lakna/helpers.test.js`, `validators.test.js`, `productModel.test.js`, `productController.test.js`, **`productRoutes.test.js`** (HTTP), `imageUploadService.test.js`, `ecoImpactService.test.js`. **Command:** `npm run test:lakna` (or `npm test -- tests/Lakna`). |
+| **Thaveesha** | **Cart**, **customer orders**, **admin order status** | `routes/Thaveesha`, `controllers/Thaveesha`, `models/Thaveesha` | **Automated:** `tests/Thaveesha/cartOrder.test.js`, `adminOrder.test.js`. **Command:** `npm run test:thaveesha`. |
+| **Senara** | **Reviews** (create/update/delete, by product, admin list/delete, “can review” checks) | `routes/Senara`, `controllers/Senara` | **Automated:** `tests/Senara/review.test.js`. **Command:** `npm run test:senara`. Uses authenticated **customer/admin** roles as per route `restrictTo`. |
+
+**Submission tip:** Add each student’s **name** and **student ID** next to their module on the assignment cover page or duplicate a one-line “Tested by: …” note under your section in this document.
+
+**Shared:** All members should run **`npm test`** before merging; **frontend** UI checks are `cd frontend && npm run lint` (and manual browser testing for your flows).
+
 ---
 
 ## 2. How to run unit tests
@@ -36,11 +51,17 @@ This runs Jest with `jest.config.cjs` and matches `tests/**/*.test.js`.
 ### 2.3 Run tests by area
 
 ```bash
+# Lakna (products — all tests in tests/Lakna/)
+npm run test:lakna
+
 # Thaveesha (cart, orders, admin orders)
 npm run test:thaveesha
 
 # Senara (reviews)
 npm run test:senara
+
+# Tudakshana (payments — /api/payments)
+npm run test:tudakshana
 ```
 
 ### 2.4 Run a single file
@@ -90,6 +111,7 @@ npm test
 | `tests/Lakna/productRoutes.test.js` | Product HTTP API |
 | `tests/Thaveesha/cartOrder.test.js` | Cart / order flows |
 | `tests/Thaveesha/adminOrder.test.js` | Admin order API |
+| `tests/Tudakshana/payment.test.js` | Payments (card, COD, refund) |
 | `tests/Senara/review.test.js` | Review API |
 
 ### 3.4 Execution
@@ -98,41 +120,71 @@ Same as section 2: `npm test` runs integration suites together with unit suites.
 
 ---
 
-## 4. Performance testing — setup and execution
+## 4. Load testing — Artillery
 
-This repository does **not** ship a dedicated performance test suite (e.g. k6, Artillery, JMeter). For coursework or production validation, you may add performance checks as follows.
+This project includes **[Artillery](https://www.artillery.io/)** (`artillery` in `devDependencies`). Scripts live in **`load-tests/`**.
 
-### 4.1 Suggested approach
+### 4.1 Install
 
-1. **Tooling (choose one):**
-   - [k6](https://k6.io/) — scriptable load tests.
-   - [Artillery](https://www.artillery.io/) — YAML/JSON scenarios.
-   - Apache JMeter — GUI / CLI load tests.
+From the backend root (after `npm install`), the CLI is available as `npx artillery`.
 
-2. **Targets:**
-   - `GET /health` — baseline latency.
-   - `GET /api/products` — read-heavy public endpoint.
-   - Authenticated endpoints — use a test JWT from `/api/auth/login`.
+### 4.2 Scripts (`package.json`)
 
-3. **Environment:**
-   - Run against **staging** or a dedicated test deployment, not production during heavy load.
+| Command | Purpose |
+|---------|---------|
+| `npm run load-test:smoke` | ~10s, low rate — quick sanity check |
+| `npm run load-test` | ~80s — warm-up then sustained load on **public** routes |
+| `npm run load-test:auth` | Login + `GET /api/auth/profile` (needs env vars, see below) |
+| `npm run load-test:report` | Writes JSON metrics to `load-tests/report.json` (gitignored) |
+| `npm run load-test:report:html` | Opens HTML report from that JSON |
 
-4. **Record results:**
-   - Throughput (requests/sec), p95/p99 latency, error rate.
-   - Attach graphs or CLI output to your submission if required.
+### 4.3 Before you run
 
-### 4.2 Example k6 sketch (illustrative only)
+1. Start the API locally (`npm run dev` / `npm start`) **or** point Artillery at a deployed URL.
+2. Override base URL without editing YAML:
 
-```javascript
-import http from 'k6/http';
-import { check, sleep } from 'k6';
-export const options = { vus: 10, duration: '30s' };
-export default function () {
-  const res = http.get('https://your-api.example.com/health');
-  check(res, { 'status 200': (r) => r.status === 200 });
-  sleep(1);
-}
+```bash
+npx artillery run load-tests/public-api.yml -t https://sliit-af-backend.onrender.com
 ```
+
+PowerShell example:
+
+```powershell
+npx artillery run load-tests/smoke.yml -t http://127.0.0.1:5000
+```
+
+### 4.4 Authenticated scenario
+
+`load-tests/authenticated.yml` calls `POST /api/auth/login` then `GET /api/auth/profile`. Set credentials in the environment:
+
+**bash**
+
+```bash
+export LOAD_TEST_EMAIL="customer@example.com"
+export LOAD_TEST_PASSWORD="yourpassword"
+npm run load-test:auth
+```
+
+**PowerShell**
+
+```powershell
+$env:LOAD_TEST_EMAIL = "customer@example.com"
+$env:LOAD_TEST_PASSWORD = "yourpassword"
+npm run load-test:auth
+```
+
+Optional: `npx artillery run load-tests/authenticated.yml --dotenv path/to/.env`
+
+### 4.5 What is exercised
+
+- **Public:** `GET /health`, `GET /api/products` (read-heavy, no JWT).
+- **Auth:** `POST /api/auth/login`, `GET /api/auth/profile`.
+
+Tune **`phases`** (`duration`, `arrivalRate`, `maxVusers`) in the YAML files for coursework limits. Prefer **staging** or a dedicated environment for aggressive load; avoid hammering shared production without agreement.
+
+### 4.6 Submission / evidence
+
+Save Artillery’s final **Summary report** from the terminal (or run `npm run load-test:report` then `npm run load-test:report:html`) and attach **p95/p99**, **request rate**, and **error counts** to your report.
 
 ---
 

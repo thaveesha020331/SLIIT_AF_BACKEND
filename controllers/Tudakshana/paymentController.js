@@ -1,18 +1,15 @@
-import Payment from '../../models/Thaveesha/Payment.js';
+import Payment from '../../models/Tudakshana/Payment.js';
 import Order from '../../models/Thaveesha/Order.js';
 
-// Generate transaction ID
 const generateTransactionId = () => {
   return `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 };
-
 
 export const processCardPayment = async (req, res) => {
   try {
     const { orderId, cardNumber, expiryMonth, expiryYear, cvv, cardholderName } = req.body;
     const userId = req.user.id;
 
-    // Validation
     if (!orderId || !cardNumber || !expiryMonth || !expiryYear || !cvv || !cardholderName) {
       return res.status(400).json({
         success: false,
@@ -20,7 +17,6 @@ export const processCardPayment = async (req, res) => {
       });
     }
 
-    // Validate card number length (basic check)
     if (cardNumber.replace(/\s/g, '').length < 13 || cardNumber.replace(/\s/g, '').length > 19) {
       return res.status(400).json({
         success: false,
@@ -28,11 +24,10 @@ export const processCardPayment = async (req, res) => {
       });
     }
 
-    // Validate expiry
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
     const currentYear = currentDate.getFullYear();
-    
+
     if (expiryYear < currentYear || (expiryYear === currentYear && expiryMonth < currentMonth)) {
       return res.status(400).json({
         success: false,
@@ -40,7 +35,6 @@ export const processCardPayment = async (req, res) => {
       });
     }
 
-    // Validate CVV
     if (cvv.length < 3 || cvv.length > 4 || isNaN(cvv)) {
       return res.status(400).json({
         success: false,
@@ -48,7 +42,6 @@ export const processCardPayment = async (req, res) => {
       });
     }
 
-    // Check if order exists
     const order = await Order.findOne({ _id: orderId, user: userId });
     if (!order) {
       return res.status(404).json({
@@ -57,7 +50,6 @@ export const processCardPayment = async (req, res) => {
       });
     }
 
-    // Check if payment already exists for this order
     const existingPayment = await Payment.findOne({ order: orderId });
     if (existingPayment && existingPayment.status === 'completed') {
       return res.status(400).json({
@@ -66,20 +58,15 @@ export const processCardPayment = async (req, res) => {
       });
     }
 
-    // Extract last 4 digits
     const last4 = cardNumber.replace(/\s/g, '').slice(-4);
     const cardBrand = detectCardBrand(cardNumber);
 
-    // Generate transaction ID
     const transactionId = generateTransactionId();
 
-    // Simulate card processing (In production, integrate with Stripe/PayPal)
-    // For demo: randomly succeed or fail (90% success rate)
     const isPaymentSuccessful = Math.random() < 0.9;
 
     let payment;
     if (isPaymentSuccessful) {
-      // Create or update payment record
       if (existingPayment) {
         payment = await Payment.findByIdAndUpdate(
           existingPayment._id,
@@ -91,8 +78,8 @@ export const processCardPayment = async (req, res) => {
             cardDetails: {
               last4Digits: last4,
               cardBrand,
-              expiryMonth: parseInt(expiryMonth),
-              expiryYear: parseInt(expiryYear),
+              expiryMonth: parseInt(expiryMonth, 10),
+              expiryYear: parseInt(expiryYear, 10),
             },
             paymentDate: new Date(),
           },
@@ -109,14 +96,13 @@ export const processCardPayment = async (req, res) => {
           cardDetails: {
             last4Digits: last4,
             cardBrand,
-            expiryMonth: parseInt(expiryMonth),
-            expiryYear: parseInt(expiryYear),
+            expiryMonth: parseInt(expiryMonth, 10),
+            expiryYear: parseInt(expiryYear, 10),
           },
           paymentDate: new Date(),
         });
       }
 
-      // Update order payment status
       await Order.findByIdAndUpdate(orderId, {
         payment: payment._id,
         paymentStatus: 'completed',
@@ -135,7 +121,6 @@ export const processCardPayment = async (req, res) => {
         },
       });
     } else {
-      // Payment failed
       const failureReasons = [
         'Insufficient funds',
         'Card declined',
@@ -145,13 +130,10 @@ export const processCardPayment = async (req, res) => {
       const failureReason = failureReasons[Math.floor(Math.random() * failureReasons.length)];
 
       if (existingPayment) {
-        await Payment.findByIdAndUpdate(
-          existingPayment._id,
-          {
-            status: 'failed',
-            failureReason,
-          }
-        );
+        await Payment.findByIdAndUpdate(existingPayment._id, {
+          status: 'failed',
+          failureReason,
+        });
       } else {
         await Payment.create({
           order: orderId,
@@ -163,7 +145,6 @@ export const processCardPayment = async (req, res) => {
         });
       }
 
-      // Update order payment status
       await Order.findByIdAndUpdate(orderId, {
         paymentStatus: 'failed',
       });
@@ -183,15 +164,11 @@ export const processCardPayment = async (req, res) => {
   }
 };
 
-// @desc    Process cash on delivery
-// @route   POST /api/payments/process-cod
-// @access  Protected
 export const processCashOnDelivery = async (req, res) => {
   try {
     const { orderId } = req.body;
     const userId = req.user.id;
 
-    // Check if order exists
     const order = await Order.findOne({ _id: orderId, user: userId });
     if (!order) {
       return res.status(404).json({
@@ -200,7 +177,6 @@ export const processCashOnDelivery = async (req, res) => {
       });
     }
 
-    // Check if payment already exists
     const existingPayment = await Payment.findOne({ order: orderId });
     if (existingPayment && existingPayment.status === 'completed') {
       return res.status(400).json({
@@ -236,7 +212,6 @@ export const processCashOnDelivery = async (req, res) => {
       });
     }
 
-    // Update order payment status
     await Order.findByIdAndUpdate(orderId, {
       payment: payment._id,
       paymentStatus: 'completed',
@@ -263,9 +238,6 @@ export const processCashOnDelivery = async (req, res) => {
   }
 };
 
-// @desc    Get payment status
-// @route   GET /api/payments/:paymentId
-// @access  Protected
 export const getPaymentStatus = async (req, res) => {
   try {
     const { paymentId } = req.params;
@@ -303,15 +275,11 @@ export const getPaymentStatus = async (req, res) => {
   }
 };
 
-// @desc    Get payment by order ID
-// @route   GET /api/payments/order/:orderId
-// @access  Protected
 export const getPaymentByOrderId = async (req, res) => {
   try {
     const { orderId } = req.params;
     const userId = req.user.id;
 
-    // Verify order belongs to user
     const order = await Order.findOne({ _id: orderId, user: userId });
     if (!order) {
       return res.status(404).json({
@@ -351,9 +319,6 @@ export const getPaymentByOrderId = async (req, res) => {
   }
 };
 
-// @desc    Refund payment
-// @route   POST /api/payments/:paymentId/refund
-// @access  Protected
 export const refundPayment = async (req, res) => {
   try {
     const { paymentId } = req.params;
@@ -374,14 +339,12 @@ export const refundPayment = async (req, res) => {
       });
     }
 
-    // Update payment status
     const updatedPayment = await Payment.findByIdAndUpdate(
       paymentId,
       { status: 'cancelled' },
       { new: true }
     );
 
-    // Update order payment status
     await Order.findByIdAndUpdate(payment.order, {
       paymentStatus: 'failed',
     });
@@ -404,7 +367,6 @@ export const refundPayment = async (req, res) => {
   }
 };
 
-// Helper function to detect card brand
 const detectCardBrand = (cardNumber) => {
   const number = cardNumber.replace(/\s/g, '');
   if (/^4[0-9]{12}(?:[0-9]{3})?$/.test(number)) return 'Visa';

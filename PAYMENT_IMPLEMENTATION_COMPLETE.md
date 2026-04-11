@@ -12,12 +12,12 @@ A fully functional payment processing system with two payment methods:
 
 ### Backend Files Created ✅
 ```
-✅ models/Thaveesha/Payment.js
+✅ models/Tudakshana/Payment.js
    - Payment schema with status, method, card details
    - Relationships with Order and User
    - Indexes for performance
 
-✅ controllers/Thaveesha/paymentController.js
+✅ controllers/Tudakshana/paymentController.js
    - processCardPayment() - Validate & process card payments
    - processCashOnDelivery() - Confirm COD
    - getPaymentStatus() - Get payment details
@@ -25,7 +25,7 @@ A fully functional payment processing system with two payment methods:
    - refundPayment() - Refund completed payments
    - Helper: detectCardBrand() - Auto-detect card type
 
-✅ routes/Thaveesha/paymentRoutes.js
+✅ routes/Tudakshana/paymentRoutes.js
    - POST /process-card
    - POST /process-cod
    - GET /:paymentId
