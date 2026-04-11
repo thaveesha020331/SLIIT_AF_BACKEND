@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
-  Leaf, Loader2, ArrowRight, PackageOpen, CheckCircle2,
-  Circle, XCircle, ShoppingBag, RotateCcw,
+  Loader2, ArrowRight, PackageOpen, CheckCircle2,
+  Circle, XCircle, ShoppingBag, RotateCcw, ClipboardList, ChevronRight, Leaf,
 } from 'lucide-react';
 import { orderAPI } from '../../services/Thaveesha';
 import CancelConfirmModal from '../../components/Thaveesha/CancelConfirmModal';
@@ -17,11 +18,11 @@ const STATUS_LABELS = {
 };
 
 const STATUS_STYLES = {
-  pending:    'bg-amber-100 text-amber-800',
-  processing: 'bg-blue-100 text-blue-800',
-  shipped:    'bg-indigo-100 text-indigo-800',
-  delivered:  'bg-lime-100 text-lime-800',
-  cancelled:  'bg-red-100 text-red-800',
+  pending:    'bg-amber-900 text-amber-50 ring-1 ring-amber-700/60 shadow-sm',
+  processing: 'bg-slate-800 text-slate-50 ring-1 ring-slate-600/80 shadow-sm',
+  shipped:    'bg-indigo-900 text-indigo-50 ring-1 ring-indigo-700/60 shadow-sm',
+  delivered:  'bg-emerald-900 text-emerald-50 ring-1 ring-emerald-700/60 shadow-sm',
+  cancelled:  'bg-red-900 text-red-50 ring-1 ring-red-700/60 shadow-sm',
 };
 
 const TRACKING_STEPS = ['Placed', 'Processing', 'Shipped', 'Delivered'];
@@ -126,37 +127,73 @@ export default function MyOrders() {
 
   /* ── Main render ──────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-b from-lime-100/50 via-white to-white">
 
-      {/* ── Hero ─────────────────────────────────────── */}
-      <div className="px-4 md:px-6 lg:px-8 pt-4 pb-12 max-w-8xl mx-auto">
-        <div className="relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-lime-100 via-lime-200 to-lime-400 px-8 py-12">
+      {/* ── Hero (matches Home / Cart lime band) ───────────────── */}
+      <div className="px-4 md:px-6 lg:px-8 pt-4 pb-10 max-w-8xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-lime-100 via-lime-200 to-lime-400 px-6 py-10 md:px-10 md:py-12 shadow-[0_20px_50px_-12px_rgba(101,163,15,0.4)]"
+        >
           <div className="pointer-events-none absolute top-0 right-0 w-2/3 h-full bg-white/10 rounded-l-full blur-3xl transform translate-x-1/4" />
           <div className="pointer-events-none absolute bottom-0 left-0 w-1/2 h-1/2 bg-lime-300/20 blur-3xl rounded-full" />
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-lime-300 bg-white/80 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-lime-800 backdrop-blur-sm">
-                <Leaf size={13} className="text-lime-700" />
-                Eco.Mart
-              </span>
-              <h1 className="mt-3 text-3xl md:text-4xl font-bold text-gray-900 leading-tight">My Orders</h1>
-              <p className="mt-1 text-sm text-gray-700">
-                {orders.length > 0
-                  ? `${orders.length} order${orders.length !== 1 ? 's' : ''} in your history`
-                  : 'Track and manage your purchases'}
-              </p>
-            </div>
-            <Link
-              to="/cart"
-              className="inline-flex items-center gap-2 self-start sm:self-auto rounded-full bg-[#0D0D0D] px-6 py-3 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-gray-700"
+
+          <div className="relative z-10">
+            <nav
+              className="mb-6 inline-flex flex-wrap items-center gap-1 rounded-full border border-lime-300 bg-white/80 px-3.5 py-2 text-xs font-semibold text-gray-600 shadow-sm backdrop-blur-sm"
+              aria-label="Breadcrumb"
             >
-              <ShoppingBag size={14} /> View cart
-            </Link>
+              <Link to="/" className="px-1.5 py-0.5 rounded-full hover:bg-lime-100 hover:text-lime-900 transition-colors">
+                Home
+              </Link>
+              <ChevronRight size={14} className="text-lime-700/60 shrink-0" aria-hidden />
+              <span className="px-1.5 py-0.5 rounded-full font-bold text-lime-900">Orders</span>
+            </nav>
+
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+              <div className="flex flex-col sm:flex-row sm:items-start gap-5 min-w-0">
+                <div className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#0D0D0D] text-lime-300 shadow-lg ring-1 ring-black/10">
+                  <ClipboardList size={26} strokeWidth={1.75} />
+                </div>
+                <div className="min-w-0">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-lime-300 bg-white/80 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-lime-800 backdrop-blur-sm">
+                    <Leaf size={13} className="text-lime-700" />
+                    Eco.Mart
+                  </span>
+                  <h1 className="mt-3 text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                    My orders
+                  </h1>
+                  <p className="mt-1 text-sm text-gray-700 max-w-xl">
+                    {orders.length > 0
+                      ? `${orders.length} order${orders.length !== 1 ? 's' : ''} — track delivery and open details anytime.`
+                      : 'Track and manage your purchases from one place.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+                {orders.length > 0 && (
+                  <div className="rounded-2xl border border-lime-200/80 bg-white/90 px-5 py-4 shadow-[0_10px_35px_rgba(132,204,22,0.12)] backdrop-blur-sm">
+                    <p className="text-2xl font-bold tabular-nums text-gray-900 leading-none">{orders.length}</p>
+                    <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-gray-500">Total orders</p>
+                  </div>
+                )}
+                <Link
+                  to="/cart"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0D0D0D] px-6 py-3 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-gray-700 shadow-md"
+                >
+                  <ShoppingBag size={14} strokeWidth={2} />
+                  View cart
+                </Link>
+              </div>
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      <div className="px-4 md:px-6 lg:px-8 pt-6 pb-16 max-w-7xl mx-auto">
+      <div className="px-4 md:px-6 lg:px-8 pt-2 pb-16 max-w-7xl mx-auto">
 
         {/* ── Error banner ──────────────────────────── */}
         {error && (
@@ -214,7 +251,7 @@ export default function MyOrders() {
                       <span className="text-xs text-gray-400">{formatDate(order.createdAt)}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${STATUS_STYLES[order.status] || 'bg-gray-100 text-gray-700'}`}>
+                      <span className={`inline-flex items-center rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-widest ${STATUS_STYLES[order.status] || 'bg-gray-800 text-gray-100 ring-1 ring-gray-600'}`}>
                         {STATUS_LABELS[order.status] || order.status}
                       </span>
                       <span className="text-base font-bold text-lime-700">${(order.total ?? 0).toFixed(2)}</span>
@@ -228,31 +265,48 @@ export default function MyOrders() {
                       <p className="text-xs text-gray-400 mb-4">Ship to: {order.shippingAddress}</p>
                     )}
 
-                    {/* Tracking stepper */}
+                    {/* Tracking stepper — lime / white (matches cart & order cards) */}
                     {!isCancelled ? (
-                      <div className="mb-5">
-                        <div className="flex items-center gap-0">
+                      <div className="mb-5 rounded-2xl border border-lime-200/90 bg-gradient-to-br from-lime-50/90 via-white to-lime-100/50 px-3 py-4 sm:px-5 sm:py-5 shadow-[0_8px_30px_rgba(132,204,22,0.12)] ring-1 ring-lime-900/[0.04]">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-lime-800 mb-3 sm:mb-4 text-center sm:text-left">
+                          Delivery progress
+                        </p>
+                        <div className="flex items-start w-full">
                           {TRACKING_STEPS.map((label, i) => {
                             const done = i < stepIndex;
                             const current = i === stepIndex;
+                            const segmentFilled = i < stepIndex;
                             return (
                               <React.Fragment key={label}>
-                                <div className="flex flex-col items-center gap-1">
+                                <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
                                   {done ? (
-                                    <CheckCircle2 size={22} className="text-lime-500" strokeWidth={2} />
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0D0D0D] text-lime-300 shadow-md ring-2 ring-lime-300/40">
+                                      <CheckCircle2 size={20} strokeWidth={2.5} className="text-lime-300" />
+                                    </div>
                                   ) : current ? (
-                                    <div className="h-[22px] w-[22px] rounded-full border-2 border-lime-500 bg-lime-100 flex items-center justify-center">
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-lime-500 bg-white shadow-[0_0_0_4px_rgba(163,230,53,0.2)]">
                                       <div className="h-2.5 w-2.5 rounded-full bg-lime-500 animate-pulse" />
                                     </div>
                                   ) : (
-                                    <Circle size={22} className="text-gray-200" strokeWidth={1.5} />
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-lime-200 bg-white text-lime-200">
+                                      <Circle size={18} strokeWidth={2} className="text-lime-200" />
+                                    </div>
                                   )}
-                                  <span className={`text-[10px] font-semibold ${done || current ? 'text-gray-700' : 'text-gray-300'}`}>
+                                  <span
+                                    className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-center leading-tight px-0.5 ${
+                                      done ? 'text-lime-900' : current ? 'text-gray-900' : 'text-gray-400'
+                                    }`}
+                                  >
                                     {label}
                                   </span>
                                 </div>
                                 {i < TRACKING_STEPS.length - 1 && (
-                                  <div className={`flex-1 h-0.5 mb-4 mx-1 ${done ? 'bg-lime-400' : 'bg-gray-100'}`} />
+                                  <div
+                                    className={`h-1 rounded-full self-center mt-[14px] sm:mt-[15px] flex-1 min-w-[6px] max-w-none mx-0.5 sm:mx-1 ${
+                                      segmentFilled ? 'bg-gradient-to-r from-lime-500 to-lime-400' : 'bg-lime-100'
+                                    }`}
+                                    aria-hidden
+                                  />
                                 )}
                               </React.Fragment>
                             );

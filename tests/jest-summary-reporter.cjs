@@ -79,6 +79,7 @@ class SummaryReporter {
       console.log('-------------------------------------------\n');
     };
 
+    printSummary('Tudakshana Payment test summary', buildSummary('Tudakshana'));
     printSummary('Thaveesha Cart & Order test summary', buildSummary('Thaveesha'));
     printSummary('Senara Review test summary', buildSummary('Senara'));
     printSummary('Lakna Product test summary', buildSummary('Lakna'));

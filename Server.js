@@ -2,14 +2,16 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import path from 'path';
+import { serve as swaggerServe, setup as swaggerSetup } from 'swagger-ui-express';
 import connectDB from './config/db.js';
+import { loadOpenApiSpec } from './config/loadOpenApi.js';
 import authRoutes from './routes/Tudakshana/authRoutes.js';
 import adminRoutes from './routes/Tudakshana/adminRoutes.js';
 import productRoutes from './routes/Lakna/productRoutes.js';
 import cartRoutes from './routes/Thaveesha/cartRoutes.js';
 import orderRoutes from './routes/Thaveesha/orderRoutes.js';
 import adminOrderRoutes from './routes/Thaveesha/adminOrderRoutes.js';
-import paymentRoutes from './routes/Thaveesha/paymentRoutes.js';
+import paymentRoutes from './routes/Tudakshana/paymentRoutes.js';
 import reviewRoutes from './routes/Senara/reviewRoutes.js';
 
 dotenv.config();
@@ -30,6 +32,24 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.resolve('uploads')));
+
+// OpenAPI / Swagger UI
+try {
+  const openApiSpec = loadOpenApiSpec();
+  app.get('/api-docs.json', (req, res) => {
+    res.json(openApiSpec);
+  });
+  app.use(
+    '/api-docs',
+    swaggerServe,
+    swaggerSetup(openApiSpec, {
+      customSiteTitle: 'EcoMart API — Swagger',
+      customCss: '.swagger-ui .topbar { display: none }',
+    })
+  );
+} catch (err) {
+  console.warn('Swagger UI not mounted:', err.message);
+}
 
 // API Routes
 app.use('/api/auth', authRoutes);

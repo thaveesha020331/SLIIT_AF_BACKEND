@@ -12,11 +12,11 @@ import { adminOrderAPI } from '../../services/Thaveesha/adminOrderService';
 const STATUS_OPTIONS = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
 
 const STATUS_COLORS = {
-  pending:    'bg-orange-50 text-orange-700',
-  processing: 'bg-blue-50 text-blue-700',
-  shipped:    'bg-yellow-50 text-yellow-700',
-  delivered:  'bg-green-50 text-green-700',
-  cancelled:  'bg-red-50 text-red-700',
+  pending:    'bg-amber-900 text-amber-50 ring-1 ring-amber-700/60',
+  processing: 'bg-slate-800 text-slate-50 ring-1 ring-slate-600/80',
+  shipped:    'bg-indigo-900 text-indigo-50 ring-1 ring-indigo-700/60',
+  delivered:  'bg-emerald-900 text-emerald-50 ring-1 ring-emerald-700/60',
+  cancelled:  'bg-red-900 text-red-50 ring-1 ring-red-700/60',
 };
 
 const PAGE_SIZE = 20;
@@ -219,7 +219,7 @@ export default function AdminOrders() {
             <tbody className="divide-y divide-gray-100">
               {filteredOrders.map((order) => {
                 const busy = updatingId === order._id;
-                const statusClass = STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-700';
+                const statusClass = STATUS_COLORS[order.status] || 'bg-gray-800 text-gray-100 ring-1 ring-gray-600';
 
                 // Lock dropdown when order was cancelled by the user
                 const lockedByUser = order.status === 'cancelled' && order.cancelledBy === 'user';
@@ -268,7 +268,7 @@ export default function AdminOrders() {
 
                     {/* Status Badge */}
                     <td className="px-4 py-3 align-top">
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${statusClass}`}>
+                      <span className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${statusClass}`}>
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
                     </td>

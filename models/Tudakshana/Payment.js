@@ -36,13 +36,13 @@ const paymentSchema = new mongoose.Schema(
     },
     cardDetails: {
       last4Digits: String,
-      cardBrand: String, // visa, mastercard, amex
+      cardBrand: String,
       expiryMonth: Number,
       expiryYear: Number,
     },
     paymentGateway: {
       type: String,
-      default: 'stripe', // stripe, paypal, etc
+      default: 'stripe',
     },
     failureReason: {
       type: String,
@@ -56,7 +56,6 @@ const paymentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index for quick lookups
 paymentSchema.index({ order: 1 });
 paymentSchema.index({ user: 1, createdAt: -1 });
 paymentSchema.index({ status: 1 });
