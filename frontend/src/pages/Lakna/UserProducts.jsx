@@ -1,16 +1,17 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
 import api from '../../services/Tudakshana/authService';
 import { cartAPI } from '../../services/Thaveesha';
 import { reviewService } from '../../services/Senara/reviewService';
-import ReviewList from '../../components/Senara/ReviewList';
 import './UserProducts.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const API_BASE_URL = API_URL.replace(/\/api\/?$/, '');
+const VIEWPORT = { once: true, amount: 0.2 };
 
-const UserProducts = ({ user }) => {
+const UserProducts = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
@@ -173,9 +174,8 @@ const UserProducts = ({ user }) => {
     });
   }, [products, selectedCategories, selectedCertifications, selectedProductCategories, sortBy]);
 
-  // Fetch reviews when opening modal
   const handleViewProduct = async (product) => {
-    setSelectedProduct({ ...product, reviews: [] }); // open modal immediately
+    setSelectedProduct({ ...product, reviews: [] });
 
     try {
       const res = await reviewService.getProductReviews(product._id);
@@ -189,114 +189,148 @@ const UserProducts = ({ user }) => {
     }
   };
 
+  const previewReview = selectedProduct?.reviews?.[0] || null;
+
   return (
-    <section className="mt-0 px-4 md:px-8 pt-2 pb-12">
+    <motion.section
+      className="mt-0 px-4 md:px-8 pt-2 pb-12"
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={VIEWPORT}
+      transition={{ duration: 0.65, ease: 'easeOut' }}
+    >
       <div className="user-products-container">
-        <div className="products-header">
+        <motion.div
+          className="products-header"
+          initial={{ opacity: 0, y: 22 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={VIEWPORT}
+          transition={{ duration: 0.65, ease: 'easeOut', delay: 0.05 }}
+        >
+          <div className="pointer-events-none absolute top-0 right-0 w-2/3 h-full bg-white/10 rounded-l-full blur-3xl transform translate-x-1/4" />
+          <div className="pointer-events-none absolute bottom-0 left-0 w-1/2 h-1/2 bg-lime-300/20 blur-3xl rounded-full" />
+          <div className="products-header-content">
           <h1>Eco-Friendly Products</h1>
           <p>Discover sustainable and environmentally conscious products</p>
-        </div>
+          </div>
+        </motion.div>
 
-        {error && <div className="alert alert-error">{error}</div>}
+        {error && (
+          <motion.div
+            className="alert alert-error"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={VIEWPORT}
+            transition={{ duration: 0.45, ease: 'easeOut' }}
+          >
+            {error}
+          </motion.div>
+        )}
 
         {/* Product Modal */}
         {selectedProduct && (
           <div className="modal-overlay" onClick={() => setSelectedProduct(null)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content modal-content-modern" onClick={(e) => e.stopPropagation()}>
               <button className="modal-close" onClick={() => setSelectedProduct(null)}>×</button>
 
-              <div className="product-detail-grid">
-                <div className="product-detail-image">
+              <div className="modal-hero">
+                <div className="modal-hero-image">
                   <img src={getProductImageSrc(selectedProduct.image)} alt={selectedProduct.title} />
+                  <div className="modal-hero-image-overlay" />
                 </div>
 
-                <div className="product-detail-info">
+                <div className="modal-hero-copy">
+                  <span className="modal-eyebrow">Product Details</span>
                   <h2>{selectedProduct.title}</h2>
-                  <div className="product-meta">
+                  <div className="product-meta product-meta-modern">
                     <span className="badge badge-category">{selectedProduct.category}</span>
                     <span className="badge badge-category">{selectedProduct.productCategory || 'Uncategorized'}</span>
                     <span className="badge badge-cert">{selectedProduct.ecocertification}</span>
                   </div>
+
+                  <div className="detail-summary-grid">
+                    <div className="detail-summary-card">
+                      <span>Price</span>
+                      <strong>${selectedProduct.price.toFixed(2)}</strong>
+                    </div>
+                    <div className={`detail-summary-card ${selectedProduct.stock > 0 ? 'summary-in-stock' : 'summary-out-of-stock'}`}>
+                      <span>Stock</span>
+                      <strong>{selectedProduct.stock > 0 ? `${selectedProduct.stock} available` : 'Out of stock'}</strong>
+                    </div>
+                    <div className="detail-summary-card">
+                      <span>Manufacturer</span>
+                      <strong>{selectedProduct.manufacturerInfo?.name || 'Not listed'}</strong>
+                    </div>
+                  </div>
+
                   <p className="product-description">{selectedProduct.description}</p>
 
-                  <div className="product-pricing">
-                    <div className="price">${selectedProduct.price.toFixed(2)}</div>
-                    <div className={`stock ${selectedProduct.stock > 0 ? 'in-stock' : 'out-of-stock'}`}>
-                      {selectedProduct.stock > 0 ? `${selectedProduct.stock} in stock` : 'Out of stock'}
-                    </div>
-                  </div>
-
-                  {/* Eco Impact Section */}
-                  <div className="eco-impact-section">
-                    <h3>Eco-Impact Score</h3>
-                    <div className="eco-metrics">
-                      <div className="eco-metric">
-                        <div className="metric-circle" style={{ borderColor: getEcoRatingColor(selectedProduct.ecoImpactScore?.sustainabilityRating || 0) }}>
-                          <div className="metric-value">{selectedProduct.ecoImpactScore?.sustainabilityRating || 0}%</div>
-                        </div>
-                        <div className="metric-label">Sustainability</div>
-                        <div className="metric-subtext">{getEcoRatingLabel(selectedProduct.ecoImpactScore?.sustainabilityRating || 0)}</div>
-                      </div>
-
-                      <div className="eco-metric">
-                        <div className="metric-value">{selectedProduct.ecoImpactScore?.carbonFootprint || 0}</div>
-                        <div className="metric-label">Carbon Footprint</div>
-                        <div className="metric-subtext">kg CO2e</div>
-                      </div>
-
-                      <div className="eco-metric">
-                        <div className="metric-value">{selectedProduct.ecoImpactScore?.waterUsage || 0}</div>
-                        <div className="metric-label">Water Usage</div>
-                        <div className="metric-subtext">liters</div>
-                      </div>
-
-                      <div className="eco-metric">
-                        <div className="metric-circle" style={{ borderColor: getEcoRatingColor(selectedProduct.ecoImpactScore?.recyclabilityScore || 0) }}>
-                          <div className="metric-value">{selectedProduct.ecoImpactScore?.recyclabilityScore || 0}%</div>
-                        </div>
-                        <div className="metric-label">Recyclability</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{ marginBottom: 20 }}>
+                  <div className="modal-actions">
                     <button
-                      className="btn-view-details"
-                      style={{ padding: '12px 24px' }}
+                      className="btn-view-details btn-modal-primary"
                       onClick={() => handleAddToCart(selectedProduct._id)}
                     >
                       Add to cart
                     </button>
                   </div>
+                </div>
+              </div>
 
-                  {/* Manufacturer Info */}
-                  {selectedProduct.manufacturerInfo && (
-                    <div className="manufacturer-info">
-                      <h3>Manufacturer</h3>
-                      {selectedProduct.manufacturerInfo.name && <p><strong>Name:</strong> {selectedProduct.manufacturerInfo.name}</p>}
-                      {selectedProduct.manufacturerInfo.location && <p><strong>Location:</strong> {selectedProduct.manufacturerInfo.location}</p>}
+              <div className="modal-detail-grid">
+                <div className="detail-card eco-impact-section">
+                  <h3>Eco-Impact Score</h3>
+                  <div className="eco-metrics">
+                    <div className="eco-metric">
+                      <div className="metric-circle" style={{ borderColor: getEcoRatingColor(selectedProduct.ecoImpactScore?.sustainabilityRating || 0) }}>
+                        <div className="metric-value">{selectedProduct.ecoImpactScore?.sustainabilityRating || 0}%</div>
+                      </div>
+                      <div className="metric-label">Sustainability</div>
+                      <div className="metric-subtext">{getEcoRatingLabel(selectedProduct.ecoImpactScore?.sustainabilityRating || 0)}</div>
                     </div>
-                  )}
 
-                  {/* Reviews Section */}
-                  <div className="reviews-section">
-                    <h3>Customer Reviews ({selectedProduct.reviews?.length || 0})</h3>
+                    <div className="eco-metric">
+                      <div className="metric-value">{selectedProduct.ecoImpactScore?.carbonFootprint || 0}</div>
+                      <div className="metric-label">Carbon Footprint</div>
+                      <div className="metric-subtext">kg CO2e</div>
+                    </div>
 
-                    <button
-                      type="button"
-                      className="btn-add-review"
-                      onClick={() => navigate(`/products/${selectedProduct._id}/all-reviews`)}
-                    >
-                      View All Reviews
-                    </button>
+                    <div className="eco-metric">
+                      <div className="metric-value">{selectedProduct.ecoImpactScore?.waterUsage || 0}</div>
+                      <div className="metric-label">Water Usage</div>
+                      <div className="metric-subtext">liters</div>
+                    </div>
 
-                    <ReviewList
-                      reviews={selectedProduct.reviews || []}
-                      currentUserId={user?._id}
-                    />
-
-                    
+                    <div className="eco-metric">
+                      <div className="metric-circle" style={{ borderColor: getEcoRatingColor(selectedProduct.ecoImpactScore?.recyclabilityScore || 0) }}>
+                        <div className="metric-value">{selectedProduct.ecoImpactScore?.recyclabilityScore || 0}%</div>
+                      </div>
+                      <div className="metric-label">Recyclability</div>
+                    </div>
                   </div>
+                </div>
+    
+                {/* Reviews */}
+
+                <div className="detail-card reviews-section">
+                  <h3>Reviews</h3>
+                  {previewReview ? (
+                    <div className="review-preview-compact">
+                      <div className="review-preview-head">
+                        <strong>{previewReview.authorName || 'Anonymous'}</strong>
+                        <span>{Number(previewReview.rating) || 0}/5</span>
+                      </div>
+                      <p>{previewReview.comment || 'No comment provided.'}</p>
+                    </div>
+                  ) : (
+                    <p className="review-empty-text">No reviews yet.</p>
+                  )}
+                  <button
+                    type="button"
+                    className="btn-add-review btn-modal-secondary"
+                    onClick={() => navigate(`/products/${selectedProduct._id}/all-reviews`)}
+                  >
+                    View All Reviews
+                  </button>
                 </div>
               </div>
             </div>
@@ -304,8 +338,20 @@ const UserProducts = ({ user }) => {
         )}
 
         {/* Products Layout */}
-        <div className="products-layout">
-          <aside className="filters-sidebar">
+        <motion.div
+          className="products-layout"
+          initial={{ opacity: 0, y: 22 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={VIEWPORT}
+          transition={{ duration: 0.65, ease: 'easeOut', delay: 0.08 }}
+        >
+          <motion.aside
+            className="filters-sidebar"
+            initial={{ opacity: 0, x: -24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={VIEWPORT}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.12 }}
+          >
             <h3>Filters</h3>
 
             <div className="sidebar-filter-group">
@@ -349,10 +395,22 @@ const UserProducts = ({ user }) => {
                 </label>
               ))}
             </div>
-          </aside>
+          </motion.aside>
 
-          <div className="products-main-content">
-            <div className="top-controls-row">
+          <motion.div
+            className="products-main-content"
+            initial={{ opacity: 0, x: 24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={VIEWPORT}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.12 }}
+          >
+            <motion.div
+              className="top-controls-row"
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={VIEWPORT}
+              transition={{ duration: 0.55, ease: 'easeOut', delay: 0.16 }}
+            >
               <div className="search-box">
                 <input
                   type="text"
@@ -380,15 +438,67 @@ const UserProducts = ({ user }) => {
               </div>
 
               <div className="product-count">Products: {displayedProducts.length}</div>
-            </div>
+            </motion.div>
 
             {loading ? (
-              <div className="loading">Loading products...</div>
+                <motion.div
+                  className="loading-state"
+                  aria-busy="true"
+                  aria-live="polite"
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={VIEWPORT}
+                  transition={{ duration: 0.45, ease: 'easeOut' }}
+                >
+                  <div className="loading-copy">
+                    <div className="loading-spinner" />
+                    <div>
+                      <h2>Refreshing products</h2>
+                      <p>Finding the best sustainable matches for your filters.</p>
+                    </div>
+                  </div>
+
+                  <div className="loading-skeleton-grid">
+                    {Array.from({ length: 8 }).map((_, index) => (
+                      <div key={index} className="product-card product-card-skeleton" aria-hidden="true">
+                        <div className="skeleton skeleton-image" />
+                        <div className="product-card-content">
+                          <div className="skeleton skeleton-title" />
+                          <div className="skeleton skeleton-line" />
+                          <div className="skeleton skeleton-line short" />
+
+                          <div className="product-footer">
+                            <div className="skeleton skeleton-pill" />
+                            <div className="skeleton skeleton-pill small" />
+                          </div>
+
+                          <div className="product-card-actions">
+                            <div className="skeleton skeleton-button" />
+                            <div className="skeleton skeleton-icon-button" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
             ) : (
               <>
-                <div className="products-grid">
-                  {displayedProducts.map((product) => (
-                    <div key={product._id} className="product-card">
+                <motion.div
+                  className="products-grid"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={VIEWPORT}
+                  transition={{ duration: 0.35, ease: 'easeOut' }}
+                >
+                  {displayedProducts.map((product, index) => (
+                    <motion.article
+                      key={product._id}
+                      className="product-card"
+                      initial={{ opacity: 0, y: 22, scale: 0.98 }}
+                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                      viewport={VIEWPORT}
+                      transition={{ duration: 0.45, ease: 'easeOut', delay: Math.min(index * 0.04, 0.24) }}
+                    >
                       <div className="product-image">
                         <img src={getProductImageSrc(product.image)} alt={product.title} />
                         <div className="product-badges">
@@ -433,12 +543,18 @@ const UserProducts = ({ user }) => {
                           </button>
                         </div>
                       </div>
-                    </div>
+                    </motion.article>
                   ))}
-                </div>
+                </motion.div>
 
                 {totalPages > 1 && (
-                  <div className="pagination">
+                  <motion.div
+                    className="pagination"
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={VIEWPORT}
+                    transition={{ duration: 0.45, ease: 'easeOut', delay: 0.08 }}
+                  >
                     <button
                       className="btn-pagination"
                       onClick={() => setPage(page - 1)}
@@ -456,14 +572,14 @@ const UserProducts = ({ user }) => {
                     >
                       Next
                     </button>
-                  </div>
+                  </motion.div>
                 )}
               </>
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 };
 

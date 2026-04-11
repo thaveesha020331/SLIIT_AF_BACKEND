@@ -23,6 +23,7 @@ const AdminProducts = ({ mode = 'both' }) => {
   const [loading, setLoading] = useState(false);
   const [reportLoading, setReportLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
   const [showForm, setShowForm] = useState(isAddMode);
   const [editingId, setEditingId] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -51,6 +52,20 @@ const AdminProducts = ({ mode = 'both' }) => {
       location: '',
     },
   });
+
+  const showToast = (message, type = 'success') => {
+    setToast({
+      id: Date.now(),
+      message,
+      type,
+    });
+  };
+
+  useEffect(() => {
+    if (!toast) return;
+    const timeout = setTimeout(() => setToast(null), 2800);
+    return () => clearTimeout(timeout);
+  }, [toast]);
 
   const resetForm = () => {
     setEditingId(null);
@@ -216,7 +231,7 @@ const AdminProducts = ({ mode = 'both' }) => {
             image: formData.image,
           });
         }
-        alert('Product updated successfully');
+        showToast('Product updated successfully');
       } else {
         const data = new FormData();
         Object.keys(formData).forEach((key) => {
@@ -233,7 +248,7 @@ const AdminProducts = ({ mode = 'both' }) => {
           }
         });
         await axios.post(`${API_URL}/products`, data);
-        alert('Product created successfully');
+        showToast('Product added successfully');
       }
 
       setShowForm(false);
@@ -249,8 +264,11 @@ const AdminProducts = ({ mode = 'both' }) => {
       if (backendErrors && typeof backendErrors === 'object') {
         const firstValidationError = Object.values(backendErrors)[0];
         setError(firstValidationError || 'Validation failed');
+        showToast(firstValidationError || 'Validation failed', 'error');
       } else {
-        setError(err.response?.data?.message || err.response?.data?.error || 'Failed to save product');
+        const message = err.response?.data?.message || err.response?.data?.error || 'Failed to save product';
+        setError(message);
+        showToast(message, 'error');
       }
       console.error(err);
     }
@@ -271,6 +289,7 @@ const AdminProducts = ({ mode = 'both' }) => {
     setSelectedFile(null);
     setEditingId(product._id);
     setShowForm(true);
+    showToast('Product loaded for editing', 'info');
   };
 
   const handleDelete = async (id) => {
@@ -278,10 +297,11 @@ const AdminProducts = ({ mode = 'both' }) => {
 
     try {
       await axios.delete(`${API_URL}/products/${id}`);
-      alert('Product deleted successfully');
+      showToast('Product deleted successfully');
       fetchProducts();
     } catch (err) {
       setError('Failed to delete product');
+      showToast('Failed to delete product', 'error');
       console.error(err);
     }
   };
@@ -456,6 +476,14 @@ const AdminProducts = ({ mode = 'both' }) => {
 
   return (
     <div className="admin-products-container">
+      <div className="toast-container" aria-live="polite" aria-atomic="true">
+        {toast && (
+          <div className={`toast toast-${toast.type}`} key={toast.id} role="status">
+            {toast.message}
+          </div>
+        )}
+      </div>
+
       <div className="admin-header">
         <h1>Product Management</h1>
         {mode === 'both' && (
@@ -711,7 +739,31 @@ const AdminProducts = ({ mode = 'both' }) => {
           </div>
 
           {loading ? (
-            <div className="loading">Loading products...</div>
+            <div className="loading-state" aria-busy="true" aria-live="polite">
+              <div className="loading-header-row">
+                <div className="loading-spinner" />
+                <div>
+                  <h3>Loading products</h3>
+                  <p>Fetching the latest inventory and eco metrics.</p>
+                </div>
+              </div>
+
+              <div className="loading-table-skeleton">
+                {Array.from({ length: 6 }).map((_, rowIndex) => (
+                  <div key={rowIndex} className="loading-row" aria-hidden="true">
+                    <div className="skeleton-cell skeleton-title" />
+                    <div className="skeleton-cell skeleton-image" />
+                    <div className="skeleton-cell" />
+                    <div className="skeleton-cell" />
+                    <div className="skeleton-cell" />
+                    <div className="skeleton-cell" />
+                    <div className="skeleton-cell" />
+                    <div className="skeleton-cell skeleton-wide" />
+                    <div className="skeleton-cell skeleton-actions" />
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : (
             <div className="products-table-container">
               <table className="products-table">
