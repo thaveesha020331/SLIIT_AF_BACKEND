@@ -17,9 +17,9 @@ const UserProfile = () => {
     phone: '',
     address: '',
     themePreference: 'light',
-    cardHolderName: '',
-    cardNumber: '',
-    expiryDate: '',
+    preferredPaymentMethod: 'cash_on_delivery',
+    billingName: '',
+    billingAddress: '',
   });
   const [showMapPicker, setShowMapPicker] = useState(false);
   const [passwordData, setPasswordData] = useState({
@@ -59,18 +59,15 @@ const UserProfile = () => {
       const response = await authAPI.getProfile();
       setUser(response.data.user);
       const paymentCard = response.data.user.paymentCard || {};
-      const expiryDate = paymentCard.expiryMonth && paymentCard.expiryYear
-        ? `${String(paymentCard.expiryMonth).padStart(2, '0')}/${String(paymentCard.expiryYear).slice(-2)}`
-        : '';
       setFormData({
         name: response.data.user.name,
         email: response.data.user.email,
         phone: response.data.user.phone || '',
         address: formatAddress(response.data.user.address),
         themePreference: response.data.user.themePreference || 'light',
-        cardHolderName: paymentCard.cardHolderName || '',
-        cardNumber: '',
-        expiryDate,
+        preferredPaymentMethod: paymentCard.preferredPaymentMethod || 'cash_on_delivery',
+        billingName: paymentCard.billingName || '',
+        billingAddress: paymentCard.billingAddress || '',
       });
       localStorage.setItem('userTheme', response.data.user.themePreference || 'light');
     } catch (err) {
@@ -109,33 +106,11 @@ const UserProfile = () => {
       const addressObj = buildAddressObject(formData.address);
       if (addressObj) payload.address = addressObj;
 
-      const hasCardInput = Boolean(
-        formData.cardHolderName.trim() ||
-        formData.cardNumber.trim() ||
-        formData.expiryDate.trim()
-      );
-
-      if (hasCardInput) {
-        const digitsOnly = formData.cardNumber.replace(/\D/g, '');
-        if (!formData.cardHolderName.trim()) {
-          setError('Card holder name is required when updating card details');
-          return;
-        }
-        if (digitsOnly.length < 12 || digitsOnly.length > 19) {
-          setError('Please enter a valid card number');
-          return;
-        }
-        if (!/^(0[1-9]|1[0-2])\s*\/\s*(\d{2}|\d{4})$/.test(formData.expiryDate.trim())) {
-          setError('Expiry date must be in MM/YY format');
-          return;
-        }
-
-        payload.paymentCard = {
-          cardHolderName: formData.cardHolderName.trim(),
-          cardNumber: digitsOnly,
-          expiryDate: formData.expiryDate.trim(),
-        };
-      }
+      payload.paymentCard = {
+        preferredPaymentMethod: formData.preferredPaymentMethod,
+        billingName: formData.billingName.trim(),
+        billingAddress: formData.billingAddress.trim(),
+      };
 
       const response = await authAPI.updateProfile(payload);
       setUser(response.data.user);
@@ -143,7 +118,6 @@ const UserProfile = () => {
       localStorage.setItem('user', JSON.stringify({ ...cachedUser, ...response.data.user }));
       setSuccess('Profile updated successfully!');
       setIsEditing(false);
-      setFormData((prev) => ({ ...prev, cardNumber: '' }));
       localStorage.setItem('userTheme', response.data.user.themePreference || 'light');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
@@ -195,9 +169,9 @@ const UserProfile = () => {
       setUser(response.data.user);
       setFormData((prev) => ({
         ...prev,
-        cardHolderName: '',
-        cardNumber: '',
-        expiryDate: '',
+        preferredPaymentMethod: 'cash_on_delivery',
+        billingName: '',
+        billingAddress: '',
       }));
       setSuccess('Saved card details removed successfully!');
       setTimeout(() => setSuccess(''), 3000);
@@ -287,10 +261,22 @@ const UserProfile = () => {
                 <span>{(user?.themePreference || 'light').toUpperCase()}</span>
               </div>
               <div className="detail-row">
-                <label>Card Details:</label>
+                <label>Preferred Payment:</label>
+                <span>{(user?.paymentCard?.preferredPaymentMethod || 'cash_on_delivery') === 'card' ? 'Card (Stripe)' : 'Cash on Delivery'}</span>
+              </div>
+              <div className="detail-row">
+                <label>Billing Name:</label>
+                <span>{user?.paymentCard?.billingName || 'Not provided'}</span>
+              </div>
+              <div className="detail-row">
+                <label>Billing Address:</label>
+                <span>{user?.paymentCard?.billingAddress || 'Not provided'}</span>
+              </div>
+              <div className="detail-row">
+                <label>Stripe Card:</label>
                 <span>
                   {user?.paymentCard?.cardNumberLast4
-                    ? `**** **** **** ${user.paymentCard.cardNumberLast4} (${String(user.paymentCard.expiryMonth || '').padStart(2, '0')}/${String(user.paymentCard.expiryYear || '').slice(-2)})`
+                    ? `${(user.paymentCard.cardBrand || 'Card').toUpperCase()} •••• ${user.paymentCard.cardNumberLast4} (${String(user.paymentCard.expiryMonth || '').padStart(2, '0')}/${String(user.paymentCard.expiryYear || '').slice(-2)})`
                     : 'Not provided'}
                 </span>
               </div>
@@ -380,43 +366,44 @@ const UserProfile = () => {
                 </select>
               </div>
               <div className="card-details-section">
-                <h3>Card Details</h3>
+                <h3>Payment Preferences</h3>
                 {user?.paymentCard?.cardNumberLast4 && (
                   <p className="card-note">
-                    Current card: **** **** **** {user.paymentCard.cardNumberLast4}
+                    Stripe card on file: {(user.paymentCard.cardBrand || 'Card').toUpperCase()} •••• {user.paymentCard.cardNumberLast4}
                   </p>
                 )}
                 <div className="form-group">
-                  <label>Card Holder Name:</label>
+                  <label>Preferred Payment Method:</label>
+                  <select
+                    name="preferredPaymentMethod"
+                    value={formData.preferredPaymentMethod}
+                    onChange={handleInputChange}
+                  >
+                    <option value="cash_on_delivery">Cash on Delivery</option>
+                    <option value="card">Card (Stripe Checkout)</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Billing Name:</label>
                   <input
                     type="text"
-                    name="cardHolderName"
-                    value={formData.cardHolderName}
+                    name="billingName"
+                    value={formData.billingName}
                     onChange={handleInputChange}
-                    placeholder="Name on card"
+                    placeholder="Name for receipts/invoices"
                   />
                 </div>
                 <div className="form-group">
-                  <label>Card Number:</label>
+                  <label>Billing Address:</label>
                   <input
                     type="text"
-                    name="cardNumber"
-                    value={formData.cardNumber}
+                    name="billingAddress"
+                    value={formData.billingAddress}
                     onChange={handleInputChange}
-                    placeholder="xxxx xxxx xxxx xxxx"
-                    inputMode="numeric"
+                    placeholder="Billing address"
                   />
                 </div>
-                <div className="form-group">
-                  <label>Expiry Date (MM/YY):</label>
-                  <input
-                    type="text"
-                    name="expiryDate"
-                    value={formData.expiryDate}
-                    onChange={handleInputChange}
-                    placeholder="MM/YY"
-                  />
-                </div>
+                <p className="card-note">Card entry is handled securely on Stripe Checkout. No raw card data is stored in your profile.</p>
               </div>
               <div className="form-actions">
                 <button type="submit" className="btn-primary">
@@ -432,11 +419,9 @@ const UserProfile = () => {
                       phone: user.phone || '',
                       address: formatAddress(user.address),
                       themePreference: user.themePreference || 'light',
-                      cardHolderName: user.paymentCard?.cardHolderName || '',
-                      cardNumber: '',
-                      expiryDate: user.paymentCard?.expiryMonth && user.paymentCard?.expiryYear
-                        ? `${String(user.paymentCard.expiryMonth).padStart(2, '0')}/${String(user.paymentCard.expiryYear).slice(-2)}`
-                        : '',
+                      preferredPaymentMethod: user.paymentCard?.preferredPaymentMethod || 'cash_on_delivery',
+                      billingName: user.paymentCard?.billingName || '',
+                      billingAddress: user.paymentCard?.billingAddress || '',
                     });
                   }} 
                   className="btn-secondary"
