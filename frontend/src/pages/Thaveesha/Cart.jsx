@@ -20,6 +20,19 @@ function formatProfileAddress(addr) {
   return parts.join(', ');
 }
 
+function buildAddressObject(rawAddress) {
+  const text = String(rawAddress || '').trim();
+  if (!text) return undefined;
+  const parts = text.split(',').map((part) => part.trim()).filter(Boolean);
+  return {
+    street: parts[0] || text,
+    city: parts[1] || '',
+    state: parts[2] || '',
+    zipCode: parts[3] || '',
+    country: parts[4] || '',
+  };
+}
+
 export default function Cart() {
   const navigate = useNavigate();
   const [cart, setCart] = useState([]);
@@ -128,6 +141,12 @@ export default function Cart() {
     setError(null);
     setFieldErrors({});
     try {
+      // Keep profile address/phone in sync with latest checkout values.
+      await authAPI.updateProfile({
+        phone: checkoutForm.phone.trim(),
+        address: buildAddressObject(checkoutForm.shippingAddress),
+      }).catch(() => {});
+
       const response = await orderAPI.createOrder({
         items: cart.map((item) => ({
           productId: (item.product && item.product._id) || item._id,
