@@ -11,7 +11,7 @@ import productRoutes from './routes/Lakna/productRoutes.js';
 import cartRoutes from './routes/Thaveesha/cartRoutes.js';
 import orderRoutes from './routes/Thaveesha/orderRoutes.js';
 import adminOrderRoutes from './routes/Thaveesha/adminOrderRoutes.js';
-import paymentRoutes from './routes/Thaveesha/paymentRoutes.js';
+import paymentRoutes from './routes/Tudakshana/paymentRoutes.js';
 import reviewRoutes from './routes/Senara/reviewRoutes.js';
 
 dotenv.config();

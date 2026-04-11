@@ -11,9 +11,9 @@ A complete payment processing system is now integrated into the EcoMart platform
 ## 🔧 SYSTEM COMPONENTS
 
 ### Backend
-- **Model**: `models/Thaveesha/Payment.js` - Payment schema with full validation
-- **Controller**: `controllers/Thaveesha/paymentController.js` - Payment processing logic
-- **Routes**: `routes/Thaveesha/paymentRoutes.js` - Payment endpoints
+- **Model**: `models/Tudakshana/Payment.js` - Payment schema with full validation
+- **Controller**: `controllers/Tudakshana/paymentController.js` - Payment processing logic
+- **Routes**: `routes/Tudakshana/paymentRoutes.js` - Payment endpoints (still mounted at `/api/payments`)
 - **Updated Order Model**: Added `payment` and `paymentStatus` fields
 
 ### Frontend

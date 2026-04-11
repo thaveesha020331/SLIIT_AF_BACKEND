@@ -48,6 +48,7 @@ SLIIT_AF_BACKEND/
 ├── middleware / utils/       # Auth helpers
 ├── uploads/                  # Product images (local dev)
 ├── tests/                    # Jest tests
+├── load-tests/               # Artillery load test YAML
 ├── scripts/                  # Seed / admin scripts
 ├── frontend/                 # Vite React app
 └── docs/                     # Deployment & testing reports
@@ -290,9 +291,9 @@ The source spec is **`swagger/openapi.yaml`** (OpenAPI 3.0). In **Authorize**, u
 
 ---
 
-### Payments — `/api/payments`
+### Payments (Tudakshana) — `/api/payments`
 
-**Auth:** User (`protect`).
+**Auth:** User (`protect`). Implementation: `routes/Tudakshana/paymentRoutes.js`, `controllers/Tudakshana/paymentController.js`, `models/Tudakshana/Payment.js` (orders remain `models/Thaveesha/Order.js`).
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -415,19 +416,32 @@ Deployment captures are stored under **`images/`** at the project root and **emb
 
 ## Testing
 
-- **Full testing guide:** [docs/TESTING_INSTRUCTIONS.md](docs/TESTING_INSTRUCTIONS.md)  
+- **Full testing guide:** [docs/TESTING_INSTRUCTIONS.md](docs/TESTING_INSTRUCTIONS.md) — includes **§1.1 Team member ownership** (four developers: Tudakshana, Lakna, Thaveesha, Senara) mapped to **functions and test files / commands**.
+
 - **Quick run (backend root):**
 
   ```bash
   npm test
   ```
 
+- **Per-member Jest commands** (from repo root):
+
+  | Module | Command |
+  |--------|---------|
+  | Lakna (products) | `npm run test:lakna` |
+  | Thaveesha (cart, orders) | `npm run test:thaveesha` |
+  | Senara (reviews) | `npm run test:senara` |
+  | Tudakshana (payments) | `npm run test:tudakshana` |
+  | Tudakshana (auth, admin) | Manual / **Swagger** `/api-docs` or Postman (see testing doc); no Jest suite for auth yet |
+
+- **Load testing (Artillery):** `load-tests/*.yml` — `npm run load-test:smoke` (quick), `npm run load-test` (full public scenario), `npm run load-test:auth` (needs `LOAD_TEST_EMAIL` / `LOAD_TEST_PASSWORD`). Details: [docs/TESTING_INSTRUCTIONS.md](docs/TESTING_INSTRUCTIONS.md) §4.
+
 Covers:
 
-- **Unit tests** — models, helpers, services  
-- **Integration tests** — HTTP routes with Supertest  
-- **Performance testing** — suggested tools (k6 / Artillery) — not bundled in repo  
-- **Test environment** — `NODE_ENV=test`, test `MONGODB_URI`  
+- **Unit tests** — models, helpers, services
+- **Integration tests** — HTTP routes with Supertest
+- **Load tests** — Artillery (`npm run load-test`, etc.)
+- **Test environment** — `NODE_ENV=test`, test `MONGODB_URI`
 
 ---
 
