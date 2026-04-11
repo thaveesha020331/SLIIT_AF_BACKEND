@@ -2,9 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Leaf, Loader2, ArrowRight, Star, Trash2, Pencil,
-  MessageSquarePlus, ShoppingCart, CheckCircle2, RotateCcw,
+  ShoppingCart, CheckCircle2, RotateCcw,
 } from 'lucide-react';
 import reviewService from '../../services/Senara/reviewService';
+
+/* ── Config ──────────────────────────────────────── */
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = API_URL.replace(/\/api\/?$/, '').replace(/\/$/, '');
+
+const getProductImageSrc = (imagePath) => {
+  if (!imagePath) return null;
+  if (
+    imagePath.startsWith('http://') ||
+    imagePath.startsWith('https://') ||
+    imagePath.startsWith('blob:') ||
+    imagePath.startsWith('data:')
+  ) return imagePath;
+  const path = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  return `${API_BASE_URL}${path}`;
+};
 
 /* ── Helpers ─────────────────────────────────────── */
 function StarRow({ rating }) {
@@ -18,22 +34,6 @@ function StarRow({ rating }) {
           strokeWidth={1.5}
         />
       ))}
-    </div>
-  );
-}
-
-const AVATAR_BG = [
-  'bg-lime-600', 'bg-emerald-600', 'bg-teal-600', 'bg-green-700',
-];
-
-function Avatar({ name }) {
-  const initials = name
-    ? name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
-    : '?';
-  const bg = name ? AVATAR_BG[name.charCodeAt(0) % AVATAR_BG.length] : AVATAR_BG[0];
-  return (
-    <div className={`flex-shrink-0 h-9 w-9 rounded-xl ${bg} flex items-center justify-center text-white text-xs font-bold shadow`}>
-      {initials}
     </div>
   );
 }
@@ -166,7 +166,7 @@ export default function MyReviewPage() {
               onClick={() => navigate('/products')}
               className="inline-flex items-center gap-2 self-start sm:self-auto rounded-full bg-[#0D0D0D] px-6 py-3 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-gray-700"
             >
-              <MessageSquarePlus size={14} /> Write a review
+              <ArrowRight size={14} /> Continue Shopping
             </button>
           </div>
         </div>
@@ -232,8 +232,9 @@ export default function MyReviewPage() {
               <div className="flex-1 flex flex-col gap-5">
                 {sorted.map((review) => {
                   const productTitle = review.product?.title || 'Product';
-                  const reviewId    = review._id;
-                  const userName    = review.user?.name || review.userName || 'You';
+                  const reviewId     = review._id;
+                  const userName     = review.user?.name || review.userName || 'You';
+                  const imgSrc       = getProductImageSrc(review.product?.image);
 
                   return (
                     <article
@@ -243,7 +244,22 @@ export default function MyReviewPage() {
                       {/* Card header */}
                       <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-b border-lime-100 bg-lime-50/40">
                         <div className="flex items-center gap-3">
-                          <Avatar name={userName} />
+
+                          {/* Product image thumbnail */}
+                          {imgSrc ? (
+                            <div className="flex-shrink-0 h-12 w-12 rounded-xl overflow-hidden border border-lime-200 shadow-sm bg-gray-100">
+                              <img
+                                src={imgSrc}
+                                alt={productTitle}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex-shrink-0 h-12 w-12 rounded-xl border border-lime-200 bg-lime-50 flex items-center justify-center">
+                              <ShoppingCart size={16} className="text-lime-400" />
+                            </div>
+                          )}
+
                           <div>
                             <p className="text-sm font-bold text-gray-900 leading-none">{userName}</p>
                             <div className="flex items-center gap-2 mt-1">
@@ -321,10 +337,10 @@ export default function MyReviewPage() {
                     </div>
 
                     <button
-                      onClick={() => navigate('/products')}
+                      onClick={() => navigate('/my-orders')}
                       className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0D0D0D] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-gray-700"
                     >
-                      <MessageSquarePlus size={13} /> Review another
+                      <ArrowRight size={13} /> Review another
                     </button>
                   </div>
                 </div>
