@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SignUp.css';
+import { EcoMartLogo } from '../../components/EcoMartLogo';
 import { authAPI, authHelpers } from '../../services/Tudakshana/authService';
 
 const SignUp = () => {
@@ -175,7 +176,9 @@ const SignUp = () => {
     <div className="signup-page">
       <div className="signup-container">
         <div className="signup-header">
-          <div className="signup-logo">🌱</div>
+          <div className="signup-logo">
+            <EcoMartLogo size={56} />
+          </div>
           <h1>Create Account</h1>
           <p>Join Eco.Mart and start your sustainable shopping journey</p>
         </div>

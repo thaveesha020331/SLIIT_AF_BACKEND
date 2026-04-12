@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './UserLogin.css'; // Reusing UserLogin styles
+import { EcoMartLogo } from '../../components/EcoMartLogo';
 import { authAPI, authHelpers } from '../../services/Tudakshana/authService';
 
 const SellerLogin = () => {
@@ -102,7 +103,9 @@ const SellerLogin = () => {
     <div className="user-login-page">
       <div className="user-login-container">
         <div className="user-login-header">
-          <div className="user-login-logo">🏪</div>
+          <div className="user-login-logo">
+            <EcoMartLogo size={56} />
+          </div>
           <span className="user-badge" style={{ backgroundColor: '#10b981' }}>Seller Portal</span>
           <h1>Seller Access</h1>
           <p>Sign in to manage your products and orders</p>
