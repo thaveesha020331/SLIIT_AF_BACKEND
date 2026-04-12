@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ShoppingBag, Menu, X, User, Leaf } from 'lucide-react'
+import { ShoppingBag, Menu, X, User } from 'lucide-react'
+import { EcoMartLogo } from './EcoMartLogo'
+import { EcoMartWordmark } from './EcoMartWordmark'
 import { authHelpers } from '../services/Tudakshana/authService'
 import { cartAPI } from '../services/Thaveesha'
 
@@ -89,12 +91,11 @@ export function Navbar() {
               onClick={() => navigate('/')}
               className="flex items-center gap-2 bg-transparent border-none cursor-pointer group"
             >
-              <span className="hidden sm:inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-lime-100 to-lime-200 text-lime-800 shadow-sm ring-1 ring-lime-300/40 transition-transform group-hover:scale-105">
-                <Leaf size={18} strokeWidth={2} className="text-lime-700" />
-              </span>
-              <span className="text-lg sm:text-xl font-serif font-bold text-gray-900 tracking-tight">
-                Eco<span className="text-lime-600">.</span>Mart
-              </span>
+              <EcoMartLogo
+                size={34}
+                className="inline-flex transition-transform group-hover:scale-105"
+              />
+              <EcoMartWordmark variant="onLight" />
             </button>
           </div>
 

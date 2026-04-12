@@ -6,6 +6,7 @@ import AdminProducts from '../Lakna/AdminProducts';
 import AdminReviewsPage from '../Senara/AdminReviewsPage';
 import AdminOrders from '../Thaveesha/AdminOrders';
 import './AdminDashboard.css';
+import { EcoMartLogo } from '../../components/EcoMartLogo';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -1501,7 +1502,9 @@ const AdminDashboard = () => {
       <aside className="dashboard-sidebar">
         <div className="sidebar-header">
           <div className="brand">
-            <span className="brand-icon">🌿</span>
+            <span className="brand-icon">
+              <EcoMartLogo size={34} />
+            </span>
             <span className="brand-name">Admin Panel</span>
           </div>
         </div>
