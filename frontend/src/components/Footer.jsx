@@ -1,6 +1,8 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Leaf, MapPin, Mail, Phone, ArrowRight, Instagram, Twitter, Facebook } from 'lucide-react'
+import { EcoMartLogo } from './EcoMartLogo'
+import { EcoMartWordmark } from './EcoMartWordmark'
 
 const NAV_LINKS = [
   { name: 'Home',       href: '/' },
@@ -41,10 +43,12 @@ export function Footer() {
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <button
+                type="button"
                 onClick={() => navigate('/')}
-                className="text-xl font-serif font-bold text-white bg-transparent border-none cursor-pointer mb-3"
+                className="flex items-center gap-2.5 bg-transparent border-none cursor-pointer mb-3"
               >
-                Eco<span className="text-lime-400">.</span>Mart
+                <EcoMartLogo size={34} className="drop-shadow-[0_2px_12px_rgba(234,179,8,0.35)]" />
+                <EcoMartWordmark variant="onDark" />
               </button>
               <p className="text-xs text-gray-500 leading-relaxed mb-4 max-w-[220px]">
                 Your trusted marketplace for eco-conscious living — partnering with local sustainable vendors.

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminLogin.css';
+import { EcoMartLogo } from '../../components/EcoMartLogo';
 import { authAPI, authHelpers } from '../../services/Tudakshana/authService';
 
 const AdminLogin = () => {
@@ -125,7 +126,9 @@ const AdminLogin = () => {
     <div className="admin-login-page">
       <div className="admin-login-container">
         <div className="admin-login-header">
-          <div className="admin-login-logo">🔐</div>
+          <div className="admin-login-logo">
+            <EcoMartLogo size={56} />
+          </div>
           <span className="admin-badge">Admin Portal</span>
           <h1>Admin Access</h1>
           <p>Secure login for administrators only</p>
