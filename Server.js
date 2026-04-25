@@ -29,6 +29,7 @@ const corsOptions = {
 
 // Middleware
 app.use(cors(corsOptions));
+app.use('/api/payments/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.resolve('uploads')));

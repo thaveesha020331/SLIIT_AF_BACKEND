@@ -52,19 +52,29 @@ const userSchema = new mongoose.Schema({
     default: '',
   },
   paymentCard: {
-    cardHolderName: {
+    preferredPaymentMethod: {
+      type: String,
+      enum: ['card', 'cash_on_delivery'],
+      default: 'cash_on_delivery',
+    },
+    billingName: {
       type: String,
       trim: true,
       default: '',
     },
-    cardNumber: {
+    billingAddress: {
       type: String,
-      match: [/^\d{12,19}$/, 'Card number must be 12 to 19 digits'],
+      trim: true,
       default: '',
     },
     cardNumberLast4: {
       type: String,
       match: [/^\d{4}$/, 'Card number must contain exactly 4 digits'],
+      default: '',
+    },
+    cardBrand: {
+      type: String,
+      trim: true,
       default: '',
     },
     expiryMonth: {
@@ -77,6 +87,10 @@ const userSchema = new mongoose.Schema({
       type: Number,
       min: 2000,
       max: 2100,
+      default: null,
+    },
+    updatedAt: {
+      type: Date,
       default: null,
     },
   },

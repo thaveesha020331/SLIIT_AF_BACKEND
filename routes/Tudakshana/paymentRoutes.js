@@ -1,6 +1,7 @@
 import express from 'express';
 import {
-  processCardPayment,
+  createStripeCheckoutSession,
+  stripeWebhook,
   processCashOnDelivery,
   getPaymentStatus,
   getPaymentByOrderId,
@@ -9,9 +10,12 @@ import {
 import { protect } from '../../utils/Tudakshana/authMiddleware.js';
 
 const router = express.Router();
+
+router.post('/stripe/webhook', stripeWebhook);
+
 router.use(protect);
 
-router.post('/process-card', processCardPayment);
+router.post('/stripe/create-checkout-session', createStripeCheckoutSession);
 router.post('/process-cod', processCashOnDelivery);
 
 router.get('/order/:orderId', getPaymentByOrderId);
