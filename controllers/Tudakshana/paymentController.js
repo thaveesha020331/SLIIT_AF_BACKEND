@@ -26,13 +26,32 @@ const isLocalUrl = (url) => {
 
 const getFrontendBaseUrl = (req) => {
   const configuredFrontendUrl = normalizeBaseUrl(process.env.FRONTEND_URL);
+  const requestOrigin = normalizeBaseUrl(req?.headers?.origin);
+
+  let apiHost = req?.headers?.['x-forwarded-host'] || req?.headers?.host || null;
+  if (typeof apiHost === 'string' && apiHost.includes(',')) {
+    apiHost = apiHost.split(',')[0].trim();
+  }
+
+  let configuredMatchesApiHost = false;
+  if (configuredFrontendUrl && apiHost) {
+    try {
+      const configuredHost = new URL(configuredFrontendUrl).host;
+      configuredMatchesApiHost = configuredHost === apiHost;
+    } catch {
+      configuredMatchesApiHost = false;
+    }
+  }
 
   // In production, ignore localhost FRONTEND_URL to prevent bad Stripe redirects.
-  if (configuredFrontendUrl && !(process.env.NODE_ENV === 'production' && isLocalUrl(configuredFrontendUrl))) {
+  if (
+    configuredFrontendUrl &&
+    !(process.env.NODE_ENV === 'production' && isLocalUrl(configuredFrontendUrl)) &&
+    !configuredMatchesApiHost
+  ) {
     return configuredFrontendUrl;
   }
 
-  const requestOrigin = normalizeBaseUrl(req?.headers?.origin);
   if (requestOrigin) return requestOrigin;
 
   const referer = req?.headers?.referer;
