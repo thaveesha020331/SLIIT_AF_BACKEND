@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { orderAPI } from '../../services/Thaveesha';
+import paymentAPI from '../../services/Thaveesha/paymentService';
 import PaymentForm from '../../components/Thaveesha/PaymentForm';
 import { downloadReceiptHTML, downloadReceiptCSV, printReceipt } from '../../utils/receiptGenerator';
 import './Checkout.css';
@@ -8,6 +9,7 @@ import './Checkout.css';
 export default function Checkout() {
   const { orderId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,6 +19,42 @@ export default function Checkout() {
   useEffect(() => {
     fetchOrder();
   }, [orderId]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const stripeState = params.get('stripe');
+
+    if (!stripeState) return;
+
+    if (stripeState === 'cancel') {
+      setError('Stripe checkout was cancelled. Please try again.');
+      return;
+    }
+
+    if (stripeState === 'success') {
+      const hydratePaymentStatus = async () => {
+        try {
+          const paymentResponse = await paymentAPI.getPaymentByOrderId(orderId);
+          const payment = paymentResponse?.payment;
+          if (payment?.status === 'completed') {
+            handlePaymentSuccess({
+              paymentId: payment._id,
+              transactionId: payment.transactionId,
+              status: payment.status,
+              method: payment.paymentMethod,
+              message: 'Stripe payment completed successfully',
+            });
+          } else {
+            setError('Payment confirmation is still processing. Please refresh in a few seconds.');
+          }
+        } catch (err) {
+          setError('Payment confirmation is still processing. Please refresh in a few seconds.');
+        }
+      };
+
+      hydratePaymentStatus();
+    }
+  }, [location.search, orderId]);
 
   const fetchOrder = async () => {
     try {

@@ -1,8 +1,266 @@
 import Payment from '../../models/Tudakshana/Payment.js';
 import Order from '../../models/Thaveesha/Order.js';
+import Stripe from 'stripe';
+import 'dotenv/config';
+import User from '../../models/Tudakshana/User.js';
+
+const getStripeClient = () => {
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeSecretKey) return null;
+  return new Stripe(stripeSecretKey);
+};
+
+const getFrontendBaseUrl = () => {
+  return (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+};
+
+const getCurrency = () => (process.env.STRIPE_CURRENCY || 'lkr').toLowerCase();
+
+const MIN_STRIPE_AMOUNT_BY_CURRENCY = {
+  lkr: 150,
+  usd: 0.5,
+};
 
 const generateTransactionId = () => {
   return `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+};
+
+export const createStripeCheckoutSession = async (req, res) => {
+  try {
+    const stripe = getStripeClient();
+    const { orderId } = req.body;
+    const userId = req.user.id;
+
+    if (!stripe) {
+      return res.status(500).json({
+        success: false,
+        message: 'Stripe is not configured. Set STRIPE_SECRET_KEY in environment.',
+      });
+    }
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Order ID is required',
+      });
+    }
+
+    const order = await Order.findOne({ _id: orderId, user: userId });
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found',
+      });
+    }
+
+    const currency = getCurrency();
+    const minAmount = MIN_STRIPE_AMOUNT_BY_CURRENCY[currency] || 0.5;
+    if (order.total < minAmount) {
+      return res.status(400).json({
+        success: false,
+        message: `Minimum card payment for ${currency.toUpperCase()} is ${minAmount.toFixed(2)}. Use COD or increase order amount.`,
+      });
+    }
+
+    if (order.paymentStatus === 'completed') {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment already completed for this order',
+      });
+    }
+
+    const existingPayment = await Payment.findOne({ order: orderId });
+    if (existingPayment && existingPayment.status === 'completed') {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment already completed for this order',
+      });
+    }
+
+    const frontendBaseUrl = getFrontendBaseUrl();
+    const successUrl = `${frontendBaseUrl}/checkout/${orderId}?stripe=success&session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${frontendBaseUrl}/checkout/${orderId}?stripe=cancel`;
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency,
+            unit_amount: Math.round(order.total * 100),
+            product_data: {
+              name: `Order ${order._id}`,
+              description: `Payment for order ${order._id}`,
+            },
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      metadata: {
+        orderId: String(order._id),
+        userId: String(userId),
+      },
+    });
+
+    if (existingPayment) {
+      await Payment.findByIdAndUpdate(existingPayment._id, {
+        amount: order.total,
+        paymentMethod: 'card',
+        status: 'processing',
+        paymentGateway: 'stripe',
+        transactionId: session.id,
+      });
+    } else {
+      await Payment.create({
+        order: orderId,
+        user: userId,
+        amount: order.total,
+        paymentMethod: 'card',
+        status: 'processing',
+        paymentGateway: 'stripe',
+        transactionId: session.id,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      url: session.url,
+      sessionId: session.id,
+    });
+  } catch (error) {
+    console.error('Create Stripe session error:', error?.raw?.message || error.message, error);
+    return res.status(500).json({
+      success: false,
+      message: error?.raw?.message || error.message || 'Failed to create Stripe checkout session',
+      error: error?.raw?.message || error.message,
+    });
+  }
+};
+
+export const stripeWebhook = async (req, res) => {
+  const stripe = getStripeClient();
+  const signature = req.headers['stripe-signature'];
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!stripe || !webhookSecret) {
+    return res.status(500).json({
+      success: false,
+      message: 'Stripe webhook is not configured',
+    });
+  }
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, signature, webhookSecret);
+  } catch (error) {
+    console.error('Stripe webhook signature verification failed:', error.message);
+    return res.status(400).send(`Webhook Error: ${error.message}`);
+  }
+
+  try {
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+      const orderId = session.metadata?.orderId;
+      const userId = session.metadata?.userId;
+
+      if (!orderId || !userId) {
+        return res.status(200).json({ received: true });
+      }
+
+      const order = await Order.findById(orderId);
+      if (!order) {
+        return res.status(200).json({ received: true });
+      }
+
+      let payment = await Payment.findOne({ order: orderId });
+
+      if (!payment) {
+        payment = await Payment.create({
+          order: orderId,
+          user: userId,
+          amount: (session.amount_total || 0) / 100,
+          paymentMethod: 'card',
+          status: 'completed',
+          transactionId: session.payment_intent || session.id,
+          paymentGateway: 'stripe',
+          paymentDate: new Date(),
+        });
+      } else if (payment.status !== 'completed') {
+        payment = await Payment.findByIdAndUpdate(
+          payment._id,
+          {
+            status: 'completed',
+            transactionId: session.payment_intent || session.id,
+            paymentGateway: 'stripe',
+            failureReason: null,
+            paymentDate: new Date(),
+          },
+          { new: true }
+        );
+      }
+
+      await Order.findByIdAndUpdate(orderId, {
+        payment: payment._id,
+        paymentStatus: 'completed',
+      });
+
+      // Store only non-sensitive Stripe card metadata for profile CRUD use.
+      if (session.payment_intent) {
+        try {
+          const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent, {
+            expand: ['payment_method'],
+          });
+          const card = paymentIntent?.payment_method?.card;
+
+          if (card) {
+            await User.findByIdAndUpdate(userId, {
+              paymentCard: {
+                preferredPaymentMethod: 'card',
+                billingName: session.customer_details?.name || '',
+                billingAddress: session.customer_details?.address
+                  ? [
+                    session.customer_details.address.line1,
+                    session.customer_details.address.line2,
+                    session.customer_details.address.city,
+                    session.customer_details.address.state,
+                    session.customer_details.address.postal_code,
+                    session.customer_details.address.country,
+                  ].filter(Boolean).join(', ')
+                  : '',
+                cardBrand: card.brand || '',
+                cardNumberLast4: card.last4 || '',
+                expiryMonth: card.exp_month || null,
+                expiryYear: card.exp_year || null,
+                updatedAt: new Date(),
+              },
+            });
+          }
+        } catch (metaError) {
+          console.warn('Unable to persist Stripe card metadata for profile:', metaError.message);
+        }
+      }
+    }
+
+    if (event.type === 'checkout.session.expired') {
+      const session = event.data.object;
+      const orderId = session.metadata?.orderId;
+      if (orderId) {
+        await Payment.findOneAndUpdate(
+          { order: orderId, status: { $in: ['pending', 'processing'] } },
+          { status: 'failed', failureReason: 'Checkout session expired' }
+        );
+        await Order.findByIdAndUpdate(orderId, { paymentStatus: 'failed' });
+      }
+    }
+
+    return res.status(200).json({ received: true });
+  } catch (error) {
+    console.error('Stripe webhook handling error:', error);
+    return res.status(500).json({ success: false, message: 'Webhook handling failed' });
+  }
 };
 
 export const processCardPayment = async (req, res) => {
@@ -132,6 +390,7 @@ export const processCardPayment = async (req, res) => {
       if (existingPayment) {
         await Payment.findByIdAndUpdate(existingPayment._id, {
           status: 'failed',
+          transactionId,
           failureReason,
         });
       } else {
@@ -141,6 +400,7 @@ export const processCardPayment = async (req, res) => {
           amount: order.total,
           paymentMethod: 'card',
           status: 'failed',
+          transactionId,
           failureReason,
         });
       }

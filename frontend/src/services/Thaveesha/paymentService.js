@@ -6,17 +6,18 @@ const API_URL = `${API_BASE_URL}/payments`;
 const getToken = () => localStorage.getItem('token');
 
 const paymentAPI = {
-  // Process card payment
-  processCardPayment: async (orderId, cardDetails) => {
+  // Create Stripe checkout session
+  createStripeCheckoutSession: async (orderId) => {
     try {
-      const response = await axios.post(`${API_URL}/process-card`, {
-        orderId,
-        ...cardDetails,
-      }, {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
+      const response = await axios.post(
+        `${API_URL}/stripe/create-checkout-session`,
+        { orderId },
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       throw error;
