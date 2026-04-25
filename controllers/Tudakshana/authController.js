@@ -233,53 +233,72 @@ export const updateProfile = async (req, res) => {
     if (paymentCard && typeof paymentCard === 'object') {
       if (paymentCard.clear === true) {
         user.paymentCard = {
-          cardHolderName: '',
-          cardNumber: '',
+          preferredPaymentMethod: 'cash_on_delivery',
+          billingName: '',
+          billingAddress: '',
           cardNumberLast4: '',
+          cardBrand: '',
           expiryMonth: null,
           expiryYear: null,
+          updatedAt: null,
         };
       } else {
-      const cardHolderName = String(paymentCard.cardHolderName || '').trim();
-      const cardNumber = String(paymentCard.cardNumber || '').replace(/\D/g, '');
-      const expiryDate = String(paymentCard.expiryDate || '').trim();
-      const hasAnyCardInput = Boolean(cardHolderName || cardNumber || expiryDate);
+        const currentPaymentCard = user.paymentCard?.toObject ? user.paymentCard.toObject() : (user.paymentCard || {});
 
-      if (hasAnyCardInput) {
-        if (!cardHolderName || !cardNumber || !expiryDate) {
-          return res.status(400).json({
-            success: false,
-            message: 'Please provide card holder name, card number, and expiry date',
-          });
-        }
-
-        if (cardNumber.length < 12 || cardNumber.length > 19) {
-          return res.status(400).json({
-            success: false,
-            message: 'Please enter a valid card number',
-          });
-        }
-
-        const expiryMatch = expiryDate.match(/^(0[1-9]|1[0-2])\s*\/\s*(\d{2}|\d{4})$/);
-        if (!expiryMatch) {
-          return res.status(400).json({
-            success: false,
-            message: 'Expiry date must be in MM/YY format',
-          });
-        }
-
-        const expiryMonth = Number(expiryMatch[1]);
-        let expiryYear = Number(expiryMatch[2]);
-        if (expiryYear < 100) expiryYear += 2000;
-
-        user.paymentCard = {
-          cardHolderName,
-          cardNumber,
-          cardNumberLast4: cardNumber.slice(-4),
-          expiryMonth,
-          expiryYear,
+        const nextPaymentCard = {
+          preferredPaymentMethod: currentPaymentCard.preferredPaymentMethod || 'cash_on_delivery',
+          billingName: currentPaymentCard.billingName || '',
+          billingAddress: currentPaymentCard.billingAddress || '',
+          cardNumberLast4: currentPaymentCard.cardNumberLast4 || '',
+          cardBrand: currentPaymentCard.cardBrand || '',
+          expiryMonth: currentPaymentCard.expiryMonth ?? null,
+          expiryYear: currentPaymentCard.expiryYear ?? null,
+          updatedAt: new Date(),
         };
-      }
+
+        if (paymentCard.preferredPaymentMethod != null) {
+          const preferredMethod = String(paymentCard.preferredPaymentMethod).trim();
+          if (!['card', 'cash_on_delivery'].includes(preferredMethod)) {
+            return res.status(400).json({
+              success: false,
+              message: 'Preferred payment method must be card or cash_on_delivery',
+            });
+          }
+          nextPaymentCard.preferredPaymentMethod = preferredMethod;
+        }
+
+        if (paymentCard.billingName != null) {
+          nextPaymentCard.billingName = String(paymentCard.billingName).trim();
+        }
+
+        if (paymentCard.billingAddress != null) {
+          nextPaymentCard.billingAddress = String(paymentCard.billingAddress).trim();
+        }
+
+        if (paymentCard.stripeCardMeta && typeof paymentCard.stripeCardMeta === 'object') {
+          const cardBrand = String(paymentCard.stripeCardMeta.cardBrand || '').trim();
+          const last4 = String(paymentCard.stripeCardMeta.cardNumberLast4 || '').replace(/\D/g, '');
+          const expiryMonth = paymentCard.stripeCardMeta.expiryMonth != null
+            ? Number(paymentCard.stripeCardMeta.expiryMonth)
+            : null;
+          const expiryYear = paymentCard.stripeCardMeta.expiryYear != null
+            ? Number(paymentCard.stripeCardMeta.expiryYear)
+            : null;
+
+          if (last4 && last4.length !== 4) {
+            return res.status(400).json({
+              success: false,
+              message: 'Card last4 must be exactly 4 digits',
+            });
+          }
+
+          nextPaymentCard.cardBrand = cardBrand;
+          nextPaymentCard.cardNumberLast4 = last4;
+          nextPaymentCard.expiryMonth = expiryMonth;
+          nextPaymentCard.expiryYear = expiryYear;
+        }
+
+        user.paymentCard = nextPaymentCard;
       }
     }
 
