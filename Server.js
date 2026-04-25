@@ -19,8 +19,26 @@ dotenv.config();
 const app = express();
 
 // CORS Configuration
+const normalizeOrigin = (value) => {
+  if (!value || typeof value !== 'string') return null;
+  return value.trim().replace(/\/$/, '');
+};
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://sliit-af-backend.vercel.app',
+  normalizeOrigin(process.env.FRONTEND_URL),
+].filter(Boolean);
+
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://localhost:3000','https://sliit-af-backend.vercel.app'],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(normalizeOrigin(origin))) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

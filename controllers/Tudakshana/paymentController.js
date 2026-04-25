@@ -10,8 +10,41 @@ const getStripeClient = () => {
   return new Stripe(stripeSecretKey);
 };
 
-const getFrontendBaseUrl = () => {
-  return (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+const normalizeBaseUrl = (url) => {
+  if (!url || typeof url !== 'string') return null;
+  return url.trim().replace(/\/$/, '');
+};
+
+const isLocalUrl = (url) => {
+  try {
+    const parsed = new URL(url);
+    return ['localhost', '127.0.0.1'].includes(parsed.hostname);
+  } catch {
+    return false;
+  }
+};
+
+const getFrontendBaseUrl = (req) => {
+  const configuredFrontendUrl = normalizeBaseUrl(process.env.FRONTEND_URL);
+
+  // In production, ignore localhost FRONTEND_URL to prevent bad Stripe redirects.
+  if (configuredFrontendUrl && !(process.env.NODE_ENV === 'production' && isLocalUrl(configuredFrontendUrl))) {
+    return configuredFrontendUrl;
+  }
+
+  const requestOrigin = normalizeBaseUrl(req?.headers?.origin);
+  if (requestOrigin) return requestOrigin;
+
+  const referer = req?.headers?.referer;
+  if (referer) {
+    try {
+      return new URL(referer).origin;
+    } catch {
+      // ignore invalid referer URL
+    }
+  }
+
+  return 'http://localhost:5173';
 };
 
 const getCurrency = () => (process.env.STRIPE_CURRENCY || 'lkr').toLowerCase();
@@ -77,8 +110,8 @@ export const createStripeCheckoutSession = async (req, res) => {
       });
     }
 
-    const frontendBaseUrl = getFrontendBaseUrl();
-    const successUrl = `${frontendBaseUrl}/checkout/${orderId}?stripe=success&session_id={CHECKOUT_SESSION_ID}`;
+    const frontendBaseUrl = getFrontendBaseUrl(req);
+    const successUrl = `${frontendBaseUrl}/my-orders?stripe=success&order_id=${orderId}&session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${frontendBaseUrl}/checkout/${orderId}?stripe=cancel`;
 
     const session = await stripe.checkout.sessions.create({
